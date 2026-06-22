@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>标准组件库</title>
+<style>
+:root {
+  --primary: #1F69E0;
+  --primary-light: rgb(174,207,255);
+  --primary-dark: rgb(107,150,213);
+  --green-dark: rgb(122,197,151);
+  --green-light: rgb(177,232,198);
+  --orange-dark: rgb(224,171,86);
+  --orange-light: rgb(242,213,166);
+  --yellow-dark: rgb(188,190,42);
+  --yellow-light: rgb(235,236,159);
+  --purple-dark: rgb(131,119,235);
+  --purple-light: rgb(203,196,241);
+  --gray-dark: rgb(133,142,153);
+  --gray-light: rgb(217,226,237);
+  --bg: #FAFAFA;
+  --white: #FFFFFF;
+  --text: #1A1A1A;
+  --text-sec: #666666;
+  --text-dis: #999999;
+  --text-ph: #BBBFC4;
+  --border: #E0E0E0;
+  --danger: #E53E3E;
+  --radius: 4px;
+  --radius-lg: 8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;font-size:14px;color:var(--text);background:var(--bg);line-height:1.5;}
+.wrap{max-width:1200px;margin:0 auto;padding:24px;}
+.section{background:var(--white);border-radius:var(--radius-lg);padding:24px;margin-bottom:24px;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.sec-title{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.sec-title::before{content:'';width:4px;height:18px;background:var(--primary);border-radius:2px;flex-shrink:0;}
+.sub-title{font-size:12px;color:var(--text-sec);margin-bottom:12px;}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px;}
+.col{flex:1;min-width:180px;}
+.col2{flex:2;}
+.divider{height:1px;background:var(--border);margin:20px 0;}
+.page-header{background:var(--primary);color:#fff;padding:24px 28px;margin-bottom:24px;border-radius:var(--radius-lg);}
+.page-header h1{font-size:28px;font-weight:700;letter-spacing:2px;}
+.page-header p{font-size:13px;opacity:.8;margin-top:6px;}
+.palette{display:flex;flex-wrap:wrap;gap:12px;}
+.swatch-card{width:110px;border-radius:var(--radius);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.1);}
+.swatch-dark{height:48px;}
+.swatch-light{height:28px;}
+.swatch-label{padding:4px 8px;font-size:10px;color:var(--text-sec);background:var(--white);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:6px 16px;border-radius:var(--radius);font-size:14px;font-weight:500;line-height:1.5;cursor:pointer;border:1px solid transparent;transition:all .2s;font-family:inherit;}
+.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary);}
+.btn-primary:hover{background:#1558C0;border-color:#1558C0;}
+.btn-secondary{background:var(--white);color:var(--primary);border-color:var(--primary);}
+.btn-secondary:hover{background:#EFF4FD;}
+.btn-danger{background:var(--danger);color:#fff;border-color:var(--danger);}
+.btn-danger:hover{background:#C53030;}
+.btn-ghost{background:transparent;color:var(--text-sec);border-color:var(--border);}
+.btn-ghost:hover{color:var(--primary);border-color:var(--primary);}
+.btn-text{background:transparent;color:var(--primary);border-color:transparent;padding-left:0;padding-right:0;}
+.btn-text:hover{color:#1558C0;}
+.btn-sm{padding:3px 10px;font-size:12px;}
+.btn-lg{padding:9px 22px;font-size:15px;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.tag{display:inline-flex;align-items:center;padding:1px 10px;border-radius:100px;font-size:12px;font-weight:500;line-height:1.7;}
+.tag-blue{background:var(--primary-light);color:var(--primary);}
+.tag-green{background:var(--green-light);color:rgb(34,120,70);}
+.tag-orange{background:var(--orange-light);color:rgb(160,90,20);}
+.tag-yellow{background:var(--yellow-light);color:rgb(100,100,0);}
+.tag-purple{background:var(--purple-light);color:rgb(80,60,180);}
+.tag-gray{background:var(--gray-light);color:rgb(60,70,90);}
+.form-group{margin-bottom:16px;}
+.form-label{display:inline-block;font-size:14px;color:var(--text);margin-bottom:4px;font-weight:500;}
+.form-label.req::before{content:'*';color:var(--danger);margin-right:3px;}
+.form-control{display:block;width:100%;padding:7px 12px;font-size:14px;color:var(--text);background:var(--white);border:1px solid var(--border);border-radius:var(--radius);outline:none;transition:border-color .2s,box-shadow .2s;font-family:inherit;}
+.form-control:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(31,105,224,.12);}
+.form-control:disabled{background:#F5F7FA;color:var(--text-dis);cursor:not-allowed;}
+.form-control::placeholder{color:var(--text-ph);}
+.form-control.err{border-color:var(--danger);}
+.form-control.err:focus{box-shadow:0 0 0 3px rgba(229,62,62,.12);}
+.form-hint{font-size:12px;color:var(--text-sec);margin-top:4px;}
+.form-hint.err{color:var(--danger);}
+textarea.form-control{resize:vertical;min-height:80px;}
+select.form-control{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
+.input-group{display:flex;}
+.input-addon{display:flex;align-items:center;padding:0 10px;background:#F5F7FA;border:1px solid var(--border);color:var(--text-sec);font-size:14px;white-space:nowrap;}
+.input-addon:first-child{border-right:none;border-radius:var(--radius) 0 0 var(--radius);}
+.input-addon:last-child{border-left:none;border-radius:0 var(--radius) var(--radius) 0;}
+.input-group .form-control{border-radius:0;flex:1;}
+.input-group .form-control:first-child{border-radius:var(--radius) 0 0 var(--radius);}
+.input-group .form-control:last-child{border-radius:0 var(--radius) var(--radius) 0;}
+.chk,.rdo{display:inline-flex;align-items:center;gap:6px;cursor:pointer;user-select:none;}
+.chk input,.rdo input{width:16px;height:16px;accent-color:var(--primary);cursor:pointer;}
+.chk-group,.rdo-group{display:flex;flex-direction:column;gap:8px;}
+.chk-group.inline,.rdo-group.inline{flex-direction:row;flex-wrap:wrap;gap:16px;}
+.sw{position:relative;display:inline-block;width:40px;height:22px;}
+.sw input{opacity:0;width:0;height:0;}
+.sw-bar{position:absolute;cursor:pointer;inset:0;background:#D0D5DD;border-radius:100px;transition:background .2s;}
+.sw-bar::before{content:'';position:absolute;height:16px;width:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.sw input:checked+.sw-bar{background:var(--primary);}
+.sw input:checked+.sw-bar::before{transform:translateX(18px);}
+.sw-wrap{display:inline-flex;align-items:center;gap:8px;}
+.upload-zone{border:2px dashed var(--border);border-radius:var(--radius-lg);padding:28px;text-align:center;cursor:pointer;transition:all .2s;background:var(--white);}
+.upload-zone:hover{border-color:var(--primary);background:#F0F5FF;}
+.upload-zone svg{color:var(--primary);margin-bottom:8px;}
+.upload-text{font-size:14px;color:var(--text-sec);}
+.upload-text strong{color:var(--primary);}
+.upload-hint-text{font-size:12px;color:var(--text-dis);margin-top:4px;}
+.tbl-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;}
+.tbl th{background:#F5F7FA;color:var(--text-sec);font-weight:600;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+.tbl td{padding:10px 14px;border-bottom:1px solid #F0F0F0;color:var(--text);vertical-align:middle;}
+.tbl tbody tr:last-child td{border-bottom:none;}
+.tbl tbody tr:hover td{background:#F5F8FF;}
+.modal-mask{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-mask.show{opacity:1;pointer-events:all;}
+.modal{background:var(--white);border-radius:var(--radius-lg);box-shadow:0 8px 40px rgba(0,0,0,.18);width:480px;max-width:90vw;display:flex;flex-direction:column;transform:scale(.95);transition:transform .2s;}
+.modal-mask.show .modal{transform:scale(1);}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);}
+.modal-title{font-size:15px;font-weight:600;}
+.modal-close{width:28px;height:28px;border:none;background:none;cursor:pointer;color:var(--text-sec);font-size:16px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);}
+.modal-close:hover{background:#F5F7FA;color:var(--text);}
+.modal-bd{padding:20px;overflow-y:auto;}
+.modal-ft{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid var(--border);}
+.alert{padding:10px 14px;border-radius:var(--radius);border:1px solid transparent;display:flex;gap:8px;margin-bottom:10px;font-size:13px;align-items:flex-start;}
+.alert-info{background:#EFF4FD;border-color:var(--primary-light);color:var(--primary);}
+.alert-success{background:#EDFBF4;border-color:var(--green-light);color:rgb(34,120,70);}
+.alert-warning{background:#FFF8EE;border-color:var(--orange-light);color:rgb(160,90,20);}
+.alert-error{background:#FFF5F5;border-color:#FEB2B2;color:var(--danger);}
+.icon-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:10px;}
+.icon-item{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .2s;}
+.icon-item:hover{border-color:var(--primary);background:#F0F5FF;}
+.icon-item svg{width:24px;height:24px;}
+.icon-item span{font-size:10px;color:var(--text-sec);text-align:center;}
+.ic-sm svg{width:16px;height:16px;}
+.ic-lg svg{width:32px;height:32px;}
+.ic-xl svg{width:48px;height:48px;}
+.ic-blue{color:var(--primary);}
+.ic-green{color:rgb(34,120,70);}
+.ic-orange{color:rgb(160,90,20);}
+.ic-red{color:var(--danger);}
+.ic-gray{color:var(--gray-dark);}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;}
+.card{background:var(--white);border-radius:var(--radius-lg);border:1px solid var(--border);}
+.card-hd{padding:12px 16px;border-bottom:1px solid var(--border);font-weight:600;font-size:14px;}
+.card-bd{padding:16px;}
+.c-blue{border-top:3px solid var(--primary);}
+.c-green{border-top:3px solid var(--green-dark);}
+.c-orange{border-top:3px solid var(--orange-dark);}
+.c-purple{border-top:3px solid var(--purple-dark);}
+.form-h .form-group{display:flex;align-items:flex-start;gap:16px;}
+.form-h .form-label{width:90px;flex-shrink:0;padding-top:7px;text-align:right;margin-bottom:0;}
+.form-h .form-ctrl-wrap{flex:1;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="page-header">
+    <h1>标准组件库</h1>
+    <p>基于设计规范生成的标准 UI 组件 — 图标 · 表单 · 按钮 · 弹窗 · 表格</p>
+  </div>
+  <div class="section">
+    <div class="sec-title">颜色规范</div>
+    <div class="sub-title">主色</div>
+    <div class="palette" style="margin-bottom:16px;">
+      <div class="swatch-card"><div class="swatch-dark" style="background:#1F69E0;"></div><div class="swatch-label">Primary #1F69E0</div></div>
+      <div class="swatch-card"><div class="swatch-dark" style="background:rgb(107,150,213);"></div><div class="swatch-label">蓝-深</div></div>
+      <div class="swatch-card"><div class="swatch-dark" style="background:rgb(174,207,255);"></div><div class="swatch-label">蓝-浅</div></div>
+    </div>
+    <div class="sub-title">辅助色</div>
+    <div class="palette">
+      <div class="swatch-card"><div class="swatch-dark" style="background:rgb(122,197,151);"></div><div class="swatch-light" style="background:rgb(177,232,198);"></div><div class="swatch-label">绿色</div></div>
+      <div class="swatch-card"><div class="swatch-dark" style="background:rgb(224,171,86);"></div><div class="swatch-light" style="background:rgb(242,213,166);"></div><div class="swatch-label">橙色</div></div>
+      <div class="swatch-card"><div class="swatch-dark" style="background:rgb(188,190,42);"></div><div class="swatch-light" style="background:rgb(235,236,159);"></div><div class="swatch-label">黄色</div></div>
+      <div class="swatch-card"><div class="swatch-dark" style="background:rgb(131,119,235);"></div><div class="swatch-light" style="background:rgb(203,196,241);"></div><div class="swatch-label">紫色</div></div>
+      <div class="swatch-card"><div class="swatch-dark" style="background:rgb(133,142,153);"></div><div class="swatch-light" style="background:rgb(217,226,237);"></div><div class="swatch-label">灰色</div></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sec-title">按钮</div>
+    <div class="sub-title">类型</div>
+    <div class="row" style="margin-bottom:16px;">
+      <button class="btn btn-primary">主要按钮</button>
+      <button class="btn btn-secondary">次要按钮</button>
+      <button class="btn btn-ghost">默认按钮</button>
+      <button class="btn btn-danger">危险按钮</button>
+      <button class="btn btn-text">文字按钮</button>
+    </div>
+    <div class="sub-title">尺寸</div>
+    <div class="row" style="margin-bottom:16px;align-items:center;">
+      <button class="btn btn-primary btn-lg">大号</button>
+      <button class="btn btn-primary">中号</button>
+      <button class="btn btn-primary btn-sm">小号</button>
+    </div>
+    <div class="sub-title">禁用</div>
+    <div class="row">
+      <button class="btn btn-primary" disabled>主要禁用</button>
+      <button class="btn btn-secondary" disabled>次要禁用</button>
+      <button class="btn btn-ghost" disabled>默认禁用</button>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sec-title">标签</div>
+    <div class="row">
+      <span class="tag tag-blue">蓝色标签</span>
+      <span class="tag tag-green">绿色标签</span>
+      <span class="tag tag-orange">橙色标签</span>
+      <span class="tag tag-yellow">黄色标签</span>
+      <span class="tag tag-purple">紫色标签</span>
+      <span class="tag tag-gray">灰色标签</span>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sec-title">图标</div>
+    <div class="sub-title">尺寸规格</div>
+    <div class="row" style="align-items:flex-end;margin-bottom:20px;">
+      <div class="icon-item ic-sm ic-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>16px</span></div>
+      <div class="icon-item ic-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>24px</span></div>
+      <div class="icon-item ic-lg ic-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>32px</span></div>
+      <div class="icon-item ic-xl ic-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>48px</span></div>
+    </div>
+    <div class="sub-title">常用图标</div>
+    <div class="icon-grid" style="margin-bottom:20px;">
+      <div class="icon-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><span>搜索</span></div>
+      <div class="icon-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>用户</span></div>
+      <div class="icon-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>首页</span></div>
+      <div class="icon-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg><span>编辑</span></div>
+      <div class="icon-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg><span>删除</span></div>
+      <div class="icon-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span>新增</span></div>
+      <div class="icon-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg><span>下载</span></div>
+      <div class="icon-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><span>上传</span></div>
+      <div class="icon-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span>查看</span></div>
+      <div class="icon-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>通知</span></div>
+      <div class="icon-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>日历</span></div>
+      <div class="icon-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>设置</span></div>
+    </div>
+    <div class="sub-title">颜色变体</div>
+    <div class="row">
+      <div class="icon-item ic-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>蓝色</span></div>
+      <div class="icon-item ic-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>绿色</span></div>
+      <div class="icon-item ic-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>橙色</span></div>
+      <div class="icon-item ic-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>红色</span></div>
+      <div class="icon-item ic-gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>灰色</span></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sec-title">表单组件</div>
+    <div class="sub-title">1. 输入框</div>
+    <div class="row" style="margin-bottom:16px;">
+      <div class="col"><div class="form-group"><label class="form-label">基础输入框</label><input class="form-control" type="text" placeholder="请输入内容"></div></div>
+      <div class="col"><div class="form-group"><label class="form-label req">必填项</label><input class="form-control" type="text" placeholder="请输入内容"></div></div>
+      <div class="col"><div class="form-group"><label class="form-label">禁用状态</label><input class="form-control" type="text" placeholder="已禁用" disabled></div></div>
+    </div>
+    <div class="row" style="margin-bottom:20px;">
+      <div class="col"><div class="form-group"><label class="form-label">错误状态</label><input class="form-control err" type="text" value="错误内容"><div class="form-hint err">请输入有效的内容</div></div></div>
+      <div class="col"><div class="form-group"><label class="form-label">带前缀</label><div class="input-group"><span class="input-addon">http://</span><input class="form-control" type="text" placeholder="请输入域名"></div></div></div>
+      <div class="col"><div class="form-group"><label class="form-label">带后缀</label><div class="input-group"><input class="form-control" type="text" placeholder="请输入金额"><span class="input-addon">元</span></div></div></div>
+    </div>
+    <div class="sub-title">2. 下拉选择 / 文本域</div>
+    <div class="row" style="margin-bottom:20px;">
+      <div class="col"><div class="form-group"><label class="form-label">下拉选择</label><select class="form-control"><option value="">请选择</option><option>选项一</option><option>选项二</option><option>选项三</option></select></div></div>
+      <div class="col"><div class="form-group"><label class="form-label">禁用下拉</label><select class="form-control" disabled><option>已禁用</option></select></div></div>
+      <div class="col"><div class="form-group"><label class="form-label">文本域</label><textarea class="form-control" rows="3" placeholder="请输入内容，最多 500 字"></textarea><div class="form-hint">0 / 500</div></div></div>
+    </div>
+    <div class="sub-title">3. 复选框（竖排 / 并排）</div>
+    <div class="row" style="margin-bottom:20px;align-items:flex-start;">
+      <div class="col"><label class="form-label">竖排</label><div class="chk-group" style="margin-top:6px;"><label class="chk"><input type="checkbox" checked><span>选项一</span></label><label class="chk"><input type="checkbox"><span>选项二</span></label><label class="chk"><input type="checkbox" disabled><span>禁用选项</span></label></div></div>
+      <div class="col"><label class="form-label">并排</label><div class="chk-group inline" style="margin-top:10px;"><label class="chk"><input type="checkbox" checked><span>选项A</span></label><label class="chk"><input type="checkbox"><span>选项B</span></label><label class="chk"><input type="checkbox"><span>选项C</span></label><label class="chk"><input type="checkbox" disabled><span>禁用</span></label></div></div>
+    </div>
+    <div class="sub-title">4. 单选框（竖排 / 并排）</div>
+    <div class="row" style="margin-bottom:20px;align-items:flex-start;">
+      <div class="col"><label class="form-label">竖排</label><div class="rdo-group" style="margin-top:6px;"><label class="rdo"><input type="radio" name="rv" checked><span>选项一</span></label><label class="rdo"><input type="radio" name="rv"><span>选项二</span></label><label class="rdo"><input type="radio" name="rv" disabled><span>禁用</span></label></div></div>
+      <div class="col"><label class="form-label">并排</label><div class="rdo-group inline" style="margin-top:10px;"><label class="rdo"><input type="radio" name="rh" checked><span>男</span></label><label class="rdo"><input type="radio" name="rh"><span>女</span></label><label class="rdo"><input type="radio" name="rh"><span>保密</span></label></div></div>
+    </div>
+    <div class="sub-title">5. 开关</div>
+    <div class="row" style="margin-bottom:20px;">
+      <div class="sw-wrap"><label class="sw"><input type="checkbox" checked><span class="sw-bar"></span></label><span>开启</span></div>
+      <div class="sw-wrap"><label class="sw"><input type="checkbox"><span class="sw-bar"></span></label><span>关闭</span></div>
+      <div class="sw-wrap"><label class="sw"><input type="checkbox" disabled><span class="sw-bar"></span></label><span>禁用</span></div>
+    </div>
+    <div class="sub-title">6. 上传</div>
+    <div class="row" style="align-items:flex-start;margin-bottom:0;">
+      <div class="col2"><div class="upload-zone" onclick="document.getElementById('fu').click()"><input type="file" id="fu" style="display:none" multiple><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><div class="upload-text">拖拽至此，或<strong>点击上传</strong></div><div class="upload-hint-text">支持 JPG、PNG、PDF，单文件不超过 10MB</div></div></div>
+      <div class="col"><label class="form-label">按钮上传</label><div class="row" style="margin-top:6px;margin-bottom:0;"><button class="btn btn-secondary btn-sm" onclick="document.getElementById('fu2').click()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>选择文件</button><input type="file" id="fu2" style="display:none"><span class="form-hint" id="fu2-name">未选择文件</span></div></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sec-title">7. 表格标签</div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>编号</th><th>姓名</th><th>部门</th><th>状态</th><th>角色</th><th>创建时间</th><th>操作</th></tr></thead>
+        <tbody>
+          <tr><td>001</td><td>张三</td><td>技术部</td><td><span class="tag tag-green">正常</span></td><td><span class="tag tag-blue">管理员</span></td><td>2024-01-15</td><td><button class="btn btn-text btn-sm">编辑</button> <button class="btn btn-text btn-sm" style="color:var(--danger)">删除</button></td></tr>
+          <tr><td>002</td><td>李四</td><td>产品部</td><td><span class="tag tag-orange">待审核</span></td><td><span class="tag tag-purple">编辑者</span></td><td>2024-01-16</td><td><button class="btn btn-text btn-sm">编辑</button> <button class="btn btn-text btn-sm" style="color:var(--danger)">删除</button></td></tr>
+          <tr><td>003</td><td>王五</td><td>设计部</td><td><span class="tag tag-gray">已停用</span></td><td><span class="tag tag-yellow">访客</span></td><td>2024-01-17</td><td><button class="btn btn-text btn-sm">编辑</button> <button class="btn btn-text btn-sm" style="color:var(--danger)">删除</button></td></tr>
+          <tr><td>004</td><td>赵六</td><td>运营部</td><td><span class="tag tag-green">正常</span></td><td><span class="tag tag-blue">管理员</span></td><td>2024-01-18</td><td><button class="btn btn-text btn-sm">编辑</button> <button class="btn btn-text btn-sm" style="color:var(--danger)">删除</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sec-title">提示框</div>
+    <div class="alert alert-info"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span><strong>提示：</strong>这是一条信息提示，告知用户相关内容。</span></div>
+    <div class="alert alert-success"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><polyline points="20 6 9 17 4 12"/></svg><span><strong>成功：</strong>操作已完成，数据已保存。</span></div>
+    <div class="alert alert-warning"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span><strong>警告：</strong>此操作不可撤销，请谨慎处理。</span></div>
+    <div class="alert alert-error" style="margin-bottom:0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span><strong>错误：</strong>操作失败，请检查输入后重试。</span></div>
+  </div>
+  <div class="section">
+    <div class="sec-title">8. 弹窗（居中对齐）</div>
+    <div class="row" style="margin-bottom:20px;">
+      <button class="btn btn-primary" onclick="document.getElementById('m1').classList.add('show')">确认弹窗</button>
+      <button class="btn btn-secondary" onclick="document.getElementById('m2').classList.add('show')">表单弹窗</button>
+    </div>
+    <div style="border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;max-width:480px;">
+      <div class="modal-hd"><span class="modal-title">确认操作</span><button class="modal-close">✕</button></div>
+      <div class="modal-bd"><p style="color:var(--text-sec);">确认要删除该条记录吗？此操作不可恢复，请谨慎操作。</p></div>
+      <div class="modal-ft"><button class="btn btn-ghost">取消</button><button class="btn btn-danger">确认删除</button></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sec-title">卡片</div>
+    <div class="card-grid">
+      <div class="card c-blue"><div class="card-hd" style="color:var(--primary);">客户信息</div><div class="card-bd"><div style="font-size:28px;font-weight:700;color:var(--primary);">1,234</div><div style="font-size:12px;color:var(--text-sec);margin-top:4px;">总客户数</div></div></div>
+      <div class="card c-green"><div class="card-hd" style="color:rgb(34,120,70);">成交订单</div><div class="card-bd"><div style="font-size:28px;font-weight:700;color:rgb(34,120,70);">568</div><div style="font-size:12px;color:var(--text-sec);margin-top:4px;">本月成交</div></div></div>
+      <div class="card c-orange"><div class="card-hd" style="color:rgb(160,90,20);">待处理</div><div class="card-bd"><div style="font-size:28px;font-weight:700;color:rgb(160,90,20);">42</div><div style="font-size:12px;color:var(--text-sec);margin-top:4px;">待跟进任务</div></div></div>
+      <div class="card c-purple"><div class="card-hd" style="color:rgb(80,60,180);">完成率</div><div class="card-bd"><div style="font-size:28px;font-weight:700;color:rgb(80,60,180);">89%</div><div style="font-size:12px;color:var(--text-sec);margin-top:4px;">本月目标</div></div></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sec-title">完整表单示例</div>
+    <form onsubmit="event.preventDefault()" class="form-h">
+      <div class="form-group"><label class="form-label req">姓名</label><div class="form-ctrl-wrap"><input class="form-control" type="text" placeholder="请输入真实姓名" style="max-width:300px;"></div></div>
+      <div class="form-group"><label class="form-label req">手机号</label><div class="form-ctrl-wrap"><input class="form-control" type="tel" placeholder="请输入手机号码" style="max-width:300px;"></div></div>
+      <div class="form-group"><label class="form-label">部门</label><div class="form-ctrl-wrap"><select class="form-control" style="max-width:300px;"><option value="">请选择部门</option><option>技术部</option><option>产品部</option><option>设计部</option><option>运营部</option></select></div></div>
+      <div class="form-group"><label class="form-label">角色</label><div class="form-ctrl-wrap"><div class="rdo-group inline" style="padding-top:6px;"><label class="rdo"><input type="radio" name="role" checked><span>管理员</span></label><label class="rdo"><input type="radio" name="role"><span>编辑者</span></label><label class="rdo"><input type="radio" name="role"><span>访客</span></label></div></div></div>
+      <div class="form-group"><label class="form-label">权限</label><div class="form-ctrl-wrap"><div class="chk-group inline" style="padding-top:6px;"><label class="chk"><input type="checkbox" checked><span>查看</span></label><label class="chk"><input type="checkbox" checked><span>编辑</span></label><label class="chk"><input type="checkbox"><span>删除</span></label><label class="chk"><input type="checkbox"><span>导出</span></label></div></div></div>
+      <div class="form-group"><label class="form-label">账户状态</label><div class="form-ctrl-wrap" style="padding-top:5px;"><div class="sw-wrap"><label class="sw"><input type="checkbox" checked><span class="sw-bar"></span></label><span>启用</span></div></div></div>
+      <div class="form-group"><label class="form-label">备注</label><div class="form-ctrl-wrap"><textarea class="form-control" rows="3" placeholder="请输入备注" style="max-width:500px;"></textarea></div></div>
+      <div class="divider"></div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;"><button type="reset" class="btn btn-ghost">重置</button><button type="submit" class="btn btn-primary">提交保存</button></div>
+    </form>
+  </div>
+</div>
+<div class="modal-mask" id="m1" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal">
+    <div class="modal-hd"><span class="modal-title">确认删除</span><button class="modal-close" onclick="document.getElementById('m1').classList.remove('show')">✕</button></div>
+    <div class="modal-bd"><p style="color:var(--text-sec);">确认要删除该条记录吗？此操作不可恢复，请谨慎操作。</p></div>
+    <div class="modal-ft"><button class="btn btn-ghost" onclick="document.getElementById('m1').classList.remove('show')">取消</button><button class="btn btn-danger" onclick="document.getElementById('m1').classList.remove('show')">确认删除</button></div>
+  </div>
+</div>
+<div class="modal-mask" id="m2" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal">
+    <div class="modal-hd"><span class="modal-title">新增用户</span><button class="modal-close" onclick="document.getElementById('m2').classList.remove('show')">✕</button></div>
+    <div class="modal-bd">
+      <div class="form-group"><label class="form-label req">姓名</label><input class="form-control" type="text" placeholder="请输入姓名"></div>
+      <div class="form-group"><label class="form-label req">手机号</label><input class="form-control" type="tel" placeholder="请输入手机号"></div>
+      <div class="form-group"><label class="form-label">部门</label><select class="form-control"><option value="">请选择</option><option>技术部</option><option>产品部</option></select></div>
+    </div>
+    <div class="modal-ft"><button class="btn btn-ghost" onclick="document.getElementById('m2').classList.remove('show')">取消</button><button class="btn btn-primary" onclick="document.getElementById('m2').classList.remove('show')">确认新增</button></div>
+  </div>
+</div>
+<script>
+document.getElementById('fu2').addEventListener('change',function(){
+  document.getElementById('fu2-name').textContent = this.files[0]?.name || '未选择文件';
+});
+</script>
+</body>
+</html>
