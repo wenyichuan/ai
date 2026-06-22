@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI 使用三大维度 · 知识分享</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(145deg, #f6f9fc 0%, #edf2f7 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+            line-height: 1.5;
+            color: #0b1a2f;
+        }
+        .card {
+            max-width: 1280px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border-radius: 3.5rem;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 25px 45px -12px rgba(0, 20, 40, 0.25), 0 1px 3px rgba(0,0,0,0.03);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        .header .badge {
+            display: inline-block;
+            background: #1a2c42;
+            color: #eef6ff;
+            font-weight: 600;
+            font-size: 0.8rem;
+            letter-spacing: 0.02em;
+            padding: 0.35rem 1.2rem;
+            border-radius: 40px;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #0b1f33 0%, #1f4a7a 80%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.3rem;
+        }
+        .header .sub {
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: #2c4a6a;
+            background: rgba(255,255,255,0.5);
+            display: inline-block;
+            padding: 0.2rem 2rem;
+            border-radius: 40px;
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+        .header .sub strong { font-weight: 600; color: #0b2b4a; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin: 2rem 0 1.5rem;
+        }
+        .pillar {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border-radius: 2.2rem;
+            padding: 2rem 1.8rem 2.2rem;
+            box-shadow: 0 8px 20px -8px rgba(0, 20, 40, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            transition: all 0.2s ease;
+        }
+        .pillar:hover {
+            transform: translateY(-6px);
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: 0 18px 30px -12px rgba(0, 20, 40, 0.15);
+            border-color: rgba(255, 255, 255, 0.95);
+        }
+        .pillar .icon { font-size: 2.6rem; line-height: 1; margin-bottom: 0.5rem; display: block; }
+        .pillar h2 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 0.2rem; color: #0b1f33; }
+        .pillar .subtitle {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            color: #4d6f8f;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid rgba(60, 100, 140, 0.15);
+            padding-bottom: 0.4rem;
+        }
+        .pillar .desc {
+            font-size: 0.95rem;
+            color: #1f3a54;
+            margin-bottom: 1rem;
+            font-weight: 450;
+        }
+        .pillar .input-box {
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 1.4rem;
+            padding: 1rem 1.4rem;
+            border: 1px solid rgba(0, 0, 0, 0.03);
+        }
+        .pillar .input-box .label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #5b7c9c;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-bottom: 0.4rem;
+        }
+        .pillar .input-box .label span {
+            background: #dce7f2;
+            padding: 0.05rem 0.6rem;
+            border-radius: 30px;
+            font-size: 0.55rem;
+            color: #1a3b5a;
+        }
+        .pillar .input-box p {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #0b1f33;
+            line-height: 1.6;
+        }
+        .pillar .input-box .highlight {
+            background: linear-gradient(120deg, rgba(60, 130, 210, 0.08), rgba(60, 130, 210, 0.02));
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #004080;
+        }
+        .pillar .input-box .skill-tag {
+            display: inline-block;
+            background: #1a2c42;
+            color: white;
+            font-size: 0.6rem;
+            font-weight: 600;
+            padding: 0.05rem 0.7rem;
+            border-radius: 30px;
+            margin-right: 0.3rem;
+            letter-spacing: 0.02em;
+        }
+        .pillar .footnote {
+            margin-top: 1rem;
+            font-size: 0.82rem;
+            color: #3d607e;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            background: rgba(230, 242, 255, 0.4);
+            padding: 0.4rem 1rem;
+            border-radius: 60px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .pillar .footnote .emoji { font-size: 1rem; }
+        .footer-note {
+            margin-top: 2.2rem;
+            padding-top: 1.5rem;
+            border-top: 2px dashed rgba(60, 100, 140, 0.15);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+        }
+        .footer-note .essence {
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: #12314f;
+            background: rgba(255, 255, 255, 0.4);
+            padding: 0.4rem 1.8rem;
+            border-radius: 60px;
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+        .footer-note .essence strong {
+            background: #0b1f33;
+            color: white;
+            font-weight: 600;
+            padding: 0.05rem 0.8rem;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            margin: 0 0.2rem;
+        }
+        .footer-note .meta {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            color: #3d607e;
+            font-size: 0.85rem;
+        }
+        .footer-note .meta span { display: flex; align-items: center; gap: 0.3rem; }
+        @media (max-width: 900px) {
+            .card { padding: 2rem 1.5rem; border-radius: 2.5rem; }
+            .grid { grid-template-columns: 1fr; gap: 1.5rem; }
+            .header h1 { font-size: 2.2rem; }
+            .header .sub { font-size: 1rem; padding: 0.2rem 1.2rem; }
+            .footer-note { flex-direction: column; align-items: flex-start; }
+        }
+        @media (max-width: 480px) {
+            .card { padding: 1.5rem 1rem; border-radius: 2rem; }
+            .header h1 { font-size: 1.8rem; }
+            .pillar { padding: 1.5rem 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="header">
+            <div class="badge">🧠 使用层 · 完整图谱</div>
+            <h1>AI 使用的三大维度</h1>
+            <div class="sub">
+                <strong>提示词 · 记忆 · MCP</strong> &nbsp;—&nbsp; 所有输入的本质
+            </div>
+        </div>
+
+        <div class="grid">
+            <!-- 1. 提示词工程（含 Skill） -->
+            <div class="pillar">
+                <span class="icon">✍️</span>
+                <h2>提示词工程</h2>
+                <div class="subtitle">Prompt Engineering</div>
+                <div class="desc">
+                    当前任务的指令 —— 用自然语言定义目标、角色、格式和推理路径。
+                </div>
+                <div class="input-box">
+                    <div class="label">
+                        📥 输入内容
+                        <span>核心</span>
+                    </div>
+                    <p>
+                        <span class="skill-tag">SKILL</span> “以<strong>资深数据科学家</strong>的身份，用 <strong>Markdown 表格</strong> 对比三种聚类算法，并给出适用场景。”
+                    </p>
+                    <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #2b5a7a; background: #e3edf6; padding: 0.15rem 0.8rem; border-radius: 30px; display: inline-block;">
+                        ⚡ 含 Skill（预设提示词包）
+                    </div>
+                </div>
+                <div class="footnote">
+                    <span class="emoji">🎯</span> 控制输出风格、结构、推理链 · Skill 是其封装形态
+                </div>
+            </div>
+
+            <!-- 2. 记忆工程 -->
+            <div class="pillar">
+                <span class="icon">🧩</span>
+                <h2>记忆工程</h2>
+                <div class="subtitle">Memory Engineering</div>
+                <div class="desc">
+                    历史对话 / 偏好 —— 将用户画像、长期偏好、过往事实拼入上下文。
+                </div>
+                <div class="input-box">
+                    <div class="label">
+                        📥 输入内容
+                        <span>持续累积</span>
+                    </div>
+                    <p>
+                        “用户 <strong>偏好 Python</strong>，上次项目使用 <strong>FastAPI</strong>，拒绝过 SQL 方案。本次回答延续该风格，并引用之前讨论的 <strong>RAG 架构</strong>。”
+                    </p>
+                    <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #2b5a7a; background: #e3edf6; padding: 0.15rem 0.8rem; border-radius: 30px; display: inline-block;">
+                        🔁 跨会话 · 长期
+                    </div>
+                </div>
+                <div class="footnote">
+                    <span class="emoji">📚</span> 个性化 + 上下文连贯性
+                </div>
+            </div>
+
+            <!-- 3. MCP 工程 -->
+            <div class="pillar">
+                <span class="icon">🔌</span>
+                <h2>MCP 工程</h2>
+                <div class="subtitle">Model Context Protocol</div>
+                <div class="desc">
+                    工具的描述与调用结果 —— 让模型使用外部系统（搜索、数据库、API 等）。
+                </div>
+                <div class="input-box">
+                    <div class="label">
+                        📥 输入内容
+                        <span>工具增强</span>
+                    </div>
+                    <p>
+                        “调用 <strong>Google 搜索 MCP</strong> 获取最新 AI 新闻，工具返回结果：<span class="highlight">[摘要+链接]</span>，基于此生成周报。”
+                    </p>
+                    <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #2b5a7a; background: #e3edf6; padding: 0.15rem 0.8rem; border-radius: 30px; display: inline-block;">
+                        🌐 对接外部系统
+                    </div>
+                </div>
+                <div class="footnote">
+                    <span class="emoji">⚙️</span> 行动 · 实时数据 · 扩展能力
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-note">
+            <div class="essence">
+                💡 使用层面 · 唯一动作：<strong>构造输入</strong>
+            </div>
+            <div class="meta">
+                <span>✍️ 提示词 = 当前指令 + Skill</span>
+                <span>🧠 记忆 = 历史偏好</span>
+                <span>🔌 MCP = 工具结果</span>
+            </div>
+        </div>
+
+        <div style="margin-top: 1.2rem; text-align: center; font-size: 0.75rem; color: #5d7f9e; letter-spacing: 0.02em; border-top: 1px solid rgba(0,0,0,0.02); padding-top: 0.8rem;">
+            ⚡ 所有维度最终统一为「输入给模型的上下文」 — 无第四维
+        </div>
+    </div>
+</body>
+</html>
