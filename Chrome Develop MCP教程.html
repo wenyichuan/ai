@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>自动化测试环境搭建：IDEA + Claude Code GUI + DeepSeek + Google DevTools MCP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Noto Sans', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+            background: #f0f4f8;
+            color: #1e293b;
+            line-height: 1.5;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        /* 头部 */
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            padding: 2rem 2.5rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.85;
+            max-width: 800px;
+        }
+
+        .badge-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1.25rem;
+        }
+
+        .badge {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        /* 教程主内容 */
+        .tutorial-content {
+            padding: 2rem 2.5rem;
+        }
+
+        .info-box {
+            background: #eff6ff;
+            border-left: 5px solid #3b82f6;
+            padding: 1rem 1.5rem;
+            border-radius: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .warning-box {
+            background: #fff7ed;
+            border-left: 5px solid #f97316;
+            padding: 1rem 1.5rem;
+            border-radius: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .code-block {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 1rem 1.5rem;
+            border-radius: 1rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            margin: 1rem 0;
+        }
+
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .step-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            margin-bottom: 1.8rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: box-shadow 0.2s;
+        }
+
+        .step-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .step-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            color: #0f172a;
+        }
+
+        .step-number {
+            background: #2563eb;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .mock-img {
+            background: #f8fafc;
+            border-radius: 0.75rem;
+            padding: 0.8rem 1rem;
+            text-align: center;
+            margin: 1rem 0;
+            border: 1px dashed #cbd5e1;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #334155;
+        }
+
+        .mock-img span {
+            background: #e2e8f0;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        hr {
+            margin: 2rem 0;
+            border: none;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .prompt-card {
+            background: #fef9e6;
+            border: 1px solid #fde047;
+            border-radius: 1rem;
+            padding: 1.2rem 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .prompt-card h3 {
+            color: #b45309;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer {
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            padding: 1.5rem 2.5rem;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+
+        .author-info {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            background: #eef2ff;
+            display: inline-block;
+            padding: 0.25rem 1rem;
+            border-radius: 30px;
+            color: #1e40af;
+        }
+
+        @media (max-width: 680px) {
+            .tutorial-content { padding: 1.5rem; }
+            .header h1 { font-size: 1.5rem; }
+            .step-title { font-size: 1.1rem; }
+        }
+
+        .inline-code {
+            background: #f1f5f9;
+            padding: 0.2rem 0.4rem;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🔧 自动化测试环境搭建完全指南</h1>
+        <p>IntelliJ IDEA + Claude Code GUI + DeepSeek + Google DevTools MCP 集成教程 · 从零构建智能化测试工作台</p>
+        <div class="badge-group">
+            <span class="badge">⚡ Chrome DevTools MCP</span>
+            <span class="badge">🧠 Claude Code GUI</span>
+            <span class="badge">📊 DeepSeek 辅助生成</span>
+            <span class="badge">🛠️ IDEA 编译器整合</span>
+            <span class="badge">🚀 一键自动化</span>
+        </div>
+    </div>
+
+    <div class="tutorial-content">
+        <p style="margin-bottom: 1rem;">✅ 本教程将逐步指导您配置业界领先的 AI 驱动自动化测试环境。完成配置后，您可以在 IDEA 中通过自然语言调用 Chrome DevTools MCP 完成页面导航、交互、断言、网络监控等操作，并借助 DeepSeek 生成测试用例与报告框架。</p>
+
+        <!-- Step 1 -->
+        <div class="step-card">
+            <div class="step-title"><span class="step-number">1</span> 启动 Chrome 远程调试端口</div>
+            <p>首先需要以开启远程调试模式的方式启动 Google Chrome，以便外部工具（MCP Server）能够控制浏览器实例。</p>
+            <p><strong>Windows 系统：</strong> 关闭所有 Chrome 窗口，然后按 <kbd>Win + R</kbd> 打开运行窗口，输入以下命令：</p>
+            <div class="code-block"><pre>"C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222 --user-data-dir="%TEMP%\chrome-debug-profile"</pre></div>
+            <p><strong>macOS / Linux：</strong> 终端执行（根据实际安装路径调整）</p>
+            <div class="code-block"><pre>/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222 --user-data-dir="$TMPDIR/chrome-debug-profile"</pre></div>
+            <div class="mock-img">📸 <span>[模拟截图] Chrome 启动后地址栏下方出现“DevTools 正在调试此浏览器”提示条</span> — 表示调试模式生效</div>
+            <p>✅ <strong>验证调试端口是否就绪：</strong> 打开新终端执行以下命令，应返回浏览器版本信息 JSON。</p>
+            <div class="code-block"><pre>curl http://localhost:9222/json/version</pre></div>
+            <div class="mock-img">📸 <span>[终端输出截图] 返回 {"Browser":"Chrome/xxx","webSocketDebuggerUrl":"..."}</span> — 端口正常</div>
+            <div class="info-box">💡 提示：若端口冲突可更换为 9223 等，后续 MCP 配置需同步修改 <code>--browser-url</code> 参数。</div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-card">
+            <div class="step-title"><span class="step-number">2</span> 安装并配置 MCP 服务 (chrome-devtools-mcp)</div>
+            <p>MCP (Model Context Protocol) 服务作为桥梁，让 Claude 能够调用 Chrome DevTools 能力。使用 <code>npx</code> 快速启动。</p>
+            <p><strong>2.1 创建 MCP 配置文件</strong>（Claude Code GUI 或 Claude Desktop 需要）<br>
+            在用户目录下新建配置文件（若没有则创建）：</p>
+            <ul style="margin-left: 1.5rem; margin-bottom: 0.5rem;">
+                <li>Windows: <code>%APPDATA%\Claude\claude_desktop_config.json</code> 或项目级 <code>.claude/mcp.json</code></li>
+                <li>macOS: <code>~/Library/Application Support/Claude/claude_desktop_config.json</code></li>
+            </ul>
+            <p>添加以下 MCP Server 定义：</p>
+            <div class="code-block"><pre>{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest",
+        "--browser-url=http://localhost:9222"
+      ],
+      "type": "stdio"
+    }
+  }
+}</pre></div>
+            <p><strong>2.2 手动测试 MCP 服务可用性</strong>（确保 Node.js 已安装）</p>
+            <div class="code-block"><pre>npx -y chrome-devtools-mcp@latest --browser-url=http://localhost:9222</pre></div>
+            <div class="mock-img">📸 <span>[命令行截图] 服务启动后显示 "MCP server running on stdio" 无报错</span></div>
+            <div class="info-box">📌 注意：请保持 Chrome 远程调试窗口始终运行，MCP 需要附着到该浏览器实例上。</div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-card">
+            <div class="step-title"><span class="step-number">3</span> IDEA 集成 Claude Code GUI 插件</div>
+            <p>在 IntelliJ IDEA 中安装 Claude Code GUI 插件，获得 AI 对话式自动化测试能力。</p>
+            <ol style="margin-left: 1.2rem;">
+                <li>打开 IDEA，进入 <strong>File → Settings → Plugins</strong> (macOS: <strong>IntelliJ IDEA → Preferences → Plugins</strong>)</li>
+                <li>搜索 <strong>"Claude Code GUI"</strong> 或 <strong>"Claude AI Assistant"</strong>，点击安装并重启 IDE。</li>
+                <li>配置 API 密钥：<strong>Settings → Tools → Claude Code</strong>，填入 API Key（可使用 DeepSeek API 或 Anthropic Key）。</li>
+                <li>若使用 DeepSeek，请修改 API Base URL 为 <code>https://api.deepseek.com/v1</code>，模型选择 <code>deepseek-chat</code>。</li>
+                <li><strong>关联 MCP 服务器：</strong> 在 Claude Code 设置中找到 "MCP Servers" 配置项，指定上一步创建的 <code>mcp.json</code> 路径，点击刷新，看到 <code>chrome-devtools</code> 状态为 <span style="color: #15803d;">● Connected</span> 即成功。</li>
+            </ol>
+            <div class="mock-img">📸 <span>[IDEA截图] Claude Code 工具窗口显示 MCP 工具列表: navigate_page, click, fill, take_screenshot 等</span></div>
+            <p>现在您可以在 IDEA 右侧的 Claude 对话框中输入中文指令，例如：<em>“使用 MCP 打开 https://example.com，截图并获取页面标题”</em>，AI 将自动调用 Chrome DevTools 执行。</p>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-card">
+            <div class="step-title"><span class="step-number">4</span> 结合 DeepSeek 生成测试脚本与断言</div>
+            <p>利用 DeepSeek 大模型强大的代码生成能力，快速产出符合项目需求的自动化测试步骤（可直接用于 Claude Code 或 Playwright）。</p>
+            <p><strong>典型工作流：</strong></p>
+            <ul style="margin-left: 1.2rem;">
+                <li>在 Claude Code GUI 的对话框中切换至 DeepSeek 模型（或使用官方 API），输入上下文提示词。</li>
+                <li>要求 DeepSeek 生成针对特定 Web 应用的测试计划，格式遵循 MCP 工具调用规范。</li>
+            </ul>
+            <div class="code-block"><pre>// DeepSeek 生成的测试动作序列示例
+1. navigate_page("http://192.168.50.194:3103/#/login")
+2. fill("input[name='username']", "admin")
+3. fill("input[name='password']", "admin")
+4. click("button[type='submit']")
+5. wait_for("text=数据看板")
+6. take_screenshot()</pre></div>
+            <div class="mock-img">📸 <span>[DeepSeek 网页对话截图] 提示词："生成数据中台登录模块的MCP自动化脚本" → 输出结构化动作</span></div>
+            <p>将生成的脚本直接粘贴到 Claude Code 对话框，即可执行并观察浏览器自动操作，极大提升测试开发效率。</p>
+        </div>
+
+        <!-- 重要提示与角色提示词展示 -->
+        <div class="warning-box">
+            <strong>⚠️ 重要注意事项（源自高级QA工程师经验）</strong>
+            <ul style="margin-top: 0.5rem; margin-left: 1.2rem;">
+                <li>如果调用 MCP 访问网页失败（如超时、连接拒绝），请及时检查 Chrome 调试端口 <code>9222</code> 是否被占用/正确启动，并确保命令行参数无误。<strong>若持续失败，退出当前思考流程并反馈“MCP 连接异常，请检查浏览器远程调试状态”。</strong></li>
+                <li>部分 Web 应用的操作按钮可能是图标（无文字标签），交互时推荐使用 CSS 选择器或 aria-label 定位元素，可通过 MCP 的 <code>get_page_structure</code> 获取可访问性树辅助定位。</li>
+                <li>建议在实际测试中开启控制台监听和网络请求捕获，便于发现隐藏 Bug。</li>
+            </ul>
+        </div>
+
+        <!-- 下面展示完整的角色提示词模板 (仅作为教程内容，不执行实际报告) -->
+        <div class="prompt-card">
+            <h3>📋 📌 测试工程师提示词模板（嵌入教程供参考）</h3>
+            <p>以下为完整的 <strong>角色 + 任务目标</strong> 提示词，您可以直接复制并发送给 Claude（DeepSeek 模型）以生成针对任意 Web 应用的测试报告与用户手册。本教程仅展示提示词结构，不实际输出测试报告。</p>
+            <div class="code-block" style="background: #2d2a1e; color: #f5e6b2;"><pre># 角色：高级 QA 工程师 + 技术文档工程师
+
+你是一个专业的测试工程师，擅长进行自动化测试。同时你能将测试结果转化为清晰易懂的用户手册。
+
+## 任务目标
+
+对以下本地 Web 应用进行全面的功能测试和兼容性测试，发现并记录所有 Bug，最后生成一份测试报告和一份用户手册。
+
+### 项目信息
+
+- 本地访问地址：`[http://192.168.50.194:3103/#/login]`
+- 项目名称：`[数据中台]`
+- 访问账号：admin
+- 访问密码：admin
+
+### 测试内容
+D:\work\YunCeAI\myclaude\MCP\需求定版
+
+### 可用的工具集（Chrome DevTools MCP）
+
+你可以使用以下能力：
+1. **导航**：打开页面、新建标签页、等待元素加载、刷新
+2. **交互**：点击、填写表单、悬停、选择下拉框
+3. **获取信息**：截图、获取页面结构(snapshot)、执行 JS 获取样式/属性
+4. **调试**：查看控制台报错、查看网络请求
+5. **模拟**：调整视口尺寸(响应式测试)、模拟慢网络/弱 CPU
+
+### 重要提示
+1. 如果调用MCP访问网页失败，及时退出思考，并提示我
+2. 有的操作按钮可能是图标，并不附带文字
+3. 输出的测试报告要写测试流程，每一步要附图，要覆盖全部功能，制作一个需求追踪说明表，将需求及对应的测试结果附图，输出html
+4. 输出的用户手册要写清楚操作的步骤，每一步要附图，要覆盖全部功能，输出html</pre></div>
+            <p style="margin-top: 0.5rem;">💡 将此提示词与 MCP 工具结合，可自动完成数据中台（或任何被测系统）的全回归测试，并生成带截图的 HTML 报告与用户手册。上述模板中涉及的地址/账号为示例，实际测试时替换为您的目标环境。</p>
+        </div>
+
+        <hr>
+
+        <div class="step-card">
+            <div class="step-title"><span class="step-number">5</span> 端到端自动化测试验证（示例演示）</div>
+            <p>为了验证环境配置正确，执行一个简单的端到端测试：登录演示站点并截图。</p>
+            <ol style="margin-left: 1.2rem;">
+                <li>在 IDEA Claude Code GUI 中输入：</li>
+                <div class="code-block"><pre>请使用 chrome-devtools MCP 执行以下操作：
+1. 打开页面 http://example.com
+2. 等待页面加载完成
+3. 截图并保存为 demo.png
+4. 获取控制台日志，判断是否有错误</pre></div>
+                <li>观察浏览器自动打开并导航，截图将被保存到工作区。</li>
+                <li>如果一切顺利，表示 MCP + IDEA + Claude 全链路打通。</li>
+            </ol>
+            <div class="mock-img">📸 <span>[Claude 回执截图] MCP 调用序列展示: navigate -> wait_for -> take_screenshot -> list_console_messages</span></div>
+            <div class="info-box">🎉 成功执行后即可基于此环境开展深入的自动化测试，生成需求追踪矩阵、兼容性测试报告及用户文档。</div>
+        </div>
+
+        <div class="step-card">
+            <div class="step-title"><span class="step-number">6</span> 扩展能力：网络模拟 & 响应式测试</div>
+            <p>利用 Chrome DevTools MCP 的高级功能，可以模拟弱网环境和移动设备视口。</p>
+            <ul style="margin-left: 1.2rem;">
+                <li><strong>模拟慢网络 (Slow 3G)：</strong> 调用 <code>emulate_network_conditions</code> 工具。</li>
+                <li><strong>调整视口尺寸：</strong> 使用 <code>resize_page</code> 或设置设备模拟，例如 iPhone 12。</li>
+                <li><strong>注入脚本获取性能指标：</strong> 使用 <code>evaluate_javascript</code> 获取 First Paint 时间等。</li>
+            </ul>
+            <div class="code-block"><pre>// DeepSeek 辅助生成的移动端测试示例
+调用 resize_page(375, 812)  // iPhone 12 尺寸
+导航至目标页面
+执行断言检查菜单是否折叠正常</pre></div>
+            <p>完成以上配置，您已具备企业级自动化测试基础设施。后续所有测试报告、用户手册均可借助 Claude + DeepSeek 半自动生成。</p>
+        </div>
+
+        <div class="info-box">
+            🧪 <strong>总结</strong>：通过本教程，我们完成了 IDEA + Claude Code GUI + DeepSeek + Google DevTools MCP 的全套环境搭建。现在您可以：<br>
+            ✔️ 在 IDEA 中用自然语言控制 Chrome 执行任何 UI 操作；<br>
+            ✔️ 调用 DeepSeek 生成复杂测试脚本和文档框架；<br>
+            ✔️ 结合 MCP 能力自动捕获截图、网络日志并生成测试报告；<br>
+            ✔️ 参考上方提示词模板，对任意 Web 应用执行全功能自动化测试并输出规范 HTML 报告。
+        </div>
+    </div>
+
+    <div class="footer">
+        <div>📐 本教程仅包含环境配置部分 | 提示词示例已集成于教程内供实际使用 | 基于 Chrome DevTools MCP + Claude Code 最佳实践</div>
+        <div class="author-info">✍️ 作者：yichuan@iscas.ac.cn</div>
+    </div>
+</div>
+</body>
+</html>
