@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>探索型中台 · 完整版构想 | 汇报演示</title>
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #f4f7fc;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 2rem 1.5rem;
+      color: #1a2639;
+    }
+
+    /* 主卡片 */
+    .deck {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 2.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+      padding: 2.5rem 2.8rem;
+      transition: all 0.2s;
+    }
+
+    /* 头部 */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+      border-bottom: 2px solid #eef2f6;
+      padding-bottom: 1.8rem;
+    }
+
+    .title-block h1 {
+      font-size: 2.4rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      background: linear-gradient(145deg, #0b2b4a, #1b4a7a);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.3rem;
+    }
+
+    .title-block .sub {
+      font-size: 1rem;
+      color: #4a5b6e;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .title-block .sub i {
+      color: #2b6c9e;
+      font-size: 0.9rem;
+    }
+
+    .badge-group {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .badge {
+      background: #e9f0f9;
+      padding: 0.4rem 1rem;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #1f4e7a;
+      border: 1px solid #d1e0ee;
+    }
+
+    .badge i {
+      margin-right: 6px;
+      font-size: 0.75rem;
+    }
+
+    .badge.primary {
+      background: #1f4e7a;
+      color: white;
+      border-color: #1f4e7a;
+    }
+
+    /* 对比双栏 */
+    .compare-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.8rem;
+      margin-bottom: 2.8rem;
+    }
+
+    .compare-card {
+      background: #f9fbfe;
+      border-radius: 1.5rem;
+      padding: 1.5rem 1.8rem;
+      border: 1px solid #e9edf4;
+      transition: 0.2s;
+      box-shadow: 0 4px 8px rgba(0,20,40,0.02);
+    }
+
+    .compare-card.explore {
+      border-left: 6px solid #2b6c9e;
+      background: linear-gradient(145deg, #f7faff, #f0f6fe);
+    }
+
+    .compare-card.transact {
+      border-left: 6px solid #7f8fa3;
+      background: #f8fafc;
+    }
+
+    .compare-card h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .compare-card h3 i {
+      font-size: 1.3rem;
+      width: 2rem;
+      color: #1f4e7a;
+    }
+
+    .compare-card ul {
+      list-style: none;
+      margin-top: 0.5rem;
+    }
+
+    .compare-card li {
+      padding: 0.5rem 0 0.5rem 1.8rem;
+      position: relative;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: #1e2c3f;
+      border-bottom: 1px solid #e9edf4;
+    }
+
+    .compare-card li:last-child {
+      border-bottom: 0;
+    }
+
+    .compare-card li i {
+      position: absolute;
+      left: 0;
+      top: 0.6rem;
+      color: #2b6c9e;
+      font-size: 0.9rem;
+      width: 1.2rem;
+    }
+
+    .compare-card.transact li i {
+      color: #7f8fa3;
+    }
+
+    .highlight-tag {
+      background: #dce8f5;
+      padding: 0.15rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #103a5e;
+      margin-left: 0.4rem;
+    }
+
+    /* 四层架构 (核心) */
+    .architecture {
+      margin: 2.2rem 0 1.5rem 0;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #0b2b4a;
+      margin-bottom: 1.8rem;
+    }
+
+    .section-title i {
+      color: #2b6c9e;
+      font-size: 1.6rem;
+    }
+
+    .layers {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .layer-item {
+      background: white;
+      border-radius: 1.2rem;
+      border: 1px solid #e2e9f2;
+      padding: 1.2rem 1.8rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 1rem 1.5rem;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.02);
+      transition: 0.15s;
+      border-left: 6px solid transparent;
+    }
+
+    .layer-item:hover {
+      background: #fbfdff;
+      border-color: #c4d5e8;
+    }
+
+    .layer-item:nth-child(1) { border-left-color: #a0b8d0; }
+    .layer-item:nth-child(2) { border-left-color: #4b86c1; }
+    .layer-item:nth-child(3) { border-left-color: #1f5f96; }
+    .layer-item:nth-child(4) { border-left-color: #0b3b62; }
+
+    .layer-left {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      min-width: 170px;
+    }
+
+    .layer-num {
+      background: #eef4fa;
+      width: 34px;
+      height: 34px;
+      border-radius: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #1f4e7a;
+    }
+
+    .layer-name {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: #0b2b4a;
+    }
+
+    .layer-desc {
+      flex: 2;
+      min-width: 220px;
+      color: #24344b;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .layer-desc i {
+      color: #2b6c9e;
+      margin-right: 4px;
+      font-size: 0.8rem;
+    }
+
+    .layer-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      margin-left: auto;
+    }
+
+    .tag {
+      background: #eef4fa;
+      padding: 0.2rem 0.9rem;
+      border-radius: 30px;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: #1f4e7a;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .tag.ai {
+      background: #dbeafe;
+      color: #104d82;
+    }
+
+    .tag.green {
+      background: #ddf0e5;
+      color: #146b4a;
+    }
+
+    .tag.gold {
+      background: #fcf1d6;
+      color: #8a6d1f;
+    }
+
+    /* 核心洞察卡片 */
+    .insight-box {
+      background: #e7f0fa;
+      border-radius: 1.5rem;
+      padding: 1.8rem 2.2rem;
+      margin: 2.5rem 0 0.8rem 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      border: 1px solid #cfdff0;
+    }
+
+    .insight-box .left {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+    }
+
+    .insight-box .left i {
+      font-size: 2.4rem;
+      color: #1f4e7a;
+      background: white;
+      padding: 0.6rem;
+      border-radius: 60px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+    }
+
+    .insight-box .left p {
+      font-size: 1rem;
+      max-width: 600px;
+      font-weight: 450;
+      color: #04243e;
+    }
+
+    .insight-box .left strong {
+      font-weight: 700;
+      color: #0a2c4a;
+    }
+
+    .insight-box .pill {
+      background: white;
+      padding: 0.5rem 1.6rem;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #1f4e7a;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.02);
+      border: 1px solid #b8cee5;
+    }
+
+    /* 脚注 */
+    .footer-note {
+      margin-top: 2.5rem;
+      border-top: 1px solid #e2e9f2;
+      padding-top: 1.8rem;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      color: #4e637b;
+      font-size: 0.9rem;
+    }
+
+    .footer-note i {
+      margin-right: 0.4rem;
+      color: #2b6c9e;
+    }
+
+    @media (max-width: 850px) {
+      .deck { padding: 1.8rem; }
+      .compare-row { grid-template-columns: 1fr; }
+      .layer-item { flex-direction: column; align-items: stretch; }
+      .layer-tags { margin-left: 0; }
+      .insight-box { flex-direction: column; align-items: flex-start; gap: 1rem; }
+      .title-block h1 { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="deck">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="title-block">
+      <h1>🧠 探索型中台 · 完整构想</h1>
+      <div class="sub">
+        <i class="fas fa-rocket"></i> 数据优先 · 洞察驱动 · 动态治理
+        <span style="margin-left: 0.5rem; color: #3f5f7a;"><i class="fas fa-arrows-spin"></i> 从混沌到事务沉淀</span>
+      </div>
+    </div>
+    <div class="badge-group">
+      <span class="badge"><i class="fas fa-database"></i> 星链 · 上海需求</span>
+      <span class="badge primary"><i class="fas fa-robot"></i> AI 原生</span>
+    </div>
+  </div>
+
+  <!-- 对比双栏 : 探索 vs 事务 -->
+  <div class="compare-row">
+    <div class="compare-card explore">
+      <h3><i class="fas fa-magnifying-glass-chart"></i> 探索型中台</h3>
+      <ul>
+        <li><i class="fas fa-arrow-right"></i> 存量数据“混沌接入” · 不预设模型</li>
+        <li><i class="fas fa-arrow-right"></i> AI 自动发现语义 & 隐藏关联</li>
+        <li><i class="fas fa-arrow-right"></i> 沙箱孵化 · 即席 API 动态编排</li>
+        <li><i class="fas fa-arrow-right"></i> 人机回环确认 · 业务打标反馈</li>
+        <li><i class="fas fa-arrow-right"></i> 成熟后反向治理 → 沉淀为事务型</li>
+      </ul>
+    </div>
+    <div class="compare-card transact">
+      <h3><i class="fas fa-cubes"></i> 事务型中台 (传统)</h3>
+      <ul>
+        <li><i class="fas fa-arrow-right"></i> 流程优先 · 预设主题域 & 模型</li>
+        <li><i class="fas fa-arrow-right"></i> 自上而下建模 · 变更成本高</li>
+        <li><i class="fas fa-arrow-right"></i> 标准化接口 · 面向固定业务场景</li>
+        <li><i class="fas fa-arrow-right"></i> 建完即用 · 但常与真实业务脱节</li>
+        <li><i class="fas fa-arrow-right"></i> 治理前置 · 灵活度不足</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 四层架构 (核心) -->
+  <div class="architecture">
+    <div class="section-title">
+      <i class="fas fa-layer-group"></i> 
+      <span>完整版 · 四层架构</span>
+      <span style="font-size: 0.85rem; font-weight: 400; color: #4a6a8a; margin-left: 0.5rem;">
+        <i class="fas fa-arrow-trend-up"></i> 数据科学生产线
+      </span>
+    </div>
+
+    <div class="layers">
+      <!-- 1 -->
+      <div class="layer-item">
+        <div class="layer-left">
+          <span class="layer-num">01</span>
+          <span class="layer-name">混沌接入层</span>
+        </div>
+        <div class="layer-desc">
+          <i class="fas fa-plug"></i> 挂载原始数据源 (ERP/Excel/IoT/OCR) · 不做清洗，仅提取“指纹” 
+        </div>
+        <div class="layer-tags">
+          <span class="tag"><i class="fas fa-database"></i> 数据湖暂存</span>
+          <span class="tag gold"><i class="fas fa-fingerprint"></i> 指纹提取</span>
+        </div>
+      </div>
+      <!-- 2 -->
+      <div class="layer-item">
+        <div class="layer-left">
+          <span class="layer-num">02</span>
+          <span class="layer-name">AI 认知洞察层</span>
+        </div>
+        <div class="layer-desc">
+          <i class="fas fa-brain"></i> 自动语义发现 · 聚类关联 · 生成“数据家底热力图” · 人机回环确认
+        </div>
+        <div class="layer-tags">
+          <span class="tag ai"><i class="fas fa-robot"></i> 聚类/关联</span>
+          <span class="tag ai"><i class="fas fa-comment-dots"></i> 交互式打标</span>
+        </div>
+      </div>
+      <!-- 3 -->
+      <div class="layer-item">
+        <div class="layer-left">
+          <span class="layer-num">03</span>
+          <span class="layer-name">动态能力编排层</span>
+        </div>
+        <div class="layer-desc">
+          <i class="fas fa-sliders"></i> 即席 API 生成 · 沙箱孵化“轻应用” · 反馈闭环自动回滚
+        </div>
+        <div class="layer-tags">
+          <span class="tag green"><i class="fas fa-code-branch"></i> 沙箱试错</span>
+          <span class="tag"><i class="fas fa-rotate-left"></i> 回滚机制</span>
+        </div>
+      </div>
+      <!-- 4 -->
+      <div class="layer-item">
+        <div class="layer-left">
+          <span class="layer-num">04</span>
+          <span class="layer-name">沉淀与收敛层</span>
+        </div>
+        <div class="layer-desc">
+          <i class="fas fa-arrow-right-arrow-left"></i> 稳定运行阈值触发“反向治理” · 升级为主题域 & 高可用接口
+        </div>
+        <div class="layer-tags">
+          <span class="tag"><i class="fas fa-arrow-up"></i> 升级为事务型</span>
+          <span class="tag gold"><i class="fas fa-chess-queen"></i> 常态化中台</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 核心颠覆：治理顺序倒置 -->
+  <div class="insight-box">
+    <div class="left">
+      <i class="fas fa-arrow-trend-up"></i>
+      <p>
+        <strong>治理顺序倒置</strong> · 传统“先建模、后填数” → 探索型“先看数、后建模” <br>
+        <span style="font-size: 0.9rem; opacity: 0.9;">
+          <i class="fas fa-check-circle" style="color: #0f6b41;"></i> 业务认知驱动数据架构，而非数据架构约束业务
+        </span>
+      </p>
+    </div>
+    <span class="pill"><i class="fas fa-arrows-rotate"></i> 动态演化</span>
+  </div>
+
+  <!-- 脚注 / 比喻 -->
+  <div class="footer-note">
+    <span><i class="fas fa-cube"></i> 传统事务型 = 预制板房 · 探索型 = 乐高工厂 + AI 设计师</span>
+    <span><i class="fas fa-clock"></i> 最小闭环：AI 自动发现隐藏关联 / 快速生成低代码 Demo</span>
+    <span><i class="fas fa-share-alt"></i> 汇报 · 星链 / 上海需求  </span>
+  </div>
+
+</div>
+<!-- end deck -->
+
+</body>
+</html>

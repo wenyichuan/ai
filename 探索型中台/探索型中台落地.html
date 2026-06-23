@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>探索型中台 · AI自主编程 + 领域知识融合</title>
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #eff4fc;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            padding: 2rem 1.5rem;
+            color: #0b1f33;
+        }
+
+        .deck {
+            max-width: 1500px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 2.8rem;
+            box-shadow: 0 30px 60px -16px rgba(0, 20, 40, 0.18);
+            padding: 2.8rem 3.2rem;
+        }
+
+        /* ---- header ---- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            margin-bottom: 2.2rem;
+            border-bottom: 2px solid #e8eff8;
+            padding-bottom: 1.8rem;
+        }
+
+        .title-block h1 {
+            font-size: 2.5rem;
+            font-weight: 650;
+            letter-spacing: -0.02em;
+            background: linear-gradient(145deg, #0a2a47, #1a4d7a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .title-block .sub {
+            font-size: 1rem;
+            color: #3b5a78;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            margin-top: 0.2rem;
+        }
+
+        .badge-group {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            background: #eaf0f9;
+            padding: 0.4rem 1.2rem;
+            border-radius: 60px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #1a4b72;
+            border: 1px solid #d0dfee;
+        }
+
+        .badge i {
+            margin-right: 6px;
+        }
+
+        .badge.primary {
+            background: #1a4b72;
+            color: white;
+            border-color: #1a4b72;
+        }
+
+        /* ---- 核心亮点条 ---- */
+        .hero-strip {
+            background: #e3effa;
+            border-radius: 1.8rem;
+            padding: 1.2rem 2rem;
+            margin-bottom: 2.4rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #c7dbf0;
+        }
+
+        .hero-strip .left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .hero-strip .left i {
+            font-size: 2.2rem;
+            color: #1a4b72;
+            background: white;
+            padding: 0.5rem 0.7rem;
+            border-radius: 60px;
+        }
+
+        .hero-strip .left .text {
+            font-size: 1rem;
+            color: #04243e;
+            line-height: 1.5;
+        }
+
+        .hero-strip .left .text strong {
+            color: #0b2c4a;
+        }
+
+        .hero-strip .pill {
+            background: white;
+            padding: 0.4rem 1.8rem;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #1a4b72;
+            border: 1px solid #b6cde6;
+        }
+
+        /* ---- 四层实现 (重点突出 AI 编程) ---- */
+        .architecture {
+            margin: 1.8rem 0 1.6rem 0;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #0a2a47;
+            margin-bottom: 1.8rem;
+        }
+
+        .section-title i {
+            color: #1f6ea0;
+            font-size: 1.6rem;
+        }
+
+        .layers {
+            display: flex;
+            flex-direction: column;
+            gap: 1.4rem;
+        }
+
+        .layer-item {
+            background: white;
+            border-radius: 1.4rem;
+            border: 1px solid #dfe8f3;
+            padding: 1.2rem 2rem 1.6rem 2rem;
+            border-left: 8px solid transparent;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        }
+
+        .layer-item:nth-child(1) { border-left-color: #8fb0cc; }
+        .layer-item:nth-child(2) { border-left-color: #3f80ba; }
+        .layer-item:nth-child(3) { border-left-color: #1a6396; }
+        .layer-item:nth-child(4) { border-left-color: #0c3d61; }
+
+        .layer-head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1rem 1.5rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .layer-num {
+            background: #e9f0f9;
+            width: 36px;
+            height: 36px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #1a4b72;
+        }
+
+        .layer-name {
+            font-weight: 650;
+            font-size: 1.15rem;
+            color: #0a2a47;
+        }
+
+        .layer-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-left: auto;
+        }
+
+        .tag {
+            background: #e9f0f9;
+            padding: 0.15rem 1rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #1a4b72;
+        }
+
+        .tag.ai { background: #dbeafe; color: #104d82; }
+        .tag.green { background: #ddf0e5; color: #146b4a; }
+        .tag.gold { background: #fcf1d6; color: #7a621f; }
+        .tag.purple { background: #e3ddf5; color: #4a337a; }
+        .tag.orange { background: #feead6; color: #a3501a; }
+        .tag.pink { background: #fce4ec; color: #8f3b4a; }
+
+        .layer-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem 2rem;
+            margin-top: 0.4rem;
+            padding-left: 0.2rem;
+        }
+
+        .layer-body .col {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #1a3048;
+        }
+
+        .layer-body .col strong {
+            color: #0a2a47;
+            font-weight: 600;
+        }
+
+        .layer-body .col i {
+            color: #1f6ea0;
+            width: 1.2rem;
+            margin-right: 0.2rem;
+        }
+
+        .layer-body .col .highlight {
+            background: #eaf2fc;
+            padding: 0.1rem 0.5rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .layer-body .col ul {
+            list-style: none;
+            margin-top: 0.2rem;
+        }
+
+        .layer-body .col ul li {
+            padding: 0.2rem 0 0.2rem 1.3rem;
+            position: relative;
+            font-size: 0.88rem;
+        }
+
+        .layer-body .col ul li i {
+            position: absolute;
+            left: 0;
+            top: 0.35rem;
+            font-size: 0.7rem;
+            color: #25679b;
+        }
+
+        .code-snippet {
+            background: #0b1f33;
+            color: #d4e4f7;
+            border-radius: 0.8rem;
+            padding: 0.6rem 1rem;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            margin-top: 0.3rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .code-snippet .kw { color: #ffb4a0; }
+        .code-snippet .fn { color: #8cd4ff; }
+        .code-snippet .str { color: #b8d9a0; }
+        .code-snippet .cmt { color: #6a8a9e; }
+
+        @media (max-width: 880px) {
+            .deck { padding: 1.8rem; }
+            .layer-body { grid-template-columns: 1fr; gap: 0.5rem; }
+            .layer-tags { margin-left: 0; }
+            .hero-strip { flex-direction: column; align-items: flex-start; gap: 0.8rem; }
+        }
+
+        /* ---- 底部闭环 ---- */
+        .insight-box {
+            background: #e7f0fa;
+            border-radius: 1.8rem;
+            padding: 1.6rem 2.4rem;
+            margin: 2.6rem 0 0.8rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #ccdef2;
+        }
+
+        .insight-box .left {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+        }
+
+        .insight-box .left i {
+            font-size: 2.2rem;
+            color: #1a4b72;
+            background: white;
+            padding: 0.6rem;
+            border-radius: 60px;
+        }
+
+        .insight-box .left p {
+            font-size: 0.98rem;
+            color: #04243e;
+        }
+
+        .insight-box .pill {
+            background: white;
+            padding: 0.4rem 1.8rem;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #1a4b72;
+            border: 1px solid #b6cde6;
+        }
+
+        .footer-note {
+            margin-top: 2.4rem;
+            border-top: 1px solid #dfe8f3;
+            padding-top: 1.8rem;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            color: #47607a;
+            font-size: 0.9rem;
+        }
+
+        .footer-note i {
+            margin-right: 0.4rem;
+            color: #1f6ea0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="deck">
+
+    <!-- ===== HEADER ===== -->
+    <div class="header">
+        <div class="title-block">
+            <h1>🤖 探索型中台 · AI 自主编程分析</h1>
+            <div class="sub">
+                <i class="fas fa-code"></i> AI 接入数据 → 自写 Python 分析 → 持续迭代 · 融合领域知识
+            </div>
+        </div>
+        <div class="badge-group">
+            <span class="badge"><i class="fas fa-database"></i> 存量数据混沌</span>
+            <span class="badge primary"><i class="fas fa-robot"></i> AI Agent 驱动</span>
+        </div>
+    </div>
+
+    <!-- ===== 核心亮点 ===== -->
+    <div class="hero-strip">
+        <div class="left">
+            <i class="fas fa-brain"></i>
+            <div class="text">
+                <strong>核心理念：AI 作为“数据科学家”</strong> · 
+                接入系统后自主编写 Python 代码进行探索性分析，结合 <strong>领域知识库</strong> 持续迭代，
+                输出洞察、本体、API 定义，最终反向治理为事务型中台。
+            </div>
+        </div>
+        <span class="pill"><i class="fas fa-sync-alt"></i> 自主 · 迭代 · 融合</span>
+    </div>
+
+    <!-- ===== 四层实现 (重点突出 AI 编程) ===== -->
+    <div class="architecture">
+        <div class="section-title">
+            <i class="fas fa-layer-group"></i>
+            <span>四层实现 · AI 自主编程 + 领域知识融合</span>
+            <span style="font-size: 0.85rem; font-weight: 400; color: #3f6a8a; margin-left: 0.5rem;">
+                <i class="fas fa-arrow-right"></i> 每一层 AI 都会“写代码、分析、迭代”
+            </span>
+        </div>
+
+        <div class="layers">
+
+            <!-- 第1层：数据接入 + 自主探查 -->
+            <div class="layer-item">
+                <div class="layer-head">
+                    <span class="layer-num">01</span>
+                    <span class="layer-name">数据接入 · 自主探查</span>
+                    <div class="layer-tags">
+                        <span class="tag"><i class="fas fa-database"></i> 多源接入</span>
+                        <span class="tag ai"><i class="fas fa-code"></i> 自写 EDA</span>
+                        <span class="tag purple"><i class="fas fa-feather"></i> 特征素描</span>
+                    </div>
+                </div>
+                <div class="layer-body">
+                    <div class="col">
+                        <strong><i class="fas fa-wrench"></i> AI 动作</strong>
+                        <ul>
+                            <li><i class="fas fa-circle-check"></i> 接入系统后，AI 自动读取元数据 & 样本数据</li>
+                            <li><i class="fas fa-circle-check"></i> 自主编写 Python (pandas/profiling) 进行 EDA</li>
+                            <li><i class="fas fa-circle-check"></i> 生成数据质量报告、缺失分析、分布图谱</li>
+                            <li><i class="fas fa-circle-check"></i> 结合领域知识 (金融/供应链/医疗) 标记潜在关注点</li>
+                        </ul>
+                    </div>
+                    <div class="col">
+                        <strong><i class="fas fa-code"></i> 代码示例 (AI 生成)</strong>
+                        <div class="code-snippet">
+<span class="cmt"># AI 自主生成的探查代码</span>
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> pandas_profiling
+
+df = pd.read_sql(<span class="str">"SELECT * FROM orders"</span>, conn)
+profile = df.profile_report(<span class="str">"订单数据探查"</span>)
+profile.to_file(<span class="str">"order_eda.html"</span>)
+
+<span class="cmt"># 结合领域知识：标记异常订单模式</span>
+df[<span class="str">'is_anomaly'</span>] = df[<span class="str">'amount'</span>] > df[<span class="str">'amount'</span>].mean() * 3
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第2层：AI 认知 + 本体抽取 + 持续分析 -->
+            <div class="layer-item">
+                <div class="layer-head">
+                    <span class="layer-num">02</span>
+                    <span class="layer-name">认知洞察 · 本体抽取</span>
+                    <div class="layer-tags">
+                        <span class="tag ai"><i class="fas fa-robot"></i> 聚类/关联</span>
+                        <span class="tag purple"><i class="fas fa-project-diagram"></i> 本体构建</span>
+                        <span class="tag pink"><i class="fas fa-book-open"></i> 领域知识融合</span>
+                    </div>
+                </div>
+                <div class="layer-body">
+                    <div class="col">
+                        <strong><i class="fas fa-wrench"></i> AI 动作</strong>
+                        <ul>
+                            <li><i class="fas fa-circle-check"></i> 自写 Python (scikit-learn/tsfresh) 做聚类、关联发现</li>
+                            <li><i class="fas fa-circle-check"></i> 调用 LLM 抽取概念、关系，构建动态本体</li>
+                            <li><i class="fas fa-circle-check"></i> 将领域知识库 (行业术语/规则) 注入分析过程</li>
+                            <li><i class="fas fa-circle-check"></i> 生成“数据家底热力图” + 业务主题置信度</li>
+                        </ul>
+                    </div>
+                    <div class="col">
+                        <strong><i class="fas fa-code"></i> 代码示例 (AI 生成)</strong>
+                        <div class="code-snippet">
+<span class="cmt"># AI 自主聚类 + 本体抽取</span>
+<span class="kw">from</span> sklearn.cluster <span class="kw">import</span> KMeans
+kmeans = KMeans(n_clusters=5).fit(features)
+df[<span class="str">'cluster'</span>] = kmeans.labels_
+
+<span class="cmt"># 融合领域知识：供应链领域词库</span>
+domain_terms = load_domain_kb(<span class="str">"supply_chain.json"</span>)
+ontology = extract_ontology(df, domain_terms)  <span class="cmt"># 自写函数</span>
+save_ontology(ontology, <span class="str">"ontology_v1.json"</span>)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第3层：自主编排 · 沙箱迭代 -->
+            <div class="layer-item">
+                <div class="layer-head">
+                    <span class="layer-num">03</span>
+                    <span class="layer-name">动态编排 · 沙箱迭代</span>
+                    <div class="layer-tags">
+                        <span class="tag green"><i class="fas fa-code-branch"></i> 沙箱</span>
+                        <span class="tag ai"><i class="fas fa-arrows-rotate"></i> 自动回滚</span>
+                        <span class="tag orange"><i class="fas fa-flask"></i> 持续实验</span>
+                    </div>
+                </div>
+                <div class="layer-body">
+                    <div class="col">
+                        <strong><i class="fas fa-wrench"></i> AI 动作</strong>
+                        <ul>
+                            <li><i class="fas fa-circle-check"></i> 根据本体自动生成 API 定义 & 数据管道代码</li>
+                            <li><i class="fas fa-circle-check"></i> 在沙箱中部署“轻应用”，AI 持续监控效果</li>
+                            <li><i class="fas fa-circle-check"></i> 若效果不佳，AI 自动修改分析逻辑/特征工程</li>
+                            <li><i class="fas fa-circle-check"></i> 结合领域知识调整阈值、权重、业务规则</li>
+                        </ul>
+                    </div>
+                    <div class="col">
+                        <strong><i class="fas fa-code"></i> 代码示例 (AI 生成)</strong>
+                        <div class="code-snippet">
+<span class="cmt"># AI 动态生成 API 定义</span>
+<span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI
+app = FastAPI()
+
+<span class="cmt"># 根据本体自动生成路由</span>
+<span class="kw">for</span> entity <span class="kw">in</span> ontology.entities:
+    app.add_api_route(<span class="str">f"/{entity.name}"</span>, generate_handler(entity))
+
+<span class="cmt"># 监控反馈，若准确率 &lt; 0.8 则自动回滚</span>
+<span class="kw">if</span> accuracy &lt; 0.8:
+    rollback_to_previous_version()
+    refine_analysis(domain_kb=supply_chain_kb)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第4层：沉淀 · 反向治理 -->
+            <div class="layer-item">
+                <div class="layer-head">
+                    <span class="layer-num">04</span>
+                    <span class="layer-name">沉淀收敛 · 反向治理</span>
+                    <div class="layer-tags">
+                        <span class="tag"><i class="fas fa-arrow-up"></i> 升级事务型</span>
+                        <span class="tag gold"><i class="fas fa-chess-queen"></i> 常态化</span>
+                        <span class="tag purple"><i class="fas fa-archive"></i> 本体固化</span>
+                    </div>
+                </div>
+                <div class="layer-body">
+                    <div class="col">
+                        <strong><i class="fas fa-wrench"></i> AI 动作</strong>
+                        <ul>
+                            <li><i class="fas fa-circle-check"></i> 稳定运行后，AI 自动生成治理脚本</li>
+                            <li><i class="fas fa-circle-check"></i> 临时表 → 标准化主题域 (dbt 模型)</li>
+                            <li><i class="fas fa-circle-check"></i> 临时 API → 高可用企业接口</li>
+                            <li><i class="fas fa-circle-check"></i> 本体固化，并回写领域知识库 (反哺)</li>
+                        </ul>
+                    </div>
+                    <div class="col">
+                        <strong><i class="fas fa-code"></i> 代码示例 (AI 生成)</strong>
+                        <div class="code-snippet">
+<span class="cmt"># AI 生成反向治理脚本</span>
+<span class="cmt"># 将临时表升级为 dbt 模型</span>
+dbt_model = generate_dbt_model(
+    temp_table=<span class="str">"tmp_orders_enriched"</span>,
+    ontology=ontology,
+    domain=<span class="str">"supply_chain"</span>
+)
+deploy_to_production(dbt_model)
+
+<span class="cmt"># 固化本体，回写领域知识库</span>
+update_domain_kb(ontology, version=<span class="str">"v2.0"</span>)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== 闭环 ===== -->
+    <div class="insight-box">
+        <div class="left">
+            <i class="fas fa-infinity"></i>
+            <p>
+                <strong>持续迭代闭环</strong> · 
+                AI 自主编程分析 → 结合领域知识 → 输出洞察与本体 → 沙箱验证 → 反馈回滚 → 
+                稳定后反向治理 → 本体固化并反哺领域知识库，形成 <strong>“数据 → 分析 → 沉淀 → 知识”</strong> 的增强回路。
+            </p>
+        </div>
+        <span class="pill"><i class="fas fa-rotate"></i> 自主迭代 · 知识反哺</span>
+    </div>
+
+    <!-- ===== 脚注 ===== -->
+    <div class="footer-note">
+        <span><i class="fas fa-toolbox"></i> 技术基座：Python (pandas/sklearn) + LLM + dbt + FastAPI + 领域知识图谱</span>
+        <span><i class="fas fa-clock"></i> 核心闭环：AI 自写代码 → 分析 → 迭代 → 治理</span>
+        <span><i class="fas fa-share-alt"></i> 探索型中台 · AI 自主编程实现</span>
+    </div>
+
+</div>
+<!-- end deck -->
+
+</body>
+</html>
