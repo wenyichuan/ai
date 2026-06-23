@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI 使用的完整维度 · 软件开发者第一性原理</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #0d1117;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+            line-height: 1.6;
+            color: #e6edf3;
+        }
+
+        .card {
+            max-width: 1400px;
+            width: 100%;
+            background: #161b22;
+            border-radius: 2.5rem;
+            padding: 3rem 2.8rem;
+            border: 1px solid #30363d;
+            box-shadow: 0 30px 60px -20px rgba(0,0,0,0.8);
+        }
+
+        .header { text-align: center; margin-bottom: 2.8rem; }
+        .header .badge {
+            display: inline-block;
+            background: #238636;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.65rem;
+            letter-spacing: 0.08em;
+            padding: 0.25rem 1.2rem;
+            border-radius: 40px;
+            margin-bottom: 0.6rem;
+            text-transform: uppercase;
+        }
+        .header h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #f0f6fc 0%, #79c0ff 80%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.2rem;
+        }
+        .header .sub {
+            font-size: 1.05rem;
+            font-weight: 400;
+            color: #8b949e;
+            background: rgba(255,255,255,0.03);
+            display: inline-block;
+            padding: 0.2rem 2rem;
+            border-radius: 40px;
+            border: 1px solid #30363d;
+        }
+        .header .sub code {
+            font-family: 'JetBrains Mono', monospace;
+            background: #0d1117;
+            padding: 0.05rem 0.6rem;
+            border-radius: 4px;
+            color: #f0883e;
+            font-size: 0.85rem;
+        }
+
+        .first-principle {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 1.5rem;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+        .first-principle .formula {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #f0f6fc;
+            letter-spacing: 0.05em;
+        }
+        .first-principle .formula .arrow { color: #58a6ff; }
+        .first-principle .formula .input { color: #f0883e; }
+        .first-principle .formula .model { color: #7ee787; }
+        .first-principle .formula .output { color: #d2a8ff; }
+        .first-principle .sub-text {
+            font-size: 0.85rem;
+            color: #8b949e;
+            margin-top: 0.3rem;
+        }
+        .first-principle .sub-text strong { color: #f0f6fc; }
+
+        .layer-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            margin: 2rem 0 1.2rem 0;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #8b949e;
+        }
+        .layer-label .line {
+            flex: 1;
+            max-width: 60px;
+            height: 1px;
+            background: #30363d;
+        }
+        .layer-label .label-bg {
+            background: rgba(255,255,255,0.03);
+            padding: 0.1rem 1.2rem;
+            border-radius: 40px;
+            color: #8b949e;
+            border: 1px solid #30363d;
+        }
+
+        .grid { display: grid; gap: 1.2rem; margin-bottom: 0.2rem; }
+        .grid-3 { grid-template-columns: repeat(3, 1fr); }
+        .grid-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-1 { grid-template-columns: 1fr; }
+
+        .pillar {
+            background: #0d1117;
+            border-radius: 1.5rem;
+            padding: 1.4rem 1.6rem 1.6rem;
+            border: 1px solid #30363d;
+            transition: all 0.2s ease;
+        }
+        .pillar:hover { border-color: #58a6ff; background: #0d1117; }
+
+        .pillar .icon { font-size: 1.6rem; line-height: 1; margin-bottom: 0.2rem; display: block; }
+        .pillar .name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #f0f6fc;
+            letter-spacing: -0.01em;
+        }
+        .pillar .name .aka {
+            font-size: 0.65rem;
+            font-weight: 400;
+            color: #8b949e;
+            margin-left: 0.4rem;
+            font-style: italic;
+        }
+        .pillar .subtitle {
+            font-size: 0.6rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #58a6ff;
+            margin-bottom: 0.3rem;
+            border-bottom: 1px solid #21262d;
+            padding-bottom: 0.2rem;
+        }
+        .pillar .desc {
+            font-size: 0.82rem;
+            color: #c9d1d9;
+            margin-bottom: 0.6rem;
+            line-height: 1.5;
+        }
+        .pillar .code-block {
+            background: #161b22;
+            border-radius: 0.8rem;
+            padding: 0.6rem 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: #8b949e;
+            border: 1px solid #21262d;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .pillar .code-block .kw { color: #ff7b72; }
+        .pillar .code-block .fn { color: #d2a8ff; }
+        .pillar .code-block .str { color: #a5d6ff; }
+        .pillar .code-block .var { color: #f0883e; }
+        .pillar .code-block .cmt { color: #8b949e; font-style: italic; }
+
+        .pillar .footnote {
+            margin-top: 0.6rem;
+            font-size: 0.65rem;
+            color: #8b949e;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(255,255,255,0.02);
+            padding: 0.15rem 0.8rem;
+            border-radius: 40px;
+            border: 1px solid #21262d;
+            flex-wrap: wrap;
+        }
+        .pillar .footnote .tag {
+            display: inline-block;
+            font-size: 0.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 0.04rem 0.6rem;
+            border-radius: 30px;
+        }
+        .tag-essential { background: #23863630; color: #7ee787; border: 1px solid #23863640; }
+        .tag-arch { background: #1f6feb30; color: #58a6ff; border: 1px solid #1f6feb40; }
+        .tag-api { background: #d2992230; color: #e3b341; border: 1px solid #d2992240; }
+        .tag-wrapper { background: #8b949e20; color: #8b949e; border: 1px solid #8b949e30; }
+
+        .pillar .verdict {
+            margin-top: 0.6rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.15rem 0.8rem;
+            border-radius: 40px;
+            display: inline-block;
+        }
+        .verdict-real { background: #23863620; color: #7ee787; border: 1px solid #23863640; }
+        .verdict-wrapper { background: #8b949e20; color: #8b949e; border: 1px solid #8b949e30; }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1.2rem;
+            margin-top: 1.2rem;
+        }
+        .summary-item {
+            background: #0d1117;
+            border-radius: 1.2rem;
+            padding: 1.2rem 1.4rem;
+            border: 1px solid #30363d;
+            text-align: center;
+        }
+        .summary-item .num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #58a6ff;
+        }
+        .summary-item .label {
+            font-size: 0.7rem;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-top: 0.1rem;
+        }
+        .summary-item .desc {
+            font-size: 0.75rem;
+            color: #c9d1d9;
+            margin-top: 0.3rem;
+        }
+
+        .bottom-line {
+            margin-top: 2rem;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 1.5rem;
+            padding: 1.5rem 2rem;
+            text-align: center;
+        }
+        .bottom-line p {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #f0f6fc;
+        }
+        .bottom-line p .highlight {
+            background: #23863620;
+            color: #7ee787;
+            padding: 0.05rem 0.6rem;
+            border-radius: 30px;
+        }
+        .bottom-line .sub {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: #8b949e;
+            margin-top: 0.3rem;
+        }
+
+        .footer-meta {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #21262d;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 0.65rem;
+            color: #8b949e;
+        }
+        .footer-meta .tags { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+        .footer-meta .tags span {
+            background: rgba(255,255,255,0.03);
+            padding: 0.1rem 0.8rem;
+            border-radius: 40px;
+            border: 1px solid #21262d;
+        }
+
+        @media (max-width: 1024px) {
+            .card { padding: 2rem 1.5rem; border-radius: 2rem; }
+            .grid-3 { grid-template-columns: repeat(2, 1fr); }
+            .summary-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 700px) {
+            .card { padding: 1.5rem 1rem; border-radius: 1.5rem; }
+            .header h1 { font-size: 2rem; }
+            .header .sub { font-size: 0.85rem; padding: 0.15rem 1.2rem; }
+            .grid-3 { grid-template-columns: 1fr; gap: 1rem; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .summary-grid { grid-template-columns: 1fr; }
+            .first-principle .formula { font-size: 1.1rem; }
+            .bottom-line p { font-size: 0.95rem; }
+        }
+        @media (max-width: 480px) {
+            .header h1 { font-size: 1.5rem; }
+            .pillar { padding: 1rem 1.2rem 1.2rem; }
+            .pillar .name { font-size: 0.95rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+
+    <!-- ===== HEADER ===== -->
+    <div class="header">
+        <div class="badge">⚡ 第一性原理 · 无冗余</div>
+        <h1>AI 使用的完整维度</h1>
+        <div class="sub">
+            <code>输入 → 模型 → 输出</code>
+            &nbsp;·&nbsp; 还原为软件工程基本功
+        </div>
+    </div>
+
+    <!-- ===== 第一性原理公式 ===== -->
+    <div class="first-principle">
+        <div class="formula">
+            <span class="input">输入</span>
+            <span class="arrow"> → </span>
+            <span class="model">模型</span>
+            <span class="arrow"> → </span>
+            <span class="output">输出</span>
+        </div>
+        <div class="sub-text">
+            任何 AI 应用逃不出这个公式 · 其余都是 <strong>辅助</strong>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 输入层 -->
+    <!-- ============================================================ -->
+    <div class="layer-label">
+        <span class="line"></span>
+        <span class="label-bg">📥 输入 · 拼字符串</span>
+        <span class="line"></span>
+    </div>
+
+    <div class="grid grid-3">
+        <!-- 提示词 -->
+        <div class="pillar">
+            <span class="icon">✍️</span>
+            <div class="name">
+                提示词
+                <span class="aka">= 字符串模板</span>
+            </div>
+            <div class="subtitle">Prompt · 当前指令</div>
+            <div class="desc">将用户意图、角色、格式约束拼成一段文本。</div>
+            <div class="code-block">
+<span class="cmt">// 拼接字符串</span>
+prompt = <span class="str">f"你是一名{role}，用{format}格式回答：{user_input}"</span>
+            </div>
+            <div class="footnote">
+                <span class="tag tag-essential">✅ 必要</span>
+                <span>本质：字符串拼接</span>
+            </div>
+        </div>
+
+        <!-- 记忆 -->
+        <div class="pillar">
+            <span class="icon">🧩</span>
+            <div class="name">
+                记忆
+                <span class="aka">= 数据库查询 + 拼字符串</span>
+            </div>
+            <div class="subtitle">Memory · 历史偏好</div>
+            <div class="desc">从数据库/缓存中读出历史，拼进当前上下文。</div>
+            <div class="code-block">
+<span class="cmt">// 查询 + 拼接</span>
+history = db.query(<span class="str">"SELECT * FROM history WHERE user_id=?"</span>)
+prompt = <span class="str">f"{history}\n当前问题：{question}"</span>
+            </div>
+            <div class="footnote">
+                <span class="tag tag-essential">✅ 必要</span>
+                <span>本质：CRUD</span>
+            </div>
+        </div>
+
+        <!-- MCP -->
+        <div class="pillar">
+            <span class="icon">🔌</span>
+            <div class="name">
+                MCP / 工具
+                <span class="aka">= API 集成 + 拼字符串</span>
+            </div>
+            <div class="subtitle">Tool Calling · 外部系统</div>
+            <div class="desc">调用外部 API，把返回结果拼进上下文。</div>
+            <div class="code-block">
+<span class="cmt">// 调用 API + 拼接</span>
+result = requests.get(<span class="str">"https://api.weather.com"</span>)
+prompt = <span class="str">f"天气数据：{result}\n请据此生成周报"</span>
+            </div>
+            <div class="footnote">
+                <span class="tag tag-essential">✅ 必要</span>
+                <span>本质：API 集成</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 模型层 -->
+    <!-- ============================================================ -->
+    <div class="layer-label" style="margin-top:2rem;">
+        <span class="line"></span>
+        <span class="label-bg">🧠 模型 · 调 API</span>
+        <span class="line"></span>
+    </div>
+
+    <div class="grid grid-1">
+        <div class="pillar">
+            <span class="icon">🎛️</span>
+            <div class="name">
+                推理配置
+                <span class="aka">= API 参数</span>
+            </div>
+            <div class="subtitle">Inference Params · Temperature / Top-p / Reasoning Effort</div>
+            <div class="desc">传参控制模型行为，就像调用任何 API 时传参数一样。</div>
+            <div class="code-block">
+<span class="cmt">// 调用 API 时传参</span>
+response = openai.ChatCompletion.create(
+    model=<span class="str">"gpt-4o"</span>,
+    messages=[{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: prompt}],
+    temperature=<span class="var">0.7</span>,
+    top_p=<span class="var">0.9</span>
+)
+            </div>
+            <div class="footnote">
+                <span class="tag tag-api">⚙️ API 参数</span>
+                <span>本质：传参</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 控制流层 -->
+    <!-- ============================================================ -->
+    <div class="layer-label" style="margin-top:2rem;">
+        <span class="line"></span>
+        <span class="label-bg">🔄 控制流 · 写 if-else / for / while</span>
+        <span class="line"></span>
+    </div>
+
+    <div class="grid grid-2">
+        <!-- 编排 -->
+        <div class="pillar">
+            <span class="icon">📐</span>
+            <div class="name">
+                编排 / 工作流
+                <span class="aka">= 控制流</span>
+            </div>
+            <div class="subtitle">Orchestration · 多步 / 多智能体</div>
+            <div class="desc">用代码控制模型的调用顺序、条件和循环。</div>
+            <div class="code-block">
+<span class="cmt">// 就是写代码</span>
+plan = generate_plan(prompt)       <span class="cmt"># 调用模型</span>
+<span class="kw">if</span> confidence(plan) &lt; <span class="var">0.9</span>:
+    plan = refine(plan)            <span class="cmt"># 再调一次</span>
+report = summarize(plan)           <span class="cmt"># 再调一次</span>
+            </div>
+            <div class="footnote">
+                <span class="tag tag-arch">🏗️ 应用架构</span>
+                <span>本质：if-else / for / while</span>
+            </div>
+        </div>
+
+        <!-- 路由 -->
+        <div class="pillar">
+            <span class="icon">⚖️</span>
+            <div class="name">
+                模型路由
+                <span class="aka">= 策略模式 / switch-case</span>
+            </div>
+            <div class="subtitle">Model Routing · 选哪个模型</div>
+            <div class="desc">根据任务复杂度/成本，决定调用哪个模型。</div>
+            <div class="code-block">
+<span class="cmt">// 就是 switch-case</span>
+<span class="kw">if</span> complexity == <span class="str">"high"</span>:
+    model = <span class="str">"o1"</span>
+<span class="kw">elif</span> complexity == <span class="str">"medium"</span>:
+    model = <span class="str">"gpt-4o"</span>
+<span class="kw">else</span>:
+    model = <span class="str">"gpt-4o-mini"</span>
+response = call(model, prompt)
+            </div>
+            <div class="footnote">
+                <span class="tag tag-arch">🏗️ 应用架构</span>
+                <span>本质：策略模式</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 总结：三件事 -->
+    <!-- ============================================================ -->
+    <div class="summary-grid">
+        <div class="summary-item">
+            <div class="num">1</div>
+            <div class="label">拼字符串</div>
+            <div class="desc">提示词 · 记忆 · MCP 工具结果</div>
+        </div>
+        <div class="summary-item">
+            <div class="num">2</div>
+            <div class="label">调 API</div>
+            <div class="desc">模型调用 · 推理参数</div>
+        </div>
+        <div class="summary-item">
+            <div class="num">3</div>
+            <div class="label">写控制流</div>
+            <div class="desc">if-else · for · while · 策略模式</div>
+        </div>
+    </div>
+
+    <!-- ===== 底部结论 ===== -->
+    <div class="bottom-line">
+        <p>
+            AI 应用开发 = <span class="highlight">拼字符串</span> + <span class="highlight">调 API</span> + <span class="highlight">写 if-else</span>
+        </p>
+        <div class="sub">
+            这三件事，你从第一天就会。所有“工程”都是它们的包装。
+        </div>
+    </div>
+
+    <div class="footer-meta">
+        <div class="tags">
+            <span>✅ 必要：提示词 · 记忆 · MCP</span>
+            <span>⚙️ API 参数：推理配置</span>
+            <span>🏗️ 应用架构：编排 · 路由</span>
+        </div>
+        <div>🧠 第一性原理 · 软件开发者视角</div>
+    </div>
+
+</div>
+</body>
+</html>

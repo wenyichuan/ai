@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI 使用维度 · 完整框架（输入层 + 使用层）</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f0f5fa 0%, #e4ecf3 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+            line-height: 1.5;
+            color: #0b1a2f;
+        }
+
+        .card {
+            max-width: 1360px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 3.5rem;
+            padding: 3rem 2.8rem;
+            box-shadow: 0 30px 50px -16px rgba(0, 20, 40, 0.25), 0 1px 4px rgba(0,0,0,0.03);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: all 0.2s ease;
+        }
+
+        /* 头部 */
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .header .badge {
+            display: inline-block;
+            background: #1a2c42;
+            color: #eef6ff;
+            font-weight: 600;
+            font-size: 0.75rem;
+            letter-spacing: 0.04em;
+            padding: 0.3rem 1.4rem;
+            border-radius: 40px;
+            margin-bottom: 0.8rem;
+            text-transform: uppercase;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #0b1f33 0%, #1f4a7a 80%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.3rem;
+        }
+
+        .header .sub {
+            font-size: 1.05rem;
+            font-weight: 400;
+            color: #2c4a6a;
+            background: rgba(255,255,255,0.5);
+            display: inline-block;
+            padding: 0.2rem 2rem;
+            border-radius: 40px;
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+
+        .header .sub strong {
+            font-weight: 600;
+            color: #0b2b4a;
+        }
+
+        /* 分层标识 */
+        .layer-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            margin: 2rem 0 1.2rem 0;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #3d607e;
+        }
+
+        .layer-label .line {
+            flex: 1;
+            max-width: 120px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(60, 100, 140, 0.2), transparent);
+        }
+
+        .layer-label .line-left {
+            flex: 1;
+            max-width: 80px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(60, 100, 140, 0.2));
+        }
+        .layer-label .line-right {
+            flex: 1;
+            max-width: 80px;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(60, 100, 140, 0.2), transparent);
+        }
+
+        /* 网格 — 输入层（3列） */
+        .grid-input {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.6rem;
+            margin-bottom: 0.8rem;
+        }
+
+        /* 网格 — 使用层（3列） */
+        .grid-usage {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.6rem;
+            margin-top: 0.2rem;
+        }
+
+        .pillar {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border-radius: 2rem;
+            padding: 1.6rem 1.6rem 1.8rem;
+            box-shadow: 0 6px 18px -8px rgba(0, 20, 40, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            transition: all 0.2s ease;
+        }
+
+        .pillar:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: 0 16px 28px -12px rgba(0, 20, 40, 0.12);
+            border-color: rgba(255, 255, 255, 0.95);
+        }
+
+        .pillar .icon {
+            font-size: 2.2rem;
+            line-height: 1;
+            margin-bottom: 0.3rem;
+            display: block;
+        }
+
+        .pillar h3 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            margin-bottom: 0.1rem;
+            color: #0b1f33;
+        }
+
+        .pillar .subtitle {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #4d6f8f;
+            margin-bottom: 0.6rem;
+            border-bottom: 2px solid rgba(60, 100, 140, 0.10);
+            padding-bottom: 0.35rem;
+        }
+
+        .pillar .desc {
+            font-size: 0.9rem;
+            color: #1f3a54;
+            margin-bottom: 0.8rem;
+            font-weight: 450;
+        }
+
+        .pillar .input-box {
+            background: rgba(0, 0, 0, 0.015);
+            border-radius: 1.2rem;
+            padding: 0.8rem 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.02);
+        }
+
+        .pillar .input-box .label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #5b7c9c;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .pillar .input-box .label span {
+            background: #dce7f2;
+            padding: 0.05rem 0.6rem;
+            border-radius: 30px;
+            font-size: 0.5rem;
+            color: #1a3b5a;
+        }
+
+        .pillar .input-box p {
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: #0b1f33;
+            line-height: 1.5;
+        }
+
+        .pillar .input-box .highlight {
+            background: linear-gradient(120deg, rgba(60, 130, 210, 0.08), rgba(60, 130, 210, 0.02));
+            padding: 0.05rem 0.3rem;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #004080;
+        }
+
+        .pillar .input-box .skill-tag {
+            display: inline-block;
+            background: #1a2c42;
+            color: white;
+            font-size: 0.5rem;
+            font-weight: 700;
+            padding: 0.05rem 0.6rem;
+            border-radius: 30px;
+            margin-right: 0.2rem;
+            letter-spacing: 0.03em;
+        }
+
+        .pillar .footnote {
+            margin-top: 0.8rem;
+            font-size: 0.75rem;
+            color: #3d607e;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(230, 242, 255, 0.3);
+            padding: 0.3rem 0.9rem;
+            border-radius: 60px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .pillar .footnote .emoji {
+            font-size: 0.9rem;
+        }
+
+        /* 使用层特殊标识 */
+        .pillar.usage {
+            border-left: 3px solid rgba(30, 80, 140, 0.2);
+        }
+
+        .pillar.usage .badge-usage {
+            display: inline-block;
+            background: rgba(30, 80, 140, 0.08);
+            color: #1f4a7a;
+            font-size: 0.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 0.05rem 0.6rem;
+            border-radius: 30px;
+            margin-bottom: 0.2rem;
+        }
+
+        /* 底部总结 */
+        .footer-note {
+            margin-top: 2.2rem;
+            padding-top: 1.6rem;
+            border-top: 2px dashed rgba(60, 100, 140, 0.15);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.2rem;
+        }
+
+        .footer-note .essence {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #12314f;
+            background: rgba(255, 255, 255, 0.4);
+            padding: 0.3rem 1.6rem;
+            border-radius: 60px;
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+
+        .footer-note .essence strong {
+            background: #0b1f33;
+            color: white;
+            font-weight: 600;
+            padding: 0.05rem 0.7rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            margin: 0 0.15rem;
+        }
+
+        .footer-note .meta {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            color: #3d607e;
+            font-size: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-note .meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        /* 响应式 */
+        @media (max-width: 1024px) {
+            .card {
+                padding: 2rem 1.5rem;
+                border-radius: 2.5rem;
+            }
+            .grid-input,
+            .grid-usage {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 700px) {
+            .card {
+                padding: 1.5rem 1rem;
+                border-radius: 2rem;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+            .header .sub {
+                font-size: 0.9rem;
+                padding: 0.15rem 1.2rem;
+            }
+            .grid-input,
+            .grid-usage {
+                grid-template-columns: 1fr;
+                gap: 1.2rem;
+            }
+            .pillar {
+                padding: 1.2rem 1.2rem 1.4rem;
+            }
+            .footer-note {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .footer-note .meta {
+                gap: 0.8rem;
+            }
+            .layer-label .line,
+            .layer-label .line-left,
+            .layer-label .line-right {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.6rem;
+            }
+            .pillar h3 {
+                font-size: 1.15rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <!-- 头部 -->
+        <div class="header">
+            <div class="badge">🧠 完整框架 · 输入层 + 使用层</div>
+            <h1>AI 使用的完整维度</h1>
+            <div class="sub">
+                <strong>输入层</strong>（3维） + <strong>使用层</strong>（3维）
+            </div>
+        </div>
+
+        <!-- ========= 输入层 ========= -->
+        <div class="layer-label">
+            <span class="line-left"></span>
+            <span style="background: rgba(0,0,0,0.02); padding: 0.15rem 1.2rem; border-radius: 40px; color: #1f4a7a;">📥 输入层 · 构造「给模型什么」</span>
+            <span class="line-right"></span>
+        </div>
+
+        <div class="grid-input">
+            <!-- 1. 提示词工程 -->
+            <div class="pillar">
+                <span class="icon">✍️</span>
+                <h3>提示词工程</h3>
+                <div class="subtitle">Prompt Engineering</div>
+                <div class="desc">当前任务的指令 —— 定义目标、角色、格式、推理路径。</div>
+                <div class="input-box">
+                    <div class="label">📥 输入内容 <span>核心</span></div>
+                    <p>
+                        <span class="skill-tag">SKILL</span> “以<strong>资深数据科学家</strong>身份，用 <strong>Markdown 表格</strong> 对比三种聚类算法，并给出适用场景。”
+                    </p>
+                    <div style="margin-top:0.4rem; font-size:0.7rem; color:#2b5a7a; background:#e3edf6; padding:0.1rem 0.8rem; border-radius:30px; display:inline-block;">
+                        ⚡ 含 Skill（预设提示词包）
+                    </div>
+                </div>
+                <div class="footnote">
+                    <span class="emoji">🎯</span> 控制风格 · 结构 · 推理链
+                </div>
+            </div>
+
+            <!-- 2. 记忆工程 -->
+            <div class="pillar">
+                <span class="icon">🧩</span>
+                <h3>记忆工程</h3>
+                <div class="subtitle">Memory Engineering</div>
+                <div class="desc">历史对话 / 偏好 —— 用户画像、长期偏好、过往事实。</div>
+                <div class="input-box">
+                    <div class="label">📥 输入内容 <span>持续累积</span></div>
+                    <p>
+                        “用户 <strong>偏好 Python</strong>，上次项目使用 <strong>FastAPI</strong>，拒绝过 SQL 方案。延续该风格，引用之前 <strong>RAG 架构</strong>。”
+                    </p>
+                    <div style="margin-top:0.4rem; font-size:0.7rem; color:#2b5a7a; background:#e3edf6; padding:0.1rem 0.8rem; border-radius:30px; display:inline-block;">
+                        🔁 跨会话 · 长期
+                    </div>
+                </div>
+                <div class="footnote">
+                    <span class="emoji">📚</span> 个性化 · 上下文连贯性
+                </div>
+            </div>
+
+            <!-- 3. MCP 工程 -->
+            <div class="pillar">
+                <span class="icon">🔌</span>
+                <h3>MCP 工程</h3>
+                <div class="subtitle">Model Context Protocol</div>
+                <div class="desc">工具的描述与调用结果 —— 对接外部系统（搜索、数据库、API）。</div>
+                <div class="input-box">
+                    <div class="label">📥 输入内容 <span>工具增强</span></div>
+                    <p>
+                        “调用 <strong>Google 搜索 MCP</strong> 获取最新 AI 新闻，工具返回：<span class="highlight">[摘要+链接]</span>，基于此生成周报。”
+                    </p>
+                    <div style="margin-top:0.4rem; font-size:0.7rem; color:#2b5a7a; background:#e3edf6; padding:0.1rem 0.8rem; border-radius:30px; display:inline-block;">
+                        🌐 对接外部系统
+                    </div>
+                </div>
+                <div class="footnote">
+                    <span class="emoji">⚙️</span> 行动 · 实时数据 · 扩展能力
+                </div>
+            </div>
+        </div>
+
+        <!-- ========= 使用层 ========= -->
+        <div class="layer-label" style="margin-top: 2.2rem;">
+            <span class="line-left"></span>
+            <span style="background: rgba(0,0,0,0.02); padding: 0.15rem 1.2rem; border-radius: 40px; color: #1f4a7a;">⚙️ 使用层 · 控制「模型怎么工作」</span>
+            <span class="line-right"></span>
+        </div>
+
+        <div class="grid-usage">
+            <!-- 4. 编排工程 -->
+            <div class="pillar usage">
+                <span class="icon">🔀</span>
+                <h3>编排工程</h3>
+                <div class="subtitle">Orchestration</div>
+                <div class="desc">流程设计 —— 多智能体拓扑、条件路由、状态管理、循环与终止。</div>
+                <div class="input-box">
+                    <div class="label">⚙️ 控制方式 <span>逻辑控制</span></div>
+                    <p>
+                        “A生成方案 → B负责<strong>挑错</strong> → C<strong>汇总</strong>；若A输出置信度 &lt; 90%，触发<strong>联网搜索</strong>后重试。”
+                    </p>
+                    <div style="margin-top:0.4rem; font-size:0.7rem; color:#2b5a7a; background:#e3edf6; padding:0.1rem 0.8rem; border-radius:30px; display:inline-block;">
+                        🧩 流程图 · 条件分支 · 迭代
+                    </div>
+                </div>
+                <div class="footnote">
+                    <span class="emoji">📐</span> 设计流程 · 状态流转 · 多智能体协作
+                </div>
+            </div>
+
+            <!-- 5. 推理配置 -->
+            <div class="pillar usage">
+                <span class="icon">🎛️</span>
+                <h3>推理配置</h3>
+                <div class="subtitle">Inference Config</div>
+                <div class="desc">计算参数 —— Temperature、Top-p、Frequency Penalty、Reasoning Effort。</div>
+                <div class="input-box">
+                    <div class="label">⚙️ 控制方式 <span>数值调优</span></div>
+                    <p>
+                        “同一提示词‘写一首秋天的诗’，<strong>Temperature=0.2</strong> 每次雷同，<strong>Temperature=0.9</strong> 每次都不同。”
+                    </p>
+                    <div style="margin-top:0.4rem; font-size:0.7rem; color:#2b5a7a; background:#e3edf6; padding:0.1rem 0.8rem; border-radius:30px; display:inline-block;">
+                        📊 随机性 · 长度 · 惩罚项
+                    </div>
+                </div>
+                <div class="footnote">
+                    <span class="emoji">🧪</span> 调参 · 控制确定性/创造性
+                </div>
+            </div>
+
+            <!-- 6. 模型路由 -->
+            <div class="pillar usage">
+                <span class="icon">🔄</span>
+                <h3>模型路由</h3>
+                <div class="subtitle">Model Routing</div>
+                <div class="desc">模型选择 —— 能力分级、成本/速度权衡、多模型并行、版本管理。</div>
+                <div class="input-box">
+                    <div class="label">⚙️ 控制方式 <span>选择控制</span></div>
+                    <p>
+                        “复杂推理用 <strong>o1</strong>，日常对话用 <strong>GPT-4o-mini</strong>，创意写作用 <strong>Claude</strong>。同一问题同时发给两个模型，取优。”
+                    </p>
+                    <div style="margin-top:0.4rem; font-size:0.7rem; color:#2b5a7a; background:#e3edf6; padding:0.1rem 0.8rem; border-radius:30px; display:inline-block;">
+                        🎯 选模型 · 并行 · 成本优化
+                    </div>
+                </div>
+                <div class="footnote">
+                    <span class="emoji">⚖️</span> 谁来计算 · 质量/速度/成本权衡
+                </div>
+            </div>
+        </div>
+
+        <!-- ========= 底部总结 ========= -->
+        <div class="footer-note">
+            <div class="essence">
+                💡 使用层面 · 完整动作：<strong>构造输入</strong> + <strong>控制系统</strong>
+            </div>
+            <div class="meta">
+                <span>📥 输入层：提示词 · 记忆 · MCP</span>
+                <span>⚙️ 使用层：编排 · 推理配置 · 模型路由</span>
+            </div>
+        </div>
+
+        <div style="margin-top: 1.2rem; text-align: center; font-size: 0.7rem; color: #5d7f9e; letter-spacing: 0.02em; border-top: 1px solid rgba(0,0,0,0.02); padding-top: 0.8rem;">
+            ⚡ 输入层决定「模型收到什么」 · 使用层决定「模型在什么流程、以什么参数、由谁来计算」
+        </div>
+    </div>
+</body>
+</html>

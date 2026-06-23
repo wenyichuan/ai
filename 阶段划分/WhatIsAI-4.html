@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI 能力进化与商业壁垒 · 完整框架</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: linear-gradient(145deg, #f0f5fa 0%, #e2eaf2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+            line-height: 1.5;
+            color: #0b1a2f;
+        }
+
+        .card {
+            max-width: 1360px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 3.5rem;
+            padding: 3rem 2.8rem;
+            box-shadow: 0 30px 60px -20px rgba(0, 20, 40, 0.3), 0 1px 4px rgba(0,0,0,0.02);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        /* -------- HEADER -------- */
+        .header { text-align: center; margin-bottom: 2.8rem; }
+        .header .badge {
+            display: inline-block;
+            background: #1a2c42;
+            color: #eef6ff;
+            font-weight: 600;
+            font-size: 0.7rem;
+            letter-spacing: 0.06em;
+            padding: 0.3rem 1.6rem;
+            border-radius: 40px;
+            margin-bottom: 0.8rem;
+            text-transform: uppercase;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .header h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #0b1f33 0%, #1f4a7a 80%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.2rem;
+        }
+        .header .sub {
+            font-size: 1.05rem;
+            font-weight: 400;
+            color: #2c4a6a;
+            background: rgba(255,255,255,0.5);
+            display: inline-block;
+            padding: 0.2rem 2rem;
+            border-radius: 40px;
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+        .header .sub strong { font-weight: 700; color: #0b2b4a; }
+
+        /* -------- LAYER LABEL -------- */
+        .layer-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            margin: 2.2rem 0 1.2rem 0;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #3d607e;
+        }
+        .layer-label .line-left,
+        .layer-label .line-right {
+            flex: 1;
+            max-width: 50px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(60, 100, 140, 0.2));
+        }
+        .layer-label .line-right {
+            background: linear-gradient(90deg, rgba(60, 100, 140, 0.2), transparent);
+        }
+        .layer-label .label-bg {
+            background: rgba(0,0,0,0.02);
+            padding: 0.15rem 1.2rem;
+            border-radius: 40px;
+            color: #1f4a7a;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        /* -------- GRID -------- */
+        .grid-row { display: grid; gap: 1.6rem; margin-bottom: 0.2rem; }
+        .grid-3 { grid-template-columns: repeat(3, 1fr); }
+        .grid-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-1 { grid-template-columns: 1fr; }
+
+        /* -------- PILLAR -------- */
+        .pillar {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border-radius: 2rem;
+            padding: 1.5rem 1.6rem 1.6rem;
+            box-shadow: 0 6px 18px -8px rgba(0, 20, 40, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .pillar:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.88);
+            box-shadow: 0 16px 30px -12px rgba(0, 20, 40, 0.12);
+        }
+        .pillar .icon { font-size: 2rem; line-height: 1; margin-bottom: 0.2rem; display: block; }
+        .pillar h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            margin-bottom: 0.05rem;
+            color: #0b1f33;
+        }
+        .pillar .subtitle {
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #4d6f8f;
+            margin-bottom: 0.4rem;
+            border-bottom: 2px solid rgba(60, 100, 140, 0.08);
+            padding-bottom: 0.25rem;
+        }
+        .pillar .desc {
+            font-size: 0.88rem;
+            color: #1f3a54;
+            margin-bottom: 0.7rem;
+            font-weight: 450;
+            line-height: 1.5;
+        }
+
+        /* 输入框 */
+        .pillar .input-box {
+            background: rgba(0, 0, 0, 0.015);
+            border-radius: 1.2rem;
+            padding: 0.7rem 0.9rem;
+            border: 1px solid rgba(0, 0, 0, 0.02);
+        }
+        .pillar .input-box .label {
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #5b7c9c;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            margin-bottom: 0.2rem;
+        }
+        .pillar .input-box .label span {
+            background: #dce7f2;
+            padding: 0.04rem 0.6rem;
+            border-radius: 30px;
+            font-size: 0.45rem;
+            color: #1a3b5a;
+            font-weight: 700;
+        }
+        .pillar .input-box p {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #0b1f33;
+            line-height: 1.5;
+        }
+        .pillar .input-box .highlight {
+            background: linear-gradient(120deg, rgba(60, 130, 210, 0.08), rgba(60, 130, 210, 0.02));
+            padding: 0.05rem 0.3rem;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #004080;
+        }
+        .pillar .input-box .skill-tag {
+            display: inline-block;
+            background: #1a2c42;
+            color: white;
+            font-size: 0.45rem;
+            font-weight: 700;
+            padding: 0.04rem 0.5rem;
+            border-radius: 30px;
+            margin-right: 0.2rem;
+            letter-spacing: 0.03em;
+        }
+
+        /* 底部标签 */
+        .pillar .footnote {
+            margin-top: 0.7rem;
+            font-size: 0.7rem;
+            color: #3d607e;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(230, 242, 255, 0.25);
+            padding: 0.2rem 0.8rem;
+            border-radius: 60px;
+            border: 1px solid rgba(255,255,255,0.3);
+            flex-wrap: wrap;
+        }
+        .pillar .footnote .emoji { font-size: 0.8rem; }
+
+        /* -------- 层级颜色标识 -------- */
+        .pillar.layer-input { border-left: 4px solid #4a7da8; }
+        .pillar.layer-flow { border-left: 4px solid #d97747; }
+        .pillar.layer-compute { border-left: 4px solid #38a169; }
+        .pillar.layer-resource { border-left: 4px solid #805ad5; }
+
+        .layer-badge {
+            display: inline-block;
+            font-size: 0.45rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 0.04rem 0.7rem;
+            border-radius: 30px;
+            margin-bottom: 0.15rem;
+        }
+        .layer-badge.input { background: rgba(74, 125, 168, 0.12); color: #2a5a7a; }
+        .layer-badge.flow { background: rgba(217, 119, 71, 0.12); color: #a85a2a; }
+        .layer-badge.compute { background: rgba(56, 161, 105, 0.12); color: #2a7a4a; }
+        .layer-badge.resource { background: rgba(128, 90, 213, 0.12); color: #5a3a8a; }
+
+        /* -------- 壁垒标签 -------- */
+        .moat-tag {
+            display: inline-block;
+            font-size: 0.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 0.08rem 0.7rem;
+            border-radius: 30px;
+            margin-left: 0.3rem;
+            vertical-align: middle;
+        }
+        .moat-tag.yes {
+            background: rgba(56, 161, 105, 0.15);
+            color: #1a6a3a;
+            border: 1px solid rgba(56, 161, 105, 0.15);
+        }
+        .moat-tag.no {
+            background: rgba(200, 80, 80, 0.08);
+            color: #9a3a3a;
+            border: 1px solid rgba(200, 80, 80, 0.08);
+        }
+        .moat-tag.strong {
+            background: rgba(128, 90, 213, 0.12);
+            color: #4a2a7a;
+            border: 1px solid rgba(128, 90, 213, 0.12);
+        }
+
+        .trend-tag {
+            display: inline-block;
+            font-size: 0.45rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            padding: 0.04rem 0.6rem;
+            border-radius: 30px;
+            background: rgba(0,0,0,0.03);
+            color: #4d6f8f;
+        }
+
+        /* 策略条 */
+        .strategy-bar {
+            margin-top: 0.6rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #1f4a7a;
+            background: rgba(30, 80, 140, 0.04);
+            padding: 0.25rem 0.8rem;
+            border-radius: 60px;
+            border: 1px dashed rgba(30, 80, 140, 0.1);
+            display: inline-block;
+        }
+
+        /* -------- 底部总结 -------- */
+        .footer-note {
+            margin-top: 2.4rem;
+            padding-top: 1.6rem;
+            border-top: 2px dashed rgba(60, 100, 140, 0.12);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.2rem;
+        }
+        .footer-note .essence {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #0b1f33;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 0.3rem 1.6rem;
+            border-radius: 60px;
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+        .footer-note .essence strong {
+            background: #0b1f33;
+            color: white;
+            font-weight: 700;
+            padding: 0.05rem 0.7rem;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            margin: 0 0.1rem;
+        }
+        .footer-note .meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #3d607e;
+            font-size: 0.7rem;
+            flex-wrap: wrap;
+        }
+        .footer-note .meta span { display: flex; align-items: center; gap: 0.2rem; }
+        .footer-note .meta .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 2px;
+        }
+        .dot-input { background: #4a7da8; }
+        .dot-flow { background: #d97747; }
+        .dot-compute { background: #38a169; }
+        .dot-resource { background: #805ad5; }
+
+        /* 底部结论 */
+        .conclusion-box {
+            margin-top: 1.2rem;
+            background: rgba(11, 31, 51, 0.03);
+            border-radius: 2rem;
+            padding: 1.2rem 2rem;
+            text-align: center;
+            border: 1px solid rgba(11, 31, 51, 0.04);
+        }
+        .conclusion-box p {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #0b1f33;
+            letter-spacing: 0.01em;
+        }
+        .conclusion-box p .highlight-gold {
+            background: linear-gradient(120deg, rgba(217, 119, 71, 0.12), rgba(217, 119, 71, 0.04));
+            padding: 0.1rem 0.6rem;
+            border-radius: 30px;
+            color: #a85a2a;
+        }
+        .conclusion-box .sub-note {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: #5d7f9e;
+            margin-top: 0.3rem;
+        }
+
+        /* -------- 响应式 -------- */
+        @media (max-width: 1024px) {
+            .card { padding: 2rem 1.5rem; border-radius: 2.5rem; }
+            .grid-3 { grid-template-columns: repeat(2, 1fr); }
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 700px) {
+            .card { padding: 1.5rem 1rem; border-radius: 2rem; }
+            .header h1 { font-size: 2rem; }
+            .header .sub { font-size: 0.85rem; padding: 0.15rem 1.2rem; }
+            .grid-3 { grid-template-columns: 1fr; gap: 1.2rem; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .pillar { padding: 1.2rem 1.2rem 1.4rem; }
+            .footer-note { flex-direction: column; align-items: flex-start; }
+            .footer-note .meta { gap: 0.5rem; }
+            .layer-label .line-left,
+            .layer-label .line-right { display: none; }
+            .layer-label .label-bg { font-size: 0.65rem; white-space: normal; }
+            .conclusion-box { padding: 1rem 1.2rem; }
+            .conclusion-box p { font-size: 0.9rem; }
+        }
+        @media (max-width: 480px) {
+            .header h1 { font-size: 1.6rem; }
+            .pillar h3 { font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+
+        <!-- ===== HEADER ===== -->
+        <div class="header">
+            <div class="badge">🧠 终局推演 · 能力进化 + 商业壁垒</div>
+            <h1>AI 使用的完整维度</h1>
+            <div class="sub">
+                <strong>输入层</strong> + <strong>流程层</strong> + <strong>计算层</strong> + <strong>资源层</strong>
+                &nbsp;—&nbsp; 哪些会消失，哪些是护城河
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- 第一层：输入层 -->
+        <!-- ============================================================ -->
+        <div class="layer-label">
+            <span class="line-left"></span>
+            <span class="label-bg">📥 输入层 · 构造「给模型什么」</span>
+            <span class="line-right"></span>
+        </div>
+
+        <div class="grid-row grid-3">
+            <!-- 提示词工程 -->
+            <div class="pillar layer-input">
+                <span class="layer-badge input">输入层</span>
+                <span class="icon">✍️</span>
+                <h3>提示词工程</h3>
+                <div class="subtitle">Prompt Engineering</div>
+                <div class="desc">当前任务的指令 — 目标、角色、格式、推理路径。</div>
+                <div class="input-box">
+                    <div class="label">📥 输入 <span>核心</span></div>
+                    <p><span class="skill-tag">SKILL</span> “以<strong>资深数据科学家</strong>身份，用 <strong>Markdown 表格</strong> 对比算法。”</p>
+                </div>
+                <div class="footnote">
+                    <span class="emoji">⏳</span> 1-2年消失
+                    <span class="moat-tag no">❌ 非壁垒</span>
+                    <span class="trend-tag">模型理解力提升</span>
+                </div>
+                <div class="strategy-bar">💡 入门技能，不必深研</div>
+            </div>
+
+            <!-- 记忆工程 -->
+            <div class="pillar layer-input">
+                <span class="layer-badge input">输入层</span>
+                <span class="icon">🧩</span>
+                <h3>记忆工程</h3>
+                <div class="subtitle">Memory Engineering</div>
+                <div class="desc">历史对话 / 偏好 — 用户画像、长期偏好、过往事实。</div>
+                <div class="input-box">
+                    <div class="label">📥 输入 <span>持续累积</span></div>
+                    <p>“用户 <strong>偏好 Python</strong>，上次使用 <strong>FastAPI</strong>，拒绝过 SQL。” </p>
+                </div>
+                <div class="footnote">
+                    <span class="emoji">⏳</span> 2-3年消失（长上下文）
+                    <span class="moat-tag no">❌ 非壁垒（个人级）</span>
+                    <span class="trend-tag">上下文窗口扩展</span>
+                </div>
+                <div class="strategy-bar">💡 个人级够用即可</div>
+            </div>
+
+            <!-- MCP 工程 -->
+            <div class="pillar layer-input">
+                <span class="layer-badge input">输入层</span>
+                <span class="icon">🔌</span>
+                <h3>MCP 工程</h3>
+                <div class="subtitle">Model Context Protocol</div>
+                <div class="desc">工具描述与调用结果 — 对接外部系统（搜索、数据库、API）。</div>
+                <div class="input-box">
+                    <div class="label">📥 输入 <span>工具增强</span></div>
+                    <p>“调用 <strong>Google 搜索 MCP</strong>，返回 <span class="highlight">[摘要+链接]</span>，生成周报。”</p>
+                </div>
+                <div class="footnote">
+                    <span class="emoji">🔒</span> 模型无法内化外部系统
+                    <span class="moat-tag strong">🏰 生态壁垒</span>
+                    <span class="trend-tag">工具生态网络效应</span>
+                </div>
+                <div class="strategy-bar">🔥 重点投入 · 连接世界</div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- 第二层：流程层 -->
+        <!-- ============================================================ -->
+        <div class="layer-label" style="margin-top: 2rem;">
+            <span class="line-left"></span>
+            <span class="label-bg">🔀 流程层 · 设计「模型在什么流程里工作」</span>
+            <span class="line-right"></span>
+        </div>
+
+        <div class="grid-row grid-1">
+            <div class="pillar layer-flow">
+                <span class="layer-badge flow">流程层</span>
+                <span class="icon">📐</span>
+                <h3>编排工程 <span style="font-size:0.6rem; font-weight:400; color:#4d6f8f; margin-left:0.5rem;">Orchestration Engineering</span></h3>
+                <div class="subtitle">多智能体拓扑 · 条件路由 · 状态管理 · 循环终止</div>
+                <div class="desc">业务流程是组织独有的 Know-How，模型学不会也拿不走。</div>
+                <div class="input-box">
+                    <div class="label">⚙️ 控制方式 <span>逻辑控制（流程图 / 代码）</span></div>
+                    <p>
+                        “A生成方案 → B负责<strong>挑错</strong> → C<strong>汇总</strong>；<br/>
+                        若A输出置信度 &lt; 90%，触发<strong>联网搜索</strong>后重试，最多3次。”
+                    </p>
+                </div>
+                <div class="footnote">
+                    <span class="emoji">🔒</span> 流程 = 管理经验
+                    <span class="moat-tag strong">🏰 流程壁垒</span>
+                    <span class="trend-tag">越用越厚</span>
+                </div>
+                <div class="strategy-bar">🔥 重点投入 · 把业务逻辑固化为流程</div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- 第三层：计算层 -->
+        <!-- ============================================================ -->
+        <div class="layer-label" style="margin-top: 2rem;">
+            <span class="line-left"></span>
+            <span class="label-bg">🎛️ 计算层 · 控制「模型怎么计算」</span>
+            <span class="line-right"></span>
+        </div>
+
+        <div class="grid-row grid-1">
+            <div class="pillar layer-compute">
+                <span class="layer-badge compute">计算层</span>
+                <span class="icon">🧪</span>
+                <h3>推理配置 <span style="font-size:0.6rem; font-weight:400; color:#4d6f8f; margin-left:0.5rem;">Inference Configuration</span></h3>
+                <div class="subtitle">Temperature · Top-p · Frequency Penalty · Reasoning Effort</div>
+                <div class="desc">模型将内置“自适应Temperature”，根据任务类型自动调整。</div>
+                <div class="input-box">
+                    <div class="label">⚙️ 控制方式 <span>数值调优（滑条 / 参数）</span></div>
+                    <p>
+                        “同一提示词‘写一首秋天的诗’，<strong>Temperature=0.2</strong> 每次雷同，<strong>Temperature=0.9</strong> 每次都不同。<br/>
+                        o1 模型设置 <strong>Reasoning Effort=high</strong> 解决复杂数学。”
+                    </p>
+                </div>
+                <div class="footnote">
+                    <span class="emoji">⏳</span> 1-2年消失
+                    <span class="moat-tag no">❌ 非壁垒</span>
+                    <span class="trend-tag">自适应参数</span>
+                </div>
+                <div class="strategy-bar">💡 了解即可，未来自适应</div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- 第四层：资源层 -->
+        <!-- ============================================================ -->
+        <div class="layer-label" style="margin-top: 2rem;">
+            <span class="line-left"></span>
+            <span class="label-bg">🔄 资源层 · 选择「谁来计算」</span>
+            <span class="line-right"></span>
+        </div>
+
+        <div class="grid-row grid-1">
+            <div class="pillar layer-resource">
+                <span class="layer-badge resource">资源层</span>
+                <span class="icon">⚖️</span>
+                <h3>模型路由 <span style="font-size:0.6rem; font-weight:400; color:#4d6f8f; margin-left:0.5rem;">Model Routing</span></h3>
+                <div class="subtitle">模型选择 · 多模型并行 · 成本/速度权衡 · 版本管理</div>
+                <div class="desc">模型越强，价格越分化。用最便宜的模型完成90%的任务，把昂贵的留给最关键的问题。</div>
+                <div class="input-box">
+                    <div class="label">⚙️ 控制方式 <span>选择控制（下拉 / 策略）</span></div>
+                    <p>
+                        “复杂推理用 <strong>o1</strong>，日常对话用 <strong>GPT-4o-mini</strong>，创意写作用 <strong>Claude</strong>。<br/>
+                        同一问题同时发给 <strong>GPT-4o + Claude</strong>，取最优答案。”
+                    </p>
+                </div>
+                <div class="footnote">
+                    <span class="emoji">💰</span> 成本工程 · 越强越省钱
+                    <span class="moat-tag strong">🏰 成本壁垒</span>
+                    <span class="trend-tag">价格分化加剧</span>
+                </div>
+                <div class="strategy-bar">🔥 重点投入 · 降本增效的核心</div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- 底部：总结 & 建议 -->
+        <!-- ============================================================ -->
+        <div class="footer-note">
+            <div class="essence">
+                💡 完整动作：<strong>构造输入</strong> + <strong>设计流程</strong> + <strong>调优计算</strong> + <strong>选择资源</strong>
+            </div>
+            <div class="meta">
+                <span><span class="dot dot-input"></span>输入层</span>
+                <span><span class="dot dot-flow"></span>流程层</span>
+                <span><span class="dot dot-compute"></span>计算层</span>
+                <span><span class="dot dot-resource"></span>资源层</span>
+            </div>
+        </div>
+
+        <!-- 核心结论 -->
+        <div class="conclusion-box">
+            <p>
+                <span class="highlight-gold">「让AI变聪明」的能力会贬值</span>
+                &nbsp;·&nbsp;
+                <span style="background: rgba(128, 90, 213, 0.08); padding:0.1rem 0.8rem; border-radius:30px; color:#4a2a7a; font-weight:700;">
+                    「让AI融入业务」的能力会增值
+                </span>
+            </p>
+            <div class="sub-note">
+                🥇 第一梯队：MCP工程 · 编排工程 &nbsp;|&nbsp; 🥈 第二梯队：企业级记忆 · 评估体系 &nbsp;|&nbsp; 🥉 第三梯队：提示词技巧 · 调参
+            </div>
+        </div>
+
+        <div style="margin-top: 1rem; text-align: center; font-size: 0.7rem; color: #5d7f9e; letter-spacing: 0.02em; border-top: 1px solid rgba(0,0,0,0.02); padding-top: 0.8rem;">
+            ⚡ 提示词工程 · Skill · 推理配置（1-3年贬值）&nbsp;&nbsp;|&nbsp;&nbsp; MCP · 编排 · 企业记忆 · 模型路由（长期护城河）
+        </div>
+    </div>
+</body>
+</html>
