@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XaaS 演进 · 汇报演示</title>
+  <!-- Font Awesome for icons (free) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(145deg, #f6f9fc 0%, #e9f0f5 100%);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      padding: 40px 24px 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .slide-container {
+      max-width: 1300px;
+      width: 100%;
+      background: rgba(255,255,255,0.75);
+      backdrop-filter: blur(2px);
+      border-radius: 48px;
+      padding: 40px 40px 50px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15), 0 2px 8px 0 rgba(0,0,0,0.04);
+      border: 1px solid rgba(255,255,255,0.6);
+    }
+
+    /* header / title */
+    .title-block {
+      margin-bottom: 40px;
+      border-bottom: 2px solid rgba(0,20,40,0.06);
+      padding-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .title-block h1 {
+      font-size: 2.8rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #0b2b3f 0%, #1b4a6b 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .title-block h1 i {
+      color: #2a6f8f;
+      font-size: 2.4rem;
+      background: rgba(42,111,143,0.08);
+      padding: 8px 12px;
+      border-radius: 60px;
+    }
+
+    .subhead {
+      font-size: 1.1rem;
+      font-weight: 400;
+      color: #2a4b5e;
+      background: rgba(42,79,94,0.06);
+      padding: 8px 20px;
+      border-radius: 40px;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.5);
+      letter-spacing: 0.2px;
+    }
+
+    .subhead i {
+      margin-right: 8px;
+      color: #3a7b9c;
+    }
+
+    /* 时间轴卡片——发展历程 */
+    .timeline-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 48px;
+    }
+
+    .epoch-card {
+      background: white;
+      padding: 20px 18px 22px;
+      border-radius: 28px;
+      box-shadow: 0 8px 20px -8px rgba(0,20,40,0.08);
+      border: 1px solid rgba(255,255,255,0.7);
+      transition: transform 0.2s ease, box-shadow 0.2s;
+    }
+
+    .epoch-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 28px -12px rgba(18, 52, 77, 0.12);
+    }
+
+    .epoch-icon {
+      font-size: 2.2rem;
+      background: #eef4f9;
+      width: 54px;
+      height: 54px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 18px;
+      margin-bottom: 14px;
+      color: #1b4a6b;
+    }
+
+    .epoch-title {
+      font-weight: 700;
+      font-size: 1.3rem;
+      letter-spacing: -0.3px;
+      color: #0b2b3f;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .epoch-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: #d4e2ed;
+      padding: 2px 12px;
+      border-radius: 30px;
+      color: #1a4b66;
+      letter-spacing: 0.3px;
+    }
+
+    .epoch-desc {
+      font-size: 0.95rem;
+      color: #1f3f53;
+      margin: 12px 0 8px;
+      line-height: 1.5;
+      font-weight: 400;
+    }
+
+    .epoch-example {
+      font-size: 0.85rem;
+      color: #3f637b;
+      background: #f0f6fb;
+      padding: 6px 14px;
+      border-radius: 40px;
+      display: inline-block;
+      margin-top: 6px;
+      border: 1px solid rgba(60, 110, 140, 0.08);
+    }
+
+    .epoch-example i {
+      margin-right: 6px;
+      font-size: 0.75rem;
+      color: #2b6c8f;
+    }
+
+    /* 最终形态 + 项目启示 双栏 */
+    .final-row {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 28px;
+      margin: 20px 0 24px;
+    }
+
+    .final-box {
+      background: #ffffffd6;
+      backdrop-filter: blur(4px);
+      border-radius: 32px;
+      padding: 26px 28px 30px;
+      border: 1px solid rgba(255,255,255,0.9);
+      box-shadow: 0 6px 18px -8px rgba(0, 20, 30, 0.06);
+    }
+
+    .final-box h3 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #0b334a;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      letter-spacing: -0.2px;
+    }
+
+    .final-box h3 i {
+      color: #2f7fa0;
+      font-size: 1.6rem;
+      width: 2rem;
+    }
+
+    .pillar-list {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .pillar-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .pillar-item .icon-bg {
+      background: #e1edf6;
+      width: 38px;
+      height: 38px;
+      min-width: 38px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #1a5b7a;
+      font-size: 1.2rem;
+    }
+
+    .pillar-item strong {
+      color: #093144;
+      font-weight: 600;
+      display: block;
+      font-size: 1rem;
+    }
+
+    .pillar-item span {
+      color: #1f445b;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      font-weight: 400;
+    }
+
+    .insight-badge {
+      background: #0d3145;
+      color: white;
+      padding: 18px 22px;
+      border-radius: 24px;
+      margin-top: 16px;
+      border: 1px solid #286783;
+    }
+
+    .insight-badge i {
+      color: #94c9e5;
+      margin-right: 10px;
+    }
+
+    .insight-badge strong {
+      font-weight: 600;
+      letter-spacing: -0.2px;
+    }
+
+    .insight-badge .highlight {
+      background: rgba(255, 215, 120, 0.15);
+      padding: 2px 10px;
+      border-radius: 30px;
+      color: #f7d48a;
+      font-weight: 500;
+    }
+
+    .footer-note {
+      margin-top: 30px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(0,0,0,0.04);
+      padding-top: 25px;
+      color: #2b5873;
+      font-size: 0.95rem;
+    }
+
+    .footer-note i {
+      color: #3a7b9c;
+      margin-right: 8px;
+    }
+
+    /* 响应式 */
+    @media (max-width: 900px) {
+      .slide-container { padding: 28px 20px; }
+      .timeline-grid { grid-template-columns: repeat(2, 1fr); }
+      .final-row { grid-template-columns: 1fr; }
+      .title-block h1 { font-size: 2.2rem; }
+    }
+
+    @media (max-width: 500px) {
+      .timeline-grid { grid-template-columns: 1fr; }
+      .title-block { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .subhead { font-size: 0.9rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="slide-container">
+
+  <!-- 标题区 -->
+  <div class="title-block">
+    <h1>
+      <i class="fas fa-cloud-upload-alt"></i> 
+      XaaS · 演进与终局
+    </h1>
+    <div class="subhead">
+      <i class="fas fa-arrow-right"></i> 从“资源”到“直觉”  ·  技术权力转移
+    </div>
+  </div>
+
+  <!-- 发展历程：四张卡片 -->
+  <div style="margin-bottom: 12px; display: flex; align-items: center; gap: 10px;">
+    <i class="fas fa-history" style="color: #1b4a6b; font-size: 1.2rem;"></i>
+    <span style="font-weight: 500; color: #143e55; letter-spacing: 0.3px;">发展历程 · 层层叠加</span>
+  </div>
+  <div class="timeline-grid">
+
+    <div class="epoch-card">
+      <div class="epoch-icon"><i class="fas fa-server"></i></div>
+      <div class="epoch-title">
+        资源云化 <span class="epoch-tag">IaaS → DaaS</span>
+      </div>
+      <div class="epoch-desc">“买工具”到“租硬盘”<br>资源民主化，数据API化。</div>
+      <div class="epoch-example"><i class="fas fa-database"></i> 亚马逊 S3 · 开放数据API</div>
+    </div>
+
+    <div class="epoch-card">
+      <div class="epoch-icon"><i class="fas fa-cubes"></i></div>
+      <div class="epoch-title">
+        平台组件化 <span class="epoch-tag">PaaS → 早期AaaS</span>
+      </div>
+      <div class="epoch-desc">“写代码”到“用组件”<br>分析模型封装，能力积木化。</div>
+      <div class="epoch-example"><i class="fas fa-chart-line"></i> 预测API · 分析组件</div>
+    </div>
+
+    <div class="epoch-card">
+      <div class="epoch-icon"><i class="fas fa-window-maximize"></i></div>
+      <div class="epoch-title">
+        应用标准化 <span class="epoch-tag">SaaS</span>
+      </div>
+      <div class="epoch-desc">“装软件”到“开网页”<br>交付标准化，软件即服务。</div>
+      <div class="epoch-example"><i class="fas fa-cloud"></i> Salesforce · 钉钉</div>
+    </div>
+
+    <div class="epoch-card">
+      <div class="epoch-icon"><i class="fas fa-brain"></i></div>
+      <div class="epoch-title">
+        智能涌现 <span class="epoch-tag">MaaS / AI驱动</span>
+      </div>
+      <div class="epoch-desc">“人学机器”到“机器懂人”<br>交互革命，自然语言即指令。</div>
+      <div class="epoch-example"><i class="fas fa-robot"></i> 大模型API · 智能中台</div>
+    </div>
+
+  </div>
+
+  <!-- 最终形态 + 项目启示 双栏 -->
+  <div class="final-row">
+    <!-- 左栏：最终形态 -->
+    <div class="final-box">
+      <h3><i class="fas fa-chess-queen"></i> 最终形态 · X as Intuition</h3>
+      <div class="pillar-list">
+        <div class="pillar-item">
+          <div class="icon-bg"><i class="fas fa-comment-dots"></i></div>
+          <div><strong>交互无感化</strong><span>自然对话即指令，系统自动编排MaaS/DaaS/AaaS，像与数字员工交流。</span></div>
+        </div>
+        <div class="pillar-item">
+          <div class="icon-bg"><i class="fas fa-bell"></i></div>
+          <div><strong>能力主动化</strong><span>从“被动响应”到“主动推送”：系统预警并生成预案，而非等待查询。</span></div>
+        </div>
+        <div class="pillar-item">
+          <div class="icon-bg"><i class="fas fa-water"></i></div>
+          <div><strong>界限模糊化</strong><span>底层是MaaS/AaaS/DaaS不再重要，服务如同水电，成为环境本身。</span></div>
+        </div>
+      </div>
+      <div style="margin-top: 16px; background: #e4f0f8; padding: 10px 18px; border-radius: 40px; color: #09415a; font-size: 0.9rem; border: 1px solid #c2dbe9;">
+        <i class="fas fa-quote-left" style="opacity: 0.6;"></i> 从“拥有” → “使用” → “存在” (Be)
+      </div>
+    </div>
+
+    <!-- 右栏：项目启示 -->
+    <div class="final-box" style="background: #f3f9ffd9;">
+      <h3><i class="fas fa-bullseye"></i> 对你项目的启示</h3>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="background: white; border-radius: 20px; padding: 14px 18px; border: 1px solid #dcebf5;">
+          <i class="fas fa-fingerprint" style="color: #1f6b8f; margin-right: 10px;"></i>
+          <span style="font-weight: 500;">定位：</span><span style="color: #143e55;">不要卖“DaaS平台”或“MaaS能力”，卖 <strong>“业务洞察即服务”</strong>。</span>
+        </div>
+        <div style="background: white; border-radius: 20px; padding: 14px 18px; border: 1px solid #dcebf5;">
+          <i class="fas fa-eye" style="color: #1f6b8f; margin-right: 10px;"></i>
+          <span style="font-weight: 500;">终局目标：</span><span style="color: #143e55;">业务人员 <strong>“忘记中台存在”</strong>，提问即获得方案。</span>
+        </div>
+        <div style="background: #0d3145; border-radius: 24px; padding: 16px 20px; color: #eaf3fa; margin-top: 4px;">
+          <i class="fas fa-lightbulb" style="color: #f7d48a; margin-right: 10px;"></i>
+          <span style="font-weight: 400;">护城河：<span style="background: #286783; padding: 2px 12px; border-radius: 40px; font-weight: 500;">“明天哪个SKU该补货”</span> 这类决策指令，而非数据或模型本身。</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部注脚（概括） -->
+  <div class="footer-note">
+    <span><i class="fas fa-arrow-trend-up"></i> 技术权力转移：甲方 → 乙方 → AI</span>
+    <span><i class="fas fa-arrow-right"></i> 你的位置：AI驱动的数据中台 = MaaS内核 + DaaS底座 + AaaS价值</span>
+    <span><i class="fas fa-robot"></i> 无感服务 · 思考即执行</span>
+  </div>
+
+</div>
+<!-- 微小水印，非必须 -->
+<div style="margin-top: 20px; font-size: 0.8rem; color: #6b8fa5; opacity: 0.5; letter-spacing: 0.5px;">
+  <i class="fas fa-arrow-left"></i> 汇报演示 · XaaS 演进
+</div>
+</body>
+</html>
