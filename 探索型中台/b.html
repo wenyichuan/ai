@@ -1,0 +1,3141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>认知画布 · 本体 Action 引擎 v3.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #0a0e1a;
+            --bg-2: #0f1422;
+            --card: #161e33;
+            --card-2: #1f2845;
+            --border: #2c385c;
+            --border-2: #3d4d75;
+            --fg: #f0f3fa;
+            --fg-2: #b8c2d9;
+            --muted: #8c98b8; /* 提亮 muted 颜色，确保可读性 */
+            --accent: #00e6ac;
+            --accent-2: #ffc266;
+            --accent-3: #ff7ba0;
+            --accent-4: #7c9eff;
+        }
+        * { box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; }
+        body {
+            background: var(--bg);
+            color: var(--fg);
+            font-family: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            overflow: hidden;
+            font-size: 13px;
+        }
+        .font-display { font-family: 'Space Grotesk', 'Noto Sans SC', sans-serif; letter-spacing: -0.02em; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .grid-bg {
+            background-image:
+                    radial-gradient(circle at 50% 50%, rgba(0,230,172,0.06), transparent 60%),
+                    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 28px 28px, 28px 28px;
+        }
+        .noise::before {
+            content: ''; position: absolute; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+            opacity: 0.035; pointer-events: none; mix-blend-mode: overlay;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+        @keyframes pulse-ring { 0% { r: 30; opacity: 0.6; } 100% { r: 60; opacity: 0; } }
+        @keyframes flow { from { stroke-dashoffset: 16; } to { stroke-dashoffset: 0; } }
+        @keyframes fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slide-in { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        @keyframes grow-bar { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        @keyframes breathe { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.08); opacity: 0.4; } }
+
+        .edge-flow { stroke-dasharray: 4 4; animation: flow 1s linear infinite; }
+        .fade-up { animation: fade-up 0.4s ease-out backwards; }
+        .slide-in { animation: slide-in 0.3s ease-out backwards; }
+        .live-dot { animation: blink 2s ease-in-out infinite; }
+        .bar { transform-origin: bottom; animation: grow-bar 0.6s ease-out backwards; }
+        .glass {
+            background: rgba(22, 30, 51, 0.85);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--border);
+        }
+
+        .btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 11px; border-radius: 6px;
+            font-size: 12px; font-weight: 500;
+            border: 1px solid var(--border-2);
+            background: var(--card-2); color: var(--fg);
+            cursor: pointer; transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .btn:hover { background: var(--border); border-color: var(--muted); }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary {
+            background: linear-gradient(135deg, #00e6ac, #00b386);
+            border-color: #00e6ac; color: #061320; font-weight: 600;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #00ffbc, #00c292);
+            box-shadow: 0 0 18px rgba(0,230,172,0.35);
+        }
+        .btn-ghost { background: transparent; border-color: transparent; }
+        .btn-ghost:hover { background: var(--card-2); }
+        .btn-danger { background: rgba(255,123,160,0.15); border-color: rgba(255,123,160,0.4); color: var(--accent-3); }
+        .btn-danger:hover { background: rgba(255,123,160,0.25); }
+
+        .chip {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 2px 7px; border-radius: 4px;
+            font-size: 10px; font-weight: 500;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .chip-ok { background: rgba(0,230,172,0.15); color: var(--accent); border: 1px solid rgba(0,230,172,0.3); }
+        .chip-wait { background: rgba(255,194,102,0.15); color: var(--accent-2); border: 1px solid rgba(255,194,102,0.3); }
+        .chip-warn { background: rgba(255,123,160,0.15); color: var(--accent-3); border: 1px solid rgba(255,123,160,0.3); }
+        .chip-info { background: rgba(124,158,255,0.15); color: var(--accent-4); border: 1px solid rgba(124,158,255,0.3); }
+
+        .node { cursor: pointer; transition: filter 0.2s, opacity 0.3s; }
+        .node:hover { filter: brightness(1.2); }
+        .node-label { pointer-events: none; user-select: none; fill: #060a14; } /* 统一节点文字深色 */
+
+        .selected-ring {
+            stroke: var(--accent);
+            stroke-width: 1.5;
+            fill: none;
+            stroke-dasharray: 4 4;
+            transform-box: fill-box; /* 修复旋转/缩放中心点 */
+            transform-origin: center;
+            animation: breathe 2.5s ease-in-out infinite;
+        }
+
+        .insight-card {
+            background: linear-gradient(135deg, rgba(0,230,172,0.08), rgba(124,158,255,0.04));
+            border: 1px solid rgba(0,230,172,0.25);
+            position: relative; overflow: hidden;
+        }
+        .insight-card::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(0,230,172,0.1), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 3s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .concept-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 6px 8px; border-radius: 6px;
+            cursor: pointer; transition: all 0.15s;
+            border: 1px solid transparent;
+        }
+        .concept-item:hover { background: var(--card-2); border-color: var(--border-2); }
+        .concept-item.active { background: var(--card-2); border-color: var(--accent); }
+
+        .source-item {
+            padding: 8px 10px; border-radius: 6px;
+            background: var(--card); border: 1px solid var(--border);
+            cursor: pointer; transition: all 0.15s;
+        }
+        .source-item:hover { border-color: var(--border-2); transform: translateX(2px); }
+        .health-bar { height: 4px; border-radius: 2px; overflow: hidden; background: var(--bg); }
+
+        .fab {
+            background: var(--card-2); border: 1px solid var(--border-2);
+            border-radius: 8px; padding: 3px;
+            display: flex; gap: 2px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+        }
+        .fab button {
+            width: 28px; height: 28px; border-radius: 5px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--fg-2); cursor: pointer; transition: all 0.15s;
+            background: transparent; border: none;
+        }
+        .fab button:hover { background: var(--border); color: var(--fg); }
+        .fab button.active { background: var(--accent); color: #061320; }
+
+        .timeline-stage { cursor: pointer; transition: all 0.2s; position: relative; }
+        .timeline-stage:hover .stage-dot { transform: scale(1.3); }
+        .timeline-stage.current .stage-dot {
+            background: var(--accent);
+            box-shadow: 0 0 0 4px rgba(0,230,172,0.2), 0 0 12px rgba(0,230,172,0.5);
+        }
+        .timeline-stage.done .stage-dot { background: var(--accent); }
+        .stage-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: var(--border-2); border: 2px solid var(--bg-2);
+            transition: all 0.2s; z-index: 2; position: relative;
+        }
+        .progress-track { height: 4px; background: var(--bg); border-radius: 2px; overflow: hidden; }
+        .progress-fill {
+            height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-4));
+            border-radius: 2px; position: relative; transition: width 0.6s ease;
+        }
+        .progress-fill::after {
+            content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 20px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
+        }
+
+        .tooltip {
+            position: fixed; pointer-events: none;
+            background: var(--card-2); border: 1px solid var(--border-2);
+            padding: 8px 12px; border-radius: 6px;
+            font-size: 11px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            z-index: 1000; opacity: 0;
+            transition: opacity 0.15s;
+            max-width: 240px;
+            color: var(--fg); /* 确保 tooltip 文字可见 */
+        }
+
+        .report-dock {
+            position: absolute; right: 16px; bottom: 16px;
+            width: 380px;
+            background: var(--card); border: 1px solid var(--border-2);
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .report-dock.collapsed { height: 44px; }
+        .report-dock.collapsed .report-body { display: none; }
+
+        .path-pill {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 3px 8px; border-radius: 12px;
+            font-size: 10px; font-weight: 500;
+            background: var(--card-2); border: 1px solid var(--border-2);
+            color: var(--fg-2); cursor: pointer; transition: all 0.15s;
+        }
+        .path-pill:hover { border-color: var(--muted); }
+        .path-pill.active { background: rgba(0,230,172,0.15); border-color: var(--accent); color: var(--accent); }
+        .path-arrow { color: var(--muted); font-size: 9px; }
+
+        .hypothesis-mode { cursor: crosshair !important; }
+        .input {
+            background: var(--bg); border: 1px solid var(--border-2);
+            border-radius: 6px; padding: 6px 10px; color: var(--fg);
+            font-size: 12px; width: 100%;
+            transition: border-color 0.15s;
+        }
+        .input:focus { outline: none; border-color: var(--accent); }
+
+        .section-title {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 10px; font-weight: 600;
+            color: var(--muted); text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 8px;
+        }
+        .section-title::before {
+            content: ''; width: 3px; height: 10px;
+            background: var(--accent); border-radius: 1px;
+        }
+        .close-btn {
+            width: 22px; height: 22px; border-radius: 4px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--muted);
+            transition: all 0.15s;
+        }
+        .close-btn:hover { background: var(--card-2); color: var(--fg); }
+
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 200;
+            background: rgba(5, 8, 16, 0.8);
+            backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.2s;
+        }
+        .modal-overlay.show { opacity: 1; pointer-events: auto; }
+        .modal {
+            background: var(--bg-2); border: 1px solid var(--border-2);
+            border-radius: 12px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+            max-height: 85vh; overflow: hidden;
+            display: flex; flex-direction: column;
+            transform: scale(0.95); transition: transform 0.2s;
+        }
+        .modal-overlay.show .modal { transform: scale(1); }
+
+        .toast-container {
+            position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+            z-index: 300; display: flex; flex-direction: column; gap: 8px; align-items: center;
+            pointer-events: none;
+        }
+        .toast {
+            padding: 8px 16px; border-radius: 8px;
+            background: var(--card-2); border: 1px solid var(--border-2);
+            font-size: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            animation: fade-up 0.3s ease-out;
+            display: flex; align-items: center; gap: 8px;
+            pointer-events: auto;
+            color: var(--fg); /* 确保 toast 文字可见 */
+        }
+        .toast.success { border-color: var(--accent); }
+        .toast.success i { color: var(--accent); }
+        .toast.warn { border-color: var(--accent-2); }
+        .toast.warn i { color: var(--accent-2); }
+        .toast.error { border-color: var(--accent-3); }
+        .toast.error i { color: var(--accent-3); }
+        .toast.info { border-color: var(--accent-4); }
+        .toast.info i { color: var(--accent-4); }
+
+        .heatmap-cell { transition: opacity 0.3s; }
+        .node.highlight { filter: drop-shadow(0 0 12px var(--accent-2)) brightness(1.4); }
+        .node.dimmed { opacity: 0.2; }
+        .node.stage-hidden { opacity: 0.08; pointer-events: none; }
+        .edge.stage-hidden { opacity: 0.05; }
+
+        select.input {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238c98b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            padding-right: 28px;
+        }
+
+        /* === Action Engine Styles === */
+        @keyframes action-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,123,160,0.4); } 50% { box-shadow: 0 0 0 6px rgba(255,123,160,0); } }
+        @keyframes action-fire { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+        @keyframes cascade-flow { 0% { stroke-dashoffset: 20; } 100% { stroke-dashoffset: 0; } }
+        @keyframes log-slide { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+        .action-firing { animation: action-fire 0.6s ease-out; }
+        .cascade-edge { stroke-dasharray: 6 3; animation: cascade-flow 0.8s linear infinite; }
+        .log-entry { animation: log-slide 0.3s ease-out backwards; }
+
+        .rule-card {
+            padding: 8px 10px; border-radius: 6px;
+            background: var(--card); border: 1px solid var(--border);
+            cursor: pointer; transition: all 0.2s;
+        }
+        .rule-card:hover { border-color: var(--accent-3); transform: translateX(2px); }
+        .rule-card.triggered {
+            border-color: var(--accent-3);
+            background: rgba(255,123,160,0.08);
+            animation: action-pulse 1.5s ease-in-out 2;
+        }
+        .rule-card .rule-status {
+            width: 6px; height: 6px; border-radius: 50%;
+            transition: all 0.3s;
+        }
+        .rule-card .rule-status.armed { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+        .rule-card .rule-status.firing { background: var(--accent-3); box-shadow: 0 0 8px var(--accent-3); animation: blink 0.5s ease-in-out 3; }
+        .rule-card .rule-status.done { background: var(--muted); }
+
+        .action-target {
+            display: flex; align-items: center; gap: 6px;
+            padding: 4px 8px; border-radius: 4px;
+            font-size: 10px; font-weight: 500;
+            border: 1px solid var(--border-2);
+            background: var(--card-2); color: var(--fg-2);
+            transition: all 0.3s;
+        }
+        .action-target.active {
+            border-color: var(--accent-3);
+            background: rgba(255,123,160,0.12);
+            color: var(--accent-3);
+        }
+
+        .budget-gauge {
+            position: relative; width: 100%; height: 8px;
+            background: var(--bg); border-radius: 4px; overflow: hidden;
+        }
+        .budget-gauge .fill {
+            height: 100%; border-radius: 4px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .budget-gauge .threshold {
+            position: absolute; top: -2px; bottom: -2px;
+            width: 2px; background: var(--accent-3);
+        }
+    </style>
+</head>
+<body>
+
+<!-- 顶部状态栏 -->
+<header class="h-14 border-b border-[var(--border)] flex items-center px-5 gap-6 relative noise bg-[var(--bg-2)] z-30">
+    <div class="flex items-center gap-3 cursor-pointer" data-action="go-workbench">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--accent)] to-[#00a37e] flex items-center justify-center shadow-lg shadow-[var(--accent)]/20">
+            <i class="fa-solid fa-circle-nodes text-[#061320] text-base"></i>
+        </div>
+        <div>
+            <div class="font-display font-semibold text-sm leading-tight flex items-center gap-2">
+                认知画布
+                <span class="font-mono text-[10px] text-[var(--muted)] bg-[var(--card-2)] px-1.5 py-0.5 rounded">v3.0</span>
+            </div>
+            <div class="text-[10px] text-[var(--muted)] mt-0.5">本体论驱动 · Action 引擎</div>
+        </div>
+    </div>
+
+    <div class="flex-1 flex items-center justify-center gap-6">
+        <div class="flex items-center gap-3 px-3 py-1.5 rounded-lg bg-[var(--card)] border border-[var(--border)] cursor-pointer hover:border-[var(--border-2)] transition" data-action="show-evolution-detail">
+            <svg width="34" height="34" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="14" fill="none" stroke="var(--border)" stroke-width="3"/>
+                <circle id="evolution-ring" cx="18" cy="18" r="14" fill="none" stroke="var(--accent)" stroke-width="3"
+                        stroke-dasharray="87.96" stroke-dashoffset="29.03" stroke-linecap="round"
+                        transform="rotate(-90 18 18)" filter="drop-shadow(0 0 4px rgba(0,230,172,0.6))" style="transition: stroke-dashoffset 0.6s;"/>
+                <text x="18" y="22" text-anchor="middle" font-size="9" fill="var(--fg)" font-weight="700" font-family="Space Grotesk" id="evolution-pct-text">67%</text>
+            </svg>
+            <div>
+                <div class="text-[10px] text-[var(--muted)] leading-tight">本体演化进度</div>
+                <div class="text-[11px] font-medium leading-tight mt-0.5 text-[var(--fg-2)]"><span class="text-[var(--accent-2)]" id="pending-count">12</span> 概念待确认</div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--card)] border border-[var(--border)] cursor-pointer hover:border-[var(--border-2)] transition" data-action="go-sources">
+            <div class="w-2 h-2 rounded-full bg-[var(--accent)] live-dot"></div>
+            <span class="text-[11px] text-[var(--fg-2)]">混沌接入</span>
+            <span class="font-mono text-[11px] text-[var(--accent)] font-medium" id="source-count">5</span>
+            <span class="text-[11px] text-[var(--fg-2)]">源</span>
+        </div>
+
+        <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--card)] border border-[var(--border)] cursor-pointer hover:border-[var(--border-2)] transition" data-action="show-stability">
+            <i class="fa-solid fa-shield-halved text-[var(--accent)] text-[11px]"></i>
+            <span class="text-[11px] text-[var(--fg-2)]">稳定运行</span>
+            <span class="font-mono text-[11px] font-medium">45 天</span>
+        </div>
+
+        <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--card)] border border-[var(--border)] cursor-pointer hover:border-[var(--border-2)] transition" data-action="go-apis">
+            <i class="fa-solid fa-bolt text-[var(--accent-2)] text-[11px]"></i>
+            <span class="text-[11px] text-[var(--fg-2)]">已固化 API</span>
+            <span class="font-mono text-[11px] font-medium" id="api-count">8</span>
+            <span class="text-[11px] text-[var(--fg-2)]">个</span>
+        </div>
+
+        <div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--accent-3)]/10 border border-[var(--accent-3)]/30 cursor-pointer hover:border-[var(--accent-3)]/50 transition" data-action="show-actions" onclick="openActionEngineModal()">
+            <i class="fa-solid fa-circle-exclamation text-[var(--accent-3)] text-[11px]"></i>
+            <span class="text-[11px] text-[var(--fg-2)]">Action 规则</span>
+            <span class="font-mono text-[11px] font-medium text-[var(--accent-3)]" id="action-triggered-count">0</span>
+            <span class="text-[11px] text-[var(--fg-2)]">已触发</span>
+        </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+        <div class="relative">
+            <input class="input w-56 pl-8" placeholder="搜索概念 / 数据源 / API…" id="global-search">
+            <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--muted)] text-[11px]"></i>
+            <span class="absolute right-2 top-1/2 -translate-y-1/2 font-mono text-[9px] text-[var(--muted)] bg-[var(--card-2)] px-1 py-0.5 rounded border border-[var(--border-2)]">⌘K</span>
+        </div>
+        <button class="btn-primary btn" data-action="ai-explore"><i class="fa-solid fa-wand-magic-sparkles text-[11px]"></i>AI 探索</button>
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--accent-2)] to-[var(--accent-3)] flex items-center justify-center text-xs font-semibold text-[#1a0a14] cursor-pointer hover:ring-2 hover:ring-[var(--accent-2)]/30 transition" data-action="show-profile">YC</div>
+    </div>
+</header>
+
+<!-- 主体三栏 -->
+<main class="grid grid-cols-[260px_1fr_380px] h-[calc(100vh-56px-72px)]">
+
+    <!-- 左栏 -->
+    <aside class="border-r border-[var(--border)] overflow-y-auto bg-[var(--bg-2)] p-3 flex flex-col gap-4">
+        <div>
+            <div class="section-title">工作区</div>
+            <div class="space-y-0.5" id="workspace-nav">
+                <div class="concept-item active" data-nav="canvas">
+                    <i class="fa-solid fa-brain text-[var(--accent)] text-xs w-4"></i>
+                    <span class="text-xs font-medium">认知画布</span>
+                    <span class="ml-auto chip chip-ok">10</span>
+                </div>
+                <div class="concept-item" data-nav="sources">
+                    <i class="fa-solid fa-database text-[var(--fg-2)] text-xs w-4"></i>
+                    <span class="text-xs">数据体检</span>
+                    <span class="ml-auto chip chip-wait">2</span>
+                </div>
+                <div class="concept-item" data-nav="apis">
+                    <i class="fa-solid fa-code-branch text-[var(--fg-2)] text-xs w-4"></i>
+                    <span class="text-xs">API 编排</span>
+                    <span class="ml-auto chip chip-info">18</span>
+                </div>
+                <div class="concept-item" data-nav="sandbox">
+                    <i class="fa-solid fa-flask text-[var(--fg-2)] text-xs w-4"></i>
+                    <span class="text-xs">假设沙箱</span>
+                    <span class="ml-auto chip chip-warn">3</span>
+                </div>
+                <div class="concept-item" data-nav="actions">
+                    <i class="fa-solid fa-bolt text-[var(--accent-3)] text-xs w-4"></i>
+                    <span class="text-xs font-medium">Action 引擎</span>
+                    <span class="ml-auto chip chip-warn" id="action-rule-count">5</span>
+                </div>
+                <div class="concept-item" data-nav="reports">
+                    <i class="fa-solid fa-file-lines text-[var(--fg-2)] text-xs w-4"></i>
+                    <span class="text-xs">活态报告</span>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="section-title flex justify-between">
+                <span>数据源 · 体检</span>
+                <button class="btn-ghost btn !p-0 !w-4 !h-4 text-[var(--accent)]" data-action="add-source"><i class="fa-solid fa-plus text-[10px]"></i></button>
+            </div>
+            <div class="space-y-1.5" id="source-list">
+                <div class="source-item" data-source="salary">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-file-excel text-[var(--accent)] text-[11px]"></i>
+                            <span class="text-xs font-medium">从业人员工资统计</span>
+                        </div>
+                        <span class="chip chip-ok">已确认</span>
+                    </div>
+                    <div class="flex items-center justify-between text-[10px] text-[var(--muted)] mb-1">
+                        <span class="font-mono">12 列 · 95% 识别</span>
+                        <span>3.2k 行</span>
+                    </div>
+                    <div class="health-bar"><div class="h-full bg-[var(--accent)]" style="width:95%"></div></div>
+                </div>
+                <div class="source-item" data-source="erp">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-file-csv text-[var(--accent-2)] text-[11px]"></i>
+                            <span class="text-xs font-medium">ERP订单数据</span>
+                        </div>
+                        <span class="chip chip-wait">处理中</span>
+                    </div>
+                    <div class="flex items-center justify-between text-[10px] text-[var(--muted)] mb-1">
+                        <span class="font-mono">18 列 · 62% 识别</span>
+                        <span>12.4k 行</span>
+                    </div>
+                    <div class="health-bar"><div class="h-full bg-[var(--accent-2)]" style="width:62%"></div></div>
+                </div>
+                <div class="source-item" data-source="crm">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-file-image text-[var(--accent-4)] text-[11px]"></i>
+                            <span class="text-xs font-medium">CRM客户画像</span>
+                        </div>
+                        <span class="chip chip-info">同步中</span>
+                    </div>
+                    <div class="flex items-center justify-between text-[10px] text-[var(--muted)] mb-1">
+                        <span class="font-mono">22 列 · 45% 识别</span>
+                        <span>3.8k 行</span>
+                    </div>
+                    <div class="health-bar"><div class="h-full bg-[var(--accent-4)]" style="width:45%"></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="section-title">AI 待办洞察</div>
+            <div class="space-y-1.5" id="insight-list">
+                <div class="p-2 rounded-lg border border-[var(--accent-3)]/30 bg-[var(--accent-3)]/5 cursor-pointer hover:bg-[var(--accent-3)]/10 transition" data-insight="conflict">
+                    <div class="flex items-center gap-1.5 text-[10px] text-[var(--accent-3)] font-medium mb-1">
+                        <i class="fa-solid fa-triangle-exclamation"></i>冲突告警
+                    </div>
+                    <div class="text-[11px] leading-snug text-[var(--fg-2)]">"入职年限"存在 2 种语义定义</div>
+                </div>
+                <div class="p-2 rounded-lg border border-[var(--accent-2)]/30 bg-[var(--accent-2)]/5 cursor-pointer hover:bg-[var(--accent-2)]/10 transition" data-insight="solidify">
+                    <div class="flex items-center gap-1.5 text-[10px] text-[var(--accent-2)] font-medium mb-1">
+                        <i class="fa-solid fa-lightbulb"></i>建议固化
+                    </div>
+                    <div class="text-[11px] leading-snug text-[var(--fg-2)]">"工资总额"主题已稳定 7 天</div>
+                </div>
+                <div class="p-2 rounded-lg border border-[var(--accent-4)]/30 bg-[var(--accent-4)]/5 cursor-pointer hover:bg-[var(--accent-4)]/10 transition" data-insight="anomaly">
+                    <div class="flex items-center gap-1.5 text-[10px] text-[var(--accent-4)] font-medium mb-1">
+                        <i class="fa-solid fa-wave-square"></i>异常发现
+                    </div>
+                    <div class="text-[11px] leading-snug text-[var(--fg-2)]">12月薪酬方差达 4.2σ</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action 规则引擎 -->
+        <div>
+            <div class="section-title flex justify-between">
+                <span>Action 规则引擎</span>
+                <button class="btn-ghost btn !p-0 !w-4 !h-4 text-[var(--accent-3)]" data-action="add-rule" title="添加规则"><i class="fa-solid fa-plus text-[10px]"></i></button>
+            </div>
+            <div class="space-y-1.5" id="action-rule-list">
+                <div class="rule-card" data-rule="budget_hire" onclick="openRuleDetail('budget_hire')">
+                    <div class="flex items-center justify-between mb-1">
+                        <div class="flex items-center gap-2">
+                            <div class="rule-status armed"></div>
+                            <span class="text-[10px] font-medium text-[var(--fg)]">预算 → 停止招聘</span>
+                        </div>
+                        <span class="chip chip-ok text-[8px]">已激活</span>
+                    </div>
+                    <div class="text-[9px] text-[var(--muted)]">当预算使用率 ≥ 90% 时触发</div>
+                    <div class="budget-gauge mt-1.5"><div class="fill bg-[var(--accent-2)]" style="width:85.8%"></div><div class="threshold" style="left:90%"></div></div>
+                    <div class="flex justify-between text-[8px] text-[var(--muted)] mt-0.5"><span>85.8%</span><span class="text-[var(--accent-3)]">阈值 90%</span></div>
+                </div>
+                <div class="rule-card" data-rule="budget_pay" onclick="openRuleDetail('budget_pay')">
+                    <div class="flex items-center justify-between mb-1">
+                        <div class="flex items-center gap-2">
+                            <div class="rule-status armed"></div>
+                            <span class="text-[10px] font-medium text-[var(--fg)]">预算 → 停止打款</span>
+                        </div>
+                        <span class="chip chip-ok text-[8px]">已激活</span>
+                    </div>
+                    <div class="text-[9px] text-[var(--muted)]">当预算使用率 ≥ 95% 时触发</div>
+                    <div class="budget-gauge mt-1.5"><div class="fill bg-[var(--accent)]" style="width:85.8%"></div><div class="threshold" style="left:95%"></div></div>
+                    <div class="flex justify-between text-[8px] text-[var(--muted)] mt-0.5"><span>85.8%</span><span class="text-[var(--accent-3)]">阈值 95%</span></div>
+                </div>
+                <div class="rule-card" data-rule="anomaly_procure" onclick="openRuleDetail('anomaly_procure')">
+                    <div class="flex items-center justify-between mb-1">
+                        <div class="flex items-center gap-2">
+                            <div class="rule-status armed"></div>
+                            <span class="text-[10px] font-medium text-[var(--fg)]">异常 → 冻结采购</span>
+                        </div>
+                        <span class="chip chip-ok text-[8px]">已激活</span>
+                    </div>
+                    <div class="text-[9px] text-[var(--muted)]">当薪酬方差 &gt; 3σ 且预算 &gt; 85% 时触发</div>
+                </div>
+                <div class="rule-card" data-rule="any_trigger" onclick="openRuleDetail('any_trigger')">
+                    <div class="flex items-center justify-between mb-1">
+                        <div class="flex items-center gap-2">
+                            <div class="rule-status armed"></div>
+                            <span class="text-[10px] font-medium text-[var(--fg)]">级联 → 通知管理层</span>
+                        </div>
+                        <span class="chip chip-info text-[8px]">联动</span>
+                    </div>
+                    <div class="text-[9px] text-[var(--muted)]">任一 Action 触发后自动通知审批链</div>
+                </div>
+                <div class="rule-card" data-rule="budget_restore" onclick="openRuleDetail('budget_restore')">
+                    <div class="flex items-center justify-between mb-1">
+                        <div class="flex items-center gap-2">
+                            <div class="rule-status done"></div>
+                            <span class="text-[10px] font-medium text-[var(--fg)]">预算恢复 → 解除限制</span>
+                        </div>
+                        <span class="chip chip-wait text-[8px]">待触发</span>
+                    </div>
+                    <div class="text-[9px] text-[var(--muted)]">当预算使用率回落至 &lt; 80% 时自动解除</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 中栏：认知画布 -->
+    <section class="relative overflow-hidden grid-bg" id="canvas-stage">
+        <div class="absolute top-3 left-3 fab z-20" id="left-toolbar">
+            <button class="active" data-tool="select" title="选择/拖拽"><i class="fa-solid fa-arrow-pointer text-xs"></i></button>
+            <button data-tool="hypothesis" title="假设画笔"><i class="fa-solid fa-pen-nib text-xs"></i></button>
+            <button data-tool="freezeze" title="框选固化"><i class="fa-solid fa-vector-square text-xs"></i></button>
+            <button data-tool="layout" title="自动布局"><i class="fa-solid fa-wand-sparkles text-xs"></i></button>
+            <div class="w-px bg-[var(--border-2)] mx-0.5"></div>
+            <button data-tool="zoom-in" title="放大"><i class="fa-solid fa-magnifying-glass-plus text-xs"></i></button>
+            <button data-tool="zoom-out" title="缩小"><i class="fa-solid fa-magnifying-glass-minus text-xs"></i></button>
+            <button data-tool="zoom-fit" title="居中"><i class="fa-solid fa-expand text-xs"></i></button>
+        </div>
+
+        <div class="absolute top-3 left-1/2 -translate-x-1/2 z-20 fab" id="view-tabs">
+            <button class="active" data-view="graph" title="认知图谱"><i class="fa-solid fa-circle-nodes text-xs"></i></button>
+            <button data-view="heatmap" title="关联热力图"><i class="fa-solid fa-fire text-xs"></i></button>
+            <button data-view="evolution" title="演化时间轴"><i class="fa-solid fa-timeline text-xs"></i></button>
+            <button data-view="report" title="数据报表"><i class="fa-solid fa-chart-line text-xs"></i></button>
+        </div>
+
+        <div class="absolute top-3 right-3 z-20 glass rounded-lg p-2.5 text-[10px] space-y-1.5 w-36">
+            <div class="font-mono text-[var(--muted)] mb-1.5">LEGEND</div>
+            <div class="flex items-center gap-2 text-[var(--fg-2)]"><span class="w-2.5 h-2.5 rounded-full bg-[var(--accent)] shadow-[0_0_6px_var(--accent)]"></span>已确认实体</div>
+            <div class="flex items-center gap-2 text-[var(--fg-2)]"><span class="w-2.5 h-2.5 rounded-full bg-[var(--accent-2)] shadow-[0_0_6px_var(--accent-2)]"></span>待确认推断</div>
+            <div class="flex items-center gap-2 text-[var(--fg-2)]"><span class="w-2.5 h-2.5 rounded-full bg-[var(--accent-3)] shadow-[0_0_6px_var(--accent-3)]"></span>语义冲突</div>
+            <div class="flex items-center gap-2 text-[var(--fg-2)]"><span class="w-2.5 h-2.5 rounded-full bg-[var(--accent-4)] shadow-[0_0_6px_var(--accent-4)]"></span>度量值</div>
+            <div class="flex items-center gap-2 text-[var(--fg-2)]"><span class="w-2.5 h-2.5 rounded-full bg-[#ff6b6b] shadow-[0_0_6px_#ff6b6b]"></span>Action 规则</div>
+            <div class="border-t border-[var(--border)] pt-1.5 mt-1.5">
+                <div class="flex items-center gap-2 text-[var(--fg-2)]"><div class="w-5 h-px bg-[var(--accent)] edge-flow"></div>高置信关系</div>
+                <div class="flex items-center gap-2 text-[var(--fg-2)]"><div class="w-5 h-px bg-[var(--accent-2)] edge-flow"></div>推断关系</div>
+            </div>
+        </div>
+
+        <svg id="canvas-svg" class="w-full h-full" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet">
+            <defs>
+                <radialGradient id="grad-confirmed" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#00ffbc" stop-opacity="0.95"/>
+                    <stop offset="100%" stop-color="#00a37e" stop-opacity="0.7"/>
+                </radialGradient>
+                <radialGradient id="grad-pending" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#ffd684" stop-opacity="0.95"/>
+                    <stop offset="100%" stop-color="#cc8a20" stop-opacity="0.7"/>
+                </radialGradient>
+                <radialGradient id="grad-conflict" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#ffa3bd" stop-opacity="0.95"/>
+                    <stop offset="100%" stop-color="#cc3a68" stop-opacity="0.7"/>
+                </radialGradient>
+                <radialGradient id="grad-measure" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#a3b9ff" stop-opacity="0.95"/>
+                    <stop offset="100%" stop-color="#3a68d4" stop-opacity="0.7"/>
+                </radialGradient>
+                <radialGradient id="grad-budget" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#ffa3bd" stop-opacity="0.95"/>
+                    <stop offset="100%" stop-color="#cc3a68" stop-opacity="0.7"/>
+                </radialGradient>
+                <radialGradient id="grad-action" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#ff6b6b" stop-opacity="0.95"/>
+                    <stop offset="100%" stop-color="#c0392b" stop-opacity="0.7"/>
+                </radialGradient>
+                <radialGradient id="grad-notify" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#ffd684" stop-opacity="0.95"/>
+                    <stop offset="100%" stop-color="#cc8a20" stop-opacity="0.7"/>
+                </radialGradient>
+                <filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                <marker id="arrow-ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M0,0 L10,5 L0,10 z" fill="#00e6ac" opacity="0.7"/>
+                </marker>
+                <marker id="arrow-wait" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                    <path d="M0,0 L10,5 L0,10 z" fill="#ffc266" opacity="0.7"/>
+                </marker>
+            </defs>
+
+            <circle cx="500" cy="300" r="180" fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="2 6" opacity="0.4"/>
+            <circle cx="500" cy="300" r="280" fill="none" stroke="var(--border)" stroke-width="1" stroke-dasharray="2 6" opacity="0.25"/>
+
+            <g id="edges">
+                <g class="edge-group" data-edge="e1" data-from="employee" data-to="regular">
+                    <path d="M 470,300 Q 380,250 290,210" fill="none" stroke="#00e6ac" stroke-width="1.5" opacity="0.6" marker-end="url(#arrow-ok)" class="edge"/>
+                    <text x="370" y="240" fill="#00e6ac" font-size="9" font-family="JetBrains Mono" opacity="0.8" class="node-label">包含 · 0.98</text>
+                </g>
+                <g class="edge-group" data-edge="e2" data-from="employee" data-to="dispatch">
+                    <path d="M 470,300 Q 380,360 290,400" fill="none" stroke="#00e6ac" stroke-width="1.5" opacity="0.6" marker-end="url(#arrow-ok)" class="edge"/>
+                    <text x="370" y="370" fill="#00e6ac" font-size="9" font-family="JetBrains Mono" opacity="0.8" class="node-label">包含 · 0.95</text>
+                </g>
+                <g class="edge-group" data-edge="e3" data-from="regular" data-to="salary">
+                    <path d="M 280,210 Q 480,160 670,290" fill="none" stroke="#00e6ac" stroke-width="1.5" opacity="0.5" marker-end="url(#arrow-ok)" class="edge edge-flow"/>
+                    <text x="470" y="180" fill="#00e6ac" font-size="9" font-family="JetBrains Mono" opacity="0.8" class="node-label">产生 · 0.92</text>
+                </g>
+                <g class="edge-group" data-edge="e4" data-from="dispatch" data-to="salary">
+                    <path d="M 280,400 Q 480,440 670,310" fill="none" stroke="#ffc266" stroke-width="1.5" opacity="0.5" marker-end="url(#arrow-wait)" class="edge edge-flow" stroke-dasharray="4 4"/>
+                    <text x="470" y="430" fill="#ffc266" font-size="9" font-family="JetBrains Mono" opacity="0.8" class="node-label">产生 · 0.89</text>
+                </g>
+                <g class="edge-group" data-edge="e5" data-from="salary" data-to="bonus">
+                    <path d="M 720,300 Q 770,250 800,210" fill="none" stroke="#00e6ac" stroke-width="1.5" opacity="0.6" marker-end="url(#arrow-ok)" class="edge"/>
+                    <text x="790" y="245" fill="#00e6ac" font-size="9" font-family="JetBrains Mono" opacity="0.8" class="node-label">构成 · 0.87</text>
+                </g>
+                <g class="edge-group" data-edge="e6" data-from="salary" data-to="base">
+                    <path d="M 720,300 Q 770,350 800,380" fill="none" stroke="#00e6ac" stroke-width="1.5" opacity="0.6" marker-end="url(#arrow-ok)" class="edge"/>
+                    <text x="790" y="355" fill="#00e6ac" font-size="9" font-family="JetBrains Mono" opacity="0.8" class="node-label">构成 · 0.96</text>
+                </g>
+                <g class="edge-group" data-edge="e7" data-from="dept" data-to="employee">
+                    <path d="M 500,120 Q 500,180 500,260" fill="none" stroke="#7c9eff" stroke-width="1.5" opacity="0.5" marker-end="url(#arrow-wait)" class="edge"/>
+                    <text x="510" y="195" fill="#7c9eff" font-size="9" font-family="JetBrains Mono" opacity="0.8" class="node-label">归属 · 0.91</text>
+                </g>
+                <g class="edge-group" data-edge="e8" data-from="level" data-to="regular">
+                    <path d="M 150,300 Q 220,250 270,210" fill="none" stroke="#ffc266" stroke-width="1.5" opacity="0.5" marker-end="url(#arrow-wait)" class="edge" stroke-dasharray="4 4"/>
+                    <text x="155" y="245" fill="#ffc266" font-size="9" font-family="JetBrains Mono" opacity="0.8" class="node-label">决定 · 0.78</text>
+                </g>
+                <g class="edge-group" data-edge="e9" data-from="salary" data-to="avg">
+                    <path d="M 720,300 Q 730,380 700,440" fill="none" stroke="#7c9eff" stroke-width="1.5" opacity="0.5" marker-end="url(#arrow-wait)" class="edge"/>
+                    <text x="745" y="380" fill="#7c9eff" font-size="9" font-family="JetBrains Mono" opacity="0.8" class="node-label">衍生 · 0.85</text>
+                </g>
+                <g class="edge-group" data-edge="e10" data-from="tenure" data-to="dispatch">
+                    <path d="M 350,510 Q 280,460 270,420" fill="none" stroke="#ff7ba0" stroke-width="1.5" opacity="0.5" marker-end="url(#arrow-wait)" class="edge" stroke-dasharray="3 5"/>
+                    <text x="245" y="475" fill="#ff7ba0" font-size="9" font-family="JetBrains Mono" opacity="0.8" class="node-label">关联 · 0.65 ⚠</text>
+                </g>
+
+                <!-- === Action Engine Edges === -->
+                <g class="edge-group" data-edge="e11" data-from="budget" data-to="salary">
+                    <path d="M 280,160 Q 450,180 660,280" fill="none" stroke="#ff7ba0" stroke-width="1.5" opacity="0.5" marker-end="url(#arrow-wait)" class="edge edge-flow"/>
+                    <text x="450" y="200" fill="#ff7ba0" font-size="9" font-family="JetBrains Mono" opacity="0.8" class="node-label">监控 · 实时</text>
+                </g>
+                <g class="edge-group" data-edge="e12" data-from="budget" data-to="action_hire">
+                    <path d="M 200,190 Q 130,280 100,370" fill="none" stroke="#ff6b6b" stroke-width="2" opacity="0.6" marker-end="url(#arrow-wait)" class="edge" id="edge-budget-hire" stroke-dasharray="6 3"/>
+                    <text x="75" y="290" fill="#ff6b6b" font-size="9" font-family="JetBrains Mono" opacity="0.8" class="node-label" transform="rotate(-70,85,290)">触发 · 条件</text>
+                </g>
+                <g class="edge-group" data-edge="e13" data-from="budget" data-to="action_pay">
+                    <path d="M 220,190 Q 200,340 180,430" fill="none" stroke="#ff6b6b" stroke-width="2" opacity="0.6" marker-end="url(#arrow-wait)" class="edge" id="edge-budget-pay" stroke-dasharray="6 3"/>
+                    <text x="155" y="340" fill="#ff6b6b" font-size="9" font-family="JetBrains Mono" opacity="0.8" class="node-label" transform="rotate(-80,160,340)">触发 · 条件</text>
+                </g>
+                <g class="edge-group" data-edge="e14" data-from="budget" data-to="action_procure">
+                    <path d="M 240,180 Q 350,260 430,400" fill="none" stroke="#ff6b6b" stroke-width="2" opacity="0.6" marker-end="url(#arrow-wait)" class="edge" id="edge-budget-procure" stroke-dasharray="6 3"/>
+                    <text x="330" y="280" fill="#ff6b6b" font-size="9" font-family="JetBrains Mono" opacity="0.8" class="node-label" transform="rotate(-50,340,280)">触发 · 条件</text>
+                </g>
+                <g class="edge-group" data-edge="e15" data-from="action_hire" data-to="notify">
+                    <path d="M 130,400 Q 440,430 770,150" fill="none" stroke="#ffc266" stroke-width="1" opacity="0.3" marker-end="url(#arrow-wait)" class="edge" stroke-dasharray="3 5"/>
+                    <text x="440" y="420" fill="#ffc266" font-size="8" font-family="JetBrains Mono" opacity="0.6" class="node-label">通知管理层</text>
+                </g>
+                <g class="edge-group" data-edge="e16" data-from="action_pay" data-to="notify">
+                    <path d="M 200,460 Q 480,470 760,160" fill="none" stroke="#ffc266" stroke-width="1" opacity="0.3" marker-end="url(#arrow-wait)" class="edge" stroke-dasharray="3 5"/>
+                </g>
+                <g class="edge-group" data-edge="e17" data-from="action_procure" data-to="notify">
+                    <path d="M 460,430 Q 600,380 760,170" fill="none" stroke="#ffc266" stroke-width="1" opacity="0.3" marker-end="url(#arrow-wait)" class="edge" stroke-dasharray="3 5"/>
+                </g>
+            </g>
+
+            <g id="nodes">
+                <g class="node" data-id="employee" data-status="confirmed" data-type="entity" transform="translate(500,300)">
+                    <circle r="44" fill="url(#grad-confirmed)" filter="url(#glow)" opacity="0.18"/>
+                    <circle r="32" fill="url(#grad-confirmed)" stroke="#00e6ac" stroke-width="1.5"/>
+                    <circle r="32" fill="none" stroke="#00e6ac" stroke-width="1" opacity="0.4" class="pulse-ring" style="animation: pulse-ring 2.5s ease-out infinite"/>
+                    <text y="-4" text-anchor="middle" font-size="11" font-weight="700" class="node-label">从业</text>
+                    <text y="8" text-anchor="middle" font-size="11" font-weight="700" class="node-label">人员</text>
+                    <text y="22" text-anchor="middle" font-size="8" font-family="JetBrains Mono" class="node-label">6 props</text>
+                </g>
+                <g class="node" data-id="regular" data-status="confirmed" data-type="entity" transform="translate(250,200)">
+                    <circle r="28" fill="url(#grad-confirmed)" filter="url(#glow)" opacity="0.15"/>
+                    <circle r="22" fill="url(#grad-confirmed)" stroke="#00e6ac" stroke-width="1.2"/>
+                    <text y="-2" text-anchor="middle" font-size="10" font-weight="600" class="node-label">在岗职工</text>
+                    <text y="10" text-anchor="middle" font-size="8" font-family="JetBrains Mono" class="node-label">5 props</text>
+                </g>
+                <g class="node" data-id="dispatch" data-status="confirmed" data-type="entity" transform="translate(250,400)">
+                    <circle r="26" fill="url(#grad-confirmed)" filter="url(#glow)" opacity="0.15"/>
+                    <circle r="20" fill="url(#grad-confirmed)" stroke="#00e6ac" stroke-width="1.2"/>
+                    <text y="-2" text-anchor="middle" font-size="10" font-weight="600" class="node-label">劳务派遣</text>
+                    <text y="10" text-anchor="middle" font-size="8" font-family="JetBrains Mono" class="node-label">4 props</text>
+                </g>
+                <g class="node" data-id="salary" data-status="confirmed" data-type="measure" transform="translate(700,300)">
+                    <circle r="32" fill="url(#grad-measure)" filter="url(#glow)" opacity="0.18"/>
+                    <circle r="26" fill="url(#grad-measure)" stroke="#7c9eff" stroke-width="1.5"/>
+                    <text y="-2" text-anchor="middle" font-size="11" font-weight="700" class="node-label">工资总额</text>
+                    <text y="10" text-anchor="middle" font-size="8" font-family="JetBrains Mono" class="node-label">¥4.46亿</text>
+                </g>
+                <g class="node" data-id="bonus" data-status="pending" data-type="measure" transform="translate(820,200)">
+                    <circle r="24" fill="url(#grad-pending)" filter="url(#glow)" opacity="0.15"/>
+                    <circle r="19" fill="url(#grad-pending)" stroke="#ffc266" stroke-width="1.2"/>
+                    <text y="-2" text-anchor="middle" font-size="10" font-weight="600" class="node-label">绩效奖金</text>
+                    <text y="9" text-anchor="middle" font-size="8" font-family="JetBrains Mono" class="node-label">¥2588w</text>
+                </g>
+                <g class="node" data-id="base" data-status="confirmed" data-type="measure" transform="translate(820,380)">
+                    <circle r="22" fill="url(#grad-measure)" filter="url(#glow)" opacity="0.15"/>
+                    <circle r="17" fill="url(#grad-measure)" stroke="#7c9eff" stroke-width="1.2"/>
+                    <text y="-2" text-anchor="middle" font-size="10" font-weight="600" class="node-label">基本工资</text>
+                    <text y="9" text-anchor="middle" font-size="8" font-family="JetBrains Mono" class="node-label">2 props</text>
+                </g>
+                <g class="node" data-id="dept" data-status="confirmed" data-type="entity" transform="translate(500,90)">
+                    <circle r="22" fill="url(#grad-confirmed)" filter="url(#glow)" opacity="0.15"/>
+                    <circle r="17" fill="url(#grad-confirmed)" stroke="#00e6ac" stroke-width="1.2"/>
+                    <text y="-2" text-anchor="middle" font-size="10" font-weight="600" class="node-label">部门</text>
+                    <text y="9" text-anchor="middle" font-size="8" font-family="JetBrains Mono" class="node-label">4 props</text>
+                </g>
+                <g class="node" data-id="level" data-status="pending" data-type="entity" transform="translate(130,300)">
+                    <circle r="22" fill="url(#grad-pending)" filter="url(#glow)" opacity="0.15"/>
+                    <circle r="17" fill="url(#grad-pending)" stroke="#ffc266" stroke-width="1.2"/>
+                    <text y="-2" text-anchor="middle" font-size="10" font-weight="600" class="node-label">岗位等级</text>
+                    <text y="9" text-anchor="middle" font-size="8" font-family="JetBrains Mono" class="node-label">3 props</text>
+                </g>
+                <g class="node" data-id="avg" data-status="pending" data-type="measure" transform="translate(680,460)">
+                    <circle r="20" fill="url(#grad-pending)" filter="url(#glow)" opacity="0.15"/>
+                    <circle r="15" fill="url(#grad-pending)" stroke="#ffc266" stroke-width="1.2"/>
+                    <text y="-1" text-anchor="middle" font-size="9" font-weight="600" class="node-label">平均工资</text>
+                    <text y="9" text-anchor="middle" font-size="8" font-family="JetBrains Mono" class="node-label">30.55w</text>
+                </g>
+                <g class="node" data-id="tenure" data-status="conflict" data-type="measure" transform="translate(360,530)">
+                    <circle r="20" fill="url(#grad-conflict)" filter="url(#glow)" opacity="0.18"/>
+                    <circle r="15" fill="url(#grad-conflict)" stroke="#ff7ba0" stroke-width="1.5"/>
+                    <text y="-1" text-anchor="middle" font-size="9" font-weight="600" class="node-label">入职年限</text>
+                    <text y="9" text-anchor="middle" font-size="8" font-family="JetBrains Mono" class="node-label">⚠ 冲突</text>
+                </g>
+
+                <!-- === Action Engine Nodes === -->
+                <g class="node" data-id="budget" data-status="confirmed" data-type="entity" transform="translate(220,160)">
+                    <circle r="36" fill="url(#grad-budget)" filter="url(#glow)" opacity="0.18"/>
+                    <circle r="28" fill="url(#grad-budget)" stroke="#ff7ba0" stroke-width="1.5"/>
+                    <circle r="28" fill="none" stroke="#ff7ba0" stroke-width="1" opacity="0.4" class="pulse-ring" style="animation: pulse-ring 3s ease-out infinite"/>
+                    <text y="-4" text-anchor="middle" font-size="11" font-weight="700" class="node-label">年度预算</text>
+                    <text y="8" text-anchor="middle" font-size="8" font-family="JetBrains Mono" class="node-label">¥5.2亿</text>
+                    <text y="20" text-anchor="middle" font-size="7" font-family="JetBrains Mono" class="node-label">已用 85.8%</text>
+                </g>
+                <g class="node" data-id="action_hire" data-status="pending" data-type="action" transform="translate(110,380)">
+                    <circle r="24" fill="url(#grad-action)" filter="url(#glow)" opacity="0.15"/>
+                    <circle r="19" fill="url(#grad-action)" stroke="#ff6b6b" stroke-width="1.5"/>
+                    <text y="-2" text-anchor="middle" font-size="10" font-weight="600" class="node-label">停止招聘</text>
+                    <text y="9" text-anchor="middle" font-size="7" font-family="JetBrains Mono" class="node-label">人事系统</text>
+                </g>
+                <g class="node" data-id="action_pay" data-status="pending" data-type="action" transform="translate(190,460)">
+                    <circle r="22" fill="url(#grad-action)" filter="url(#glow)" opacity="0.15"/>
+                    <circle r="17" fill="url(#grad-action)" stroke="#ff6b6b" stroke-width="1.5"/>
+                    <text y="-2" text-anchor="middle" font-size="10" font-weight="600" class="node-label">停止打款</text>
+                    <text y="9" text-anchor="middle" font-size="7" font-family="JetBrains Mono" class="node-label">财务系统</text>
+                </g>
+                <g class="node" data-id="action_procure" data-status="pending" data-type="action" transform="translate(440,430)">
+                    <circle r="20" fill="url(#grad-action)" filter="url(#glow)" opacity="0.15"/>
+                    <circle r="15" fill="url(#grad-action)" stroke="#ff6b6b" stroke-width="1.5"/>
+                    <text y="-2" text-anchor="middle" font-size="9" font-weight="600" class="node-label">冻结采购</text>
+                    <text y="8" text-anchor="middle" font-size="7" font-family="JetBrains Mono" class="node-label">采购系统</text>
+                </g>
+                <g class="node" data-id="notify" data-status="confirmed" data-type="action" transform="translate(780,140)">
+                    <circle r="20" fill="url(#grad-notify)" filter="url(#glow)" opacity="0.15"/>
+                    <circle r="15" fill="url(#grad-notify)" stroke="#ffc266" stroke-width="1.2"/>
+                    <text y="-2" text-anchor="middle" font-size="9" font-weight="600" class="node-label">通知管理层</text>
+                    <text y="8" text-anchor="middle" font-size="7" font-family="JetBrains Mono" class="node-label">审批链</text>
+                </g>
+
+                <circle id="selection-ring" class="selected-ring" r="42" cx="500" cy="300" style="display:none"/>
+            </g>
+        </svg>
+
+        <!-- 热力图视图 -->
+        <div id="heatmap-view" class="absolute inset-0 hidden p-12 pt-20">
+            <div class="text-center mb-4">
+                <div class="font-display text-lg font-semibold">数据家底 · 关联热力图</div>
+                <div class="text-[11px] text-[var(--muted)] mt-1">各维度间的关联强度矩阵</div>
+            </div>
+            <div class="flex justify-center">
+                <div id="heatmap-grid" class="grid gap-1" style="grid-template-columns: 100px repeat(8, 52px);"></div>
+            </div>
+        </div>
+
+        <!-- 演化时间轴视图 -->
+        <div id="evolution-view" class="absolute inset-0 hidden p-8 pt-16 overflow-y-auto">
+            <div class="max-w-3xl mx-auto">
+                <div class="text-center mb-6">
+                    <div class="font-display text-xl font-semibold">本体演化时间轴</div>
+                    <div class="text-[11px] text-[var(--muted)] mt-1">从混沌接入到知识反哺的完整生命周期</div>
+                </div>
+                <div class="space-y-0" id="evolution-timeline"></div>
+            </div>
+        </div>
+
+        <!-- 报表视图 -->
+        <div id="report-view" class="absolute inset-0 hidden p-8 pt-16 overflow-y-auto">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <div class="font-display text-xl font-semibold">数据报表 · 月度薪酬趋势</div>
+                        <div class="text-[11px] text-[var(--muted)] mt-1">统计口径：国家统计局 I202-3 | 2025年1-12月</div>
+                    </div>
+                    <button class="btn-primary btn" data-action="open-full-report"><i class="fa-solid fa-up-right-from-square text-[10px]"></i>完整报告</button>
+                </div>
+                <div class="grid grid-cols-4 gap-3 mb-4">
+                    <div class="glass rounded-lg p-3">
+                        <div class="text-[10px] text-[var(--muted)]">全年人均薪酬</div>
+                        <div class="font-display font-semibold text-lg text-[var(--accent)]">30.55w</div>
+                    </div>
+                    <div class="glass rounded-lg p-3">
+                        <div class="text-[10px] text-[var(--muted)]">12月人均</div>
+                        <div class="font-display font-semibold text-lg text-[var(--accent-2)]">2.95w</div>
+                    </div>
+                    <div class="glass rounded-lg p-3">
+                        <div class="text-[10px] text-[var(--muted)]">全年总额</div>
+                        <div class="font-display font-semibold text-lg text-[var(--accent-4)]">¥4.46亿</div>
+                    </div>
+                    <div class="glass rounded-lg p-3">
+                        <div class="text-[10px] text-[var(--muted)]">绩效总池</div>
+                        <div class="font-display font-semibold text-lg text-[var(--accent-3)]">¥2588w</div>
+                    </div>
+                </div>
+                <div class="glass rounded-lg p-4">
+                    <div class="text-xs font-medium mb-3 text-[var(--fg)]">月度薪酬趋势 & 绩效脉冲</div>
+                    <svg viewBox="0 0 600 200" class="w-full h-48" id="report-chart"></svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="absolute bottom-3 left-3 z-10 text-[10px] text-[var(--muted)] flex items-center gap-3">
+            <span><i class="fa-solid fa-arrows-up-down-left-right mr-1"></i>拖拽平移</span>
+            <span><i class="fa-solid fa-magnifying-glass mr-1"></i>滚轮缩放</span>
+            <span><i class="fa-solid fa-hand-pointer mr-1"></i>单击选中</span>
+            <span><i class="fa-solid fa-hand-pointer mr-1"></i>双击确认概念</span>
+        </div>
+
+        <div class="report-dock collapsed" id="report-dock">
+            <div class="flex items-center justify-between px-4 h-11 cursor-pointer" id="report-dock-header">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-file-lines text-[var(--accent)] text-xs"></i>
+                    <span class="text-xs font-medium text-[var(--fg)]">活态报告 · 从业人员工资分析</span>
+                    <span class="chip chip-ok">LIVE</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] text-[var(--muted)] font-mono">30.55w / 年</span>
+                    <i class="fa-solid fa-chevron-up text-[10px] text-[var(--muted)]" id="dock-chevron"></i>
+                </div>
+            </div>
+            <div class="report-body p-4 pt-0">
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                    <div class="p-2 rounded-lg bg-[var(--bg)] border border-[var(--border)]">
+                        <div class="text-[9px] text-[var(--muted)]">全年人均薪酬</div>
+                        <div class="font-display font-semibold text-base text-[var(--accent)]">30.55w</div>
+                    </div>
+                    <div class="p-2 rounded-lg bg-[var(--bg)] border border-[var(--border)]">
+                        <div class="text-[9px] text-[var(--muted)]">12月人均</div>
+                        <div class="font-display font-semibold text-base text-[var(--accent-2)]">2.95w</div>
+                    </div>
+                </div>
+                <div class="p-2 rounded-lg bg-[var(--bg)] border border-[var(--border)]">
+                    <div class="text-[9px] text-[var(--muted)] mb-2">月度薪酬趋势</div>
+                    <svg viewBox="0 0 200 50" class="w-full h-12">
+                        <polyline points="0,35 18,32 36,30 54,28 72,26 90,24 108,22 126,20 144,18 162,15 180,8 200,5"
+                                  fill="none" stroke="#00e6ac" stroke-width="1.5"/>
+                        <circle cx="180" cy="8" r="2" fill="#ffc266"/>
+                    </svg>
+                    <div class="flex justify-between text-[8px] text-[var(--muted)] font-mono mt-1">
+                        <span>1月</span><span>6月</span><span>12月 ↑2.95w</span>
+                    </div>
+                </div>
+                <button class="btn-primary btn w-full justify-center mt-3 text-[11px]" data-action="open-full-report">
+                    <i class="fa-solid fa-up-right-from-square text-[10px]"></i>查看完整报告
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 右栏：AI 副驾驶 -->
+    <aside class="border-l border-[var(--border)] overflow-y-auto bg-[var(--bg-2)] p-3 flex flex-col gap-3" id="copilot-panel">
+        <div class="glass rounded-lg p-3">
+            <div class="flex items-center justify-between mb-2">
+                <div class="section-title !mb-0">当前上下文</div>
+                <span class="chip chip-ok" id="ctx-status">实体 · 已确认</span>
+            </div>
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-[var(--accent)] to-[#00a37e] flex items-center justify-center" id="ctx-icon">
+                    <i class="fa-solid fa-user text-[#061320] text-base"></i>
+                </div>
+                <div>
+                    <div class="font-display font-semibold text-base text-[var(--fg)]" id="ctx-name">从业人员</div>
+                    <div class="text-[10px] text-[var(--muted)] font-mono" id="ctx-meta">entity / employee / 6 props</div>
+                </div>
+            </div>
+            <div class="space-y-1.5" id="ctx-props"></div>
+        </div>
+
+        <div class="insight-card rounded-lg p-3 relative">
+            <div class="flex items-center gap-2 mb-2 relative z-10">
+                <div class="w-6 h-6 rounded-md bg-gradient-to-br from-[var(--accent)] to-[#00a37e] flex items-center justify-center">
+                    <i class="fa-solid fa-wand-magic-sparkles text-[#061320] text-[10px]"></i>
+                </div>
+                <span class="text-[10px] font-semibold text-[var(--accent)] tracking-wider">AI 洞察 · 高优先级</span>
+            </div>
+            <div class="text-[12px] leading-relaxed relative z-10 text-[var(--fg-2)]">
+                检测到 <span class="font-mono text-[var(--accent-2)]">12月</span> 薪酬方差达 <span class="font-mono text-[var(--accent-3)]">4.2σ</span>，
+                疑似年底绩效集中结算导致。建议下钻分析 <span class="font-medium text-[var(--accent)]">绩效奖金</span> 与 <span class="font-medium text-[var(--accent)]">岗位等级</span> 的关联。
+            </div>
+            <div class="flex gap-1.5 mt-3 relative z-10">
+                <button class="btn-primary btn text-[10px] !py-1" data-action="drill-down">
+                    <i class="fa-solid fa-play text-[9px]"></i>执行下钻
+                </button>
+                <button class="btn text-[10px] !py-1" data-action="dismiss-insight">
+                    <i class="fa-solid fa-xmark text-[9px]"></i>忽略
+                </button>
+            </div>
+        </div>
+
+        <!-- Action 触发面板 -->
+        <div class="glass rounded-lg p-3" id="action-panel">
+            <div class="flex items-center justify-between mb-2">
+                <div class="section-title !mb-0">Action 触发模拟</div>
+                <div class="flex items-center gap-1">
+                    <div class="w-1.5 h-1.5 rounded-full bg-[var(--accent)] live-dot"></div>
+                    <span class="text-[9px] text-[var(--accent)] font-mono">MONITORING</span>
+                </div>
+            </div>
+            <div class="p-2.5 rounded-lg bg-[var(--bg)] border border-[var(--border)] mb-2">
+                <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-[10px] text-[var(--muted)]">预算使用率</span>
+                    <span class="font-mono text-[11px] font-medium text-[var(--accent-2)]" id="budget-pct-display">85.8%</span>
+                </div>
+                <div class="budget-gauge">
+                    <div class="fill bg-gradient-to-r from-[var(--accent)] to-[var(--accent-2)]" id="budget-gauge-fill" style="width:85.8%"></div>
+                    <div class="threshold" style="left:90%" title="停止招聘阈值"></div>
+                    <div class="threshold" style="left:95%;background:var(--accent-4)" title="停止打款阈值"></div>
+                </div>
+                <div class="flex justify-between text-[8px] text-[var(--muted)] mt-1">
+                    <span>0%</span><span>90%<span class="text-[var(--accent-3)]"> 停招</span></span><span>95%<span class="text-[var(--accent-4)]"> 停付</span></span><span>100%</span>
+                </div>
+            </div>
+            <div class="mb-2">
+                <div class="text-[9px] text-[var(--muted)] mb-1">模拟预算使用率</div>
+                <input type="range" min="50" max="100" value="86" step="0.5" id="budget-slider" class="w-full h-1.5 rounded-lg appearance-none cursor-pointer" style="background:var(--bg-2);accent-color:var(--accent-3)">
+            </div>
+            <div class="flex gap-1.5 mb-2">
+                <button class="btn-danger btn flex-1 justify-center text-[10px] !py-1.5" data-action="simulate-trigger">
+                    <i class="fa-solid fa-play text-[9px]"></i>模拟触发
+                </button>
+                <button class="btn flex-1 justify-center text-[10px] !py-1.5" data-action="reset-simulation">
+                    <i class="fa-solid fa-rotate-left text-[9px]"></i>重置
+                </button>
+            </div>
+            <div class="text-[10px] text-[var(--muted)] mb-1.5">已触发的 Action</div>
+            <div class="space-y-1" id="action-targets">
+                <div class="action-target" id="target-hire">
+                    <i class="fa-solid fa-user-plus text-[10px]"></i>
+                    <span>人事系统 · 停止招聘</span>
+                    <span class="ml-auto text-[8px] font-mono" id="target-hire-status">待命</span>
+                </div>
+                <div class="action-target" id="target-pay">
+                    <i class="fa-solid fa-money-bill-wave text-[10px]"></i>
+                    <span>财务系统 · 停止打款</span>
+                    <span class="ml-auto text-[8px] font-mono" id="target-pay-status">待命</span>
+                </div>
+                <div class="action-target" id="target-procure">
+                    <i class="fa-solid fa-cart-shopping text-[10px]"></i>
+                    <span>采购系统 · 冻结采购</span>
+                    <span class="ml-auto text-[8px] font-mono" id="target-procure-status">待命</span>
+                </div>
+                <div class="action-target" id="target-notify">
+                    <i class="fa-solid fa-bell text-[10px]"></i>
+                    <span>管理层 · 审批通知</span>
+                    <span class="ml-auto text-[8px] font-mono" id="target-notify-status">待命</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action 执行日志 -->
+        <div class="glass rounded-lg p-3" id="action-log-panel" style="display:none">
+            <div class="flex items-center justify-between mb-2">
+                <div class="section-title !mb-0">Action 执行日志</div>
+                <button class="btn-ghost btn !p-0 !w-4 !h-4 text-[var(--muted)]" data-action="clear-log" title="清除日志"><i class="fa-solid fa-trash text-[9px]"></i></button>
+            </div>
+            <div class="space-y-1 max-h-32 overflow-y-auto" id="action-log-list"></div>
+        </div>
+
+        <div>
+            <div class="section-title">下一步探索</div>
+            <div class="space-y-1.5" id="suggestions">
+                <div class="p-2.5 rounded-lg border border-[var(--border)] bg-[var(--card)] hover:border-[var(--accent)] cursor-pointer transition group" data-suggestion="correlation">
+                    <div class="flex items-start gap-2">
+                        <i class="fa-solid fa-arrow-trend-up text-[var(--accent)] text-xs mt-0.5"></i>
+                        <div class="flex-1">
+                            <div class="text-[11px] font-medium text-[var(--fg)]">薪酬与岗位等级相关性</div>
+                            <div class="text-[10px] text-[var(--muted)] mt-0.5">预计置信度提升 +12%</div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-[var(--muted)] text-[9px] group-hover:text-[var(--accent)]"></i>
+                    </div>
+                </div>
+                <div class="p-2.5 rounded-lg border border-[var(--border)] bg-[var(--card)] hover:border-[var(--accent)] cursor-pointer transition group" data-suggestion="cluster">
+                    <div class="flex items-start gap-2">
+                        <i class="fa-solid fa-sitemap text-[var(--accent-4)] text-xs mt-0.5"></i>
+                        <div class="flex-1">
+                            <div class="text-[11px] font-medium text-[var(--fg)]">部门维度下的人员聚类</div>
+                            <div class="text-[10px] text-[var(--muted)] mt-0.5">使用 K-Means · k=5</div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-[var(--muted)] text-[9px] group-hover:text-[var(--accent)]"></i>
+                    </div>
+                </div>
+                <div class="p-2.5 rounded-lg border border-[var(--border)] bg-[var(--card)] hover:border-[var(--accent)] cursor-pointer transition group" data-suggestion="turnover">
+                    <div class="flex items-start gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-[var(--accent-2)] text-xs mt-0.5"></i>
+                        <div class="flex-1">
+                            <div class="text-[11px] font-medium text-[var(--fg)]">入职年限与离职率关联</div>
+                            <div class="text-[10px] text-[var(--muted)] mt-0.5">需先解决语义冲突</div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-[var(--muted)] text-[9px] group-hover:text-[var(--accent)]"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="section-title flex justify-between">
+                <span>探索路径</span>
+                <button class="btn-ghost btn !p-0 !w-4 !h-4 text-[var(--muted)] hover:!text-[var(--accent-3)]" data-action="clear-path" title="清除路径">
+                    <i class="fa-solid fa-trash text-[9px]"></i>
+                </button>
+            </div>
+            <div class="flex flex-wrap items-center gap-1 p-2 rounded-lg bg-[var(--card)] border border-[var(--border)]" id="path-container">
+                <span class="path-pill" data-path="0">数据接入</span>
+                <i class="fa-solid fa-chevron-right path-arrow"></i>
+                <span class="path-pill" data-path="1">EDA</span>
+                <i class="fa-solid fa-chevron-right path-arrow"></i>
+                <span class="path-pill active" data-path="2">从业人员</span>
+            </div>
+        </div>
+
+        <div class="glass rounded-lg p-3">
+            <div class="flex items-center justify-between mb-2">
+                <div class="section-title !mb-0">即席 API · 沙箱</div>
+                <div class="flex items-center gap-1">
+                    <div class="w-1.5 h-1.5 rounded-full bg-[var(--accent)] live-dot"></div>
+                    <span class="text-[9px] text-[var(--accent)] font-mono">LIVE</span>
+                </div>
+            </div>
+            <div class="font-mono text-[10px] bg-[var(--bg)] rounded-md p-2 border border-[var(--border)] mb-2 text-[var(--fg-2)]" id="api-code">
+                <div class="text-[var(--muted)]"># 由画布选区自动生成</div>
+                <div><span class="text-[var(--accent-4)]">GET</span> /api/v1/ontology/<span class="text-[var(--accent)]">employee</span></div>
+                <div class="text-[var(--muted)]">?filter=dept&dim=level</div>
+            </div>
+            <div class="text-[10px] text-[var(--muted)] mb-2">响应预览 (<span id="api-latency">2.3ms</span>)</div>
+            <div class="font-mono text-[10px] bg-[var(--bg)] rounded-md p-2 border border-[var(--border)] max-h-24 overflow-y-auto text-[var(--fg-2)]">
+                <div class="text-[var(--accent-2)]">{</div>
+                <div class="pl-3"><span class="text-[var(--accent-4)]">"total"</span>: <span class="text-[var(--accent)]">12450</span>,</div>
+                <div class="pl-3"><span class="text-[var(--accent-4)]">"avg_salary"</span>: <span class="text-[var(--accent)]">30.55</span>,</div>
+                <div class="pl-3"><span class="text-[var(--accent-4)]">"by_level"</span>: [</div>
+                <div class="pl-6 text-[var(--muted)]">{L1: 18.2w, L2: 24.5w, ...}</div>
+                <div class="pl-3">]</div>
+                <div class="text-[var(--accent-2)]">}</div>
+            </div>
+            <div class="flex gap-1.5">
+                <button class="btn-primary btn flex-1 justify-center text-[10px]" data-action="solidify-api">
+                    <i class="fa-solid fa-flask text-[9px]"></i>固化为企业 API
+                </button>
+                <button class="btn text-[10px]" data-action="copy-api" title="复制"><i class="fa-solid fa-copy text-[9px]"></i></button>
+            </div>
+        </div>
+    </aside>
+</main>
+
+<!-- 底部时间轴 -->
+<footer class="h-[72px] border-t border-[var(--border)] bg-[var(--bg-2)] px-6 flex items-center gap-6">
+    <div class="flex items-center gap-2">
+        <div class="text-[10px] text-[var(--muted)] uppercase tracking-wider">演化时间轴</div>
+        <div class="chip chip-info">点击切换阶段</div>
+    </div>
+
+    <div class="flex-1 relative h-12 flex items-center">
+        <div class="absolute inset-x-0 top-1/2 h-px bg-[var(--border-2)]" style="top:14px"></div>
+        <div class="absolute left-0 h-px bg-[var(--accent)] transition-all" id="timeline-progress" style="width: 75%; top:14px"></div>
+
+        <div class="relative w-full flex justify-between items-start">
+            <div class="timeline-stage done flex flex-col items-center gap-1" data-stage="0">
+                <div class="stage-dot"></div>
+                <div class="text-[10px] font-medium text-[var(--fg-2)]">AI 发现</div>
+                <div class="text-[9px] text-[var(--muted)] font-mono">-60d · 42概念</div>
+            </div>
+            <div class="timeline-stage done flex flex-col items-center gap-1" data-stage="1">
+                <div class="stage-dot"></div>
+                <div class="text-[10px] font-medium text-[var(--fg-2)]">沙箱验证</div>
+                <div class="text-[9px] text-[var(--muted)] font-mono">-45d · 15 API</div>
+            </div>
+            <div class="timeline-stage done flex flex-col items-center gap-1" data-stage="2">
+                <div class="stage-dot"></div>
+                <div class="text-[10px] font-medium text-[var(--fg-2)]">稳定运行</div>
+                <div class="text-[9px] text-[var(--muted)] font-mono">-30d · 0 故障</div>
+            </div>
+            <div class="timeline-stage current flex flex-col items-center gap-1" data-stage="3">
+                <div class="stage-dot"></div>
+                <div class="text-[10px] font-medium text-[var(--accent)]" id="current-stage-name">本体固化</div>
+                <div class="text-[9px] text-[var(--muted)] font-mono">当前 · 12待确</div>
+            </div>
+            <div class="timeline-stage flex flex-col items-center gap-1" data-stage="4">
+                <div class="stage-dot"></div>
+                <div class="text-[10px] text-[var(--muted)]">知识反哺</div>
+                <div class="text-[9px] text-[var(--muted)] font-mono">未来阶段</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex items-center gap-4 pl-6 border-l border-[var(--border)]">
+        <div>
+            <div class="text-[10px] text-[var(--muted)] mb-0.5">当前阶段</div>
+            <div class="text-xs font-medium text-[var(--accent)]" id="footer-stage-name">本体固化阶段</div>
+        </div>
+        <div class="h-8 w-px bg-[var(--border)]"></div>
+        <div>
+            <div class="text-[10px] text-[var(--muted)] mb-0.5">收敛度</div>
+            <div class="flex items-center gap-2">
+                <div class="progress-track w-20"><div class="progress-fill" id="convergence-bar" style="width:67%"></div></div>
+                <span class="font-mono text-xs text-[var(--accent)]" id="convergence-text">67%</span>
+            </div>
+        </div>
+        <button class="btn-primary btn" data-action="govern">
+            <i class="fa-solid fa-gavel text-[10px]"></i>执行治理收敛
+        </button>
+    </div>
+</footer>
+
+<div class="tooltip" id="tooltip"></div>
+<div class="toast-container" id="toast-container"></div>
+
+<div class="modal-overlay" id="modal-overlay">
+    <div class="modal" id="modal-box" style="width: 90%; max-width: 720px;"></div>
+</div>
+
+<script>
+    const State = {
+        selectedNode: null,
+        currentView: 'graph',
+        currentStage: 3,
+        pathSteps: ['数据接入', 'EDA', '从业人员'],
+        apiCount: 8,
+        pendingCount: 12,
+        convergence: 67,
+    };
+
+    const nodeData = {
+        employee: { name: '从业人员', type: '实体', status: '已确认', statusChip: 'chip-ok', props: 6, desc: '企业全部用工人员的统称，包含在岗职工与劳务派遣', records: 12450, source: '从业人员工资统计', icon: 'fa-user' },
+        regular:  { name: '在岗职工', type: '实体', status: '已确认', statusChip: 'chip-ok', props: 5, desc: '签订正式劳动合同的全职员工', records: 9870, source: '从业人员工资统计', icon: 'fa-user-tie' },
+        dispatch: { name: '劳务派遣', type: '实体', status: '已确认', statusChip: 'chip-ok', props: 4, desc: '由劳务公司派遣的用工', records: 2580, source: '从业人员工资统计', icon: 'fa-users' },
+        salary:   { name: '工资总额', type: '度量', status: '已确认', statusChip: 'chip-ok', props: 3, desc: '全年所有人员薪酬总和', records: 1, source: 'AI 衍生', value: '¥4.46亿', icon: 'fa-coins' },
+        bonus:    { name: '绩效奖金', type: '度量', status: '待确认', statusChip: 'chip-wait', props: 4, desc: '依据考核结果发放的浮动薪酬', records: 1, source: 'AI 衍生', value: '¥2588w', icon: 'fa-medal' },
+        base:     { name: '基本工资', type: '度量', status: '已确认', statusChip: 'chip-ok', props: 2, desc: '岗位固定薪酬部分', records: 1, source: 'AI 衍生', icon: 'fa-money-bill' },
+        dept:     { name: '部门', type: '实体', status: '已确认', statusChip: 'chip-ok', props: 4, desc: '组织架构维度', records: 28, source: 'ERP订单数据', icon: 'fa-sitemap' },
+        level:    { name: '岗位等级', type: '实体', status: '待确认', statusChip: 'chip-wait', props: 3, desc: '职级体系，AI 推断枚举值 L1-L5', records: 5, source: 'AI 推断', icon: 'fa-ranking-star' },
+        avg:      { name: '平均工资', type: '度量', status: '待确认', statusChip: 'chip-wait', props: 2, desc: '工资总额 ÷ 平均人数', records: 1, source: 'AI 衍生', value: '30.55w', icon: 'fa-calculator' },
+        tenure:   { name: '入职年限', type: '度量', status: '冲突', statusChip: 'chip-warn', props: 2, desc: '存在 2 种定义：自然年/合同年', records: 12450, source: 'CRM + ERP', icon: 'fa-calendar-day' },
+        budget:       { name: '年度预算', type: '实体', status: '已确认', statusChip: 'chip-ok', props: 6, desc: '年度总预算池，监控人力成本占比，触发跨系统联动', records: 1, source: '财务系统', value: '¥5.2亿', icon: 'fa-piggy-bank' },
+        action_hire:  { name: '停止招聘', type: 'Action', status: '待触发', statusChip: 'chip-warn', props: 3, desc: '当预算使用率 ≥ 90% 时，联动人事系统冻结全部招聘流程', records: 0, source: 'Action 引擎', icon: 'fa-user-plus' },
+        action_pay:   { name: '停止打款', type: 'Action', status: '待触发', statusChip: 'chip-warn', props: 3, desc: '当预算使用率 ≥ 95% 时，联动财务系统暂停所有对外付款', records: 0, source: 'Action 引擎', icon: 'fa-money-bill-wave' },
+        action_procure: { name: '冻结采购', type: 'Action', status: '待触发', statusChip: 'chip-warn', props: 2, desc: '当薪酬异常且预算紧张时，联动采购系统冻结非必要采购', records: 0, source: 'Action 引擎', icon: 'fa-cart-shopping' },
+        notify:       { name: '通知管理层', type: 'Action', status: '已确认', statusChip: 'chip-ok', props: 2, desc: '任一 Action 触发后，自动通知审批链上的管理层', records: 0, source: 'Action 引擎', icon: 'fa-bell' },
+    };
+
+    const nodeProps = {
+        employee: [
+            ['人员类别', '枚举 · 3值', 'accent'],
+            ['所属部门', '外键 → 部门', 'accent'],
+            ['岗位等级', '外键 · 待确认', 'accent-2'],
+            ['入职日期', 'date', 'accent'],
+            ['用工形式', '枚举 · 2值', 'accent'],
+            ['合同状态', '冲突 ⚠', 'accent-3'],
+        ],
+        regular: [
+            ['职工编号', '主键', 'accent'],
+            ['姓名', 'string', 'accent'],
+            ['部门', '外键 → 部门', 'accent'],
+            ['职级', '枚举 L1-L5', 'accent'],
+            ['合同类型', '枚举 · 2值', 'accent'],
+        ],
+        dispatch: [
+            ['派遣编号', '主键', 'accent'],
+            ['供应商', '外键', 'accent'],
+            ['派遣期限', 'date range', 'accent'],
+            ['岗位', 'string', 'accent'],
+        ],
+        salary: [
+            ['计算公式', 'Σ(基本+绩效+补贴)', 'accent'],
+            ['统计周期', '月/季/年', 'accent'],
+            ['数据来源', 'ERP + 工资表', 'accent'],
+        ],
+        bonus: [
+            ['计算公式', '考核分 × 系数', 'accent-2'],
+            ['发放周期', '季度 + 年度', 'accent-2'],
+            ['总池', '¥2588w', 'accent-2'],
+            ['占比', '5.8%', 'accent-2'],
+        ],
+        base: [
+            ['计算公式', '岗位基数 × 系数', 'accent'],
+            ['调整频率', '年度', 'accent'],
+        ],
+        dept: [
+            ['部门编号', '主键', 'accent'],
+            ['上级部门', '自引用', 'accent'],
+            ['负责人', '外键 → 员工', 'accent'],
+            ['成本中心', 'string', 'accent'],
+        ],
+        level: [
+            ['等级编码', 'L1-L5', 'accent-2'],
+            ['薪酬范围', '12w - 45w', 'accent-2'],
+            ['晋升条件', '待定义', 'accent-2'],
+        ],
+        avg: [
+            ['计算公式', '工资总额 ÷ 平均人数', 'accent-2'],
+            ['统计口径', '月度', 'accent-2'],
+        ],
+        tenure: [
+            ['定义 A', '入职至当前自然年', 'accent-3'],
+            ['定义 B', '入职至当前合同年', 'accent-3'],
+        ],
+        budget: [
+            ['年度总额', '¥5.2亿', 'accent-3'],
+            ['已使用', '¥4.46亿 (85.8%)', 'accent-2'],
+            ['人力成本占比', '85.8%', 'accent-3'],
+            ['阈值-停止招聘', '≥ 90%', 'accent-3'],
+            ['阈值-停止打款', '≥ 95%', 'accent-3'],
+            ['剩余可用', '¥0.74亿', 'accent'],
+        ],
+        action_hire: [
+            ['目标系统', '人事系统 HRMS', 'accent-3'],
+            ['触发条件', '预算使用率 ≥ 90%', 'accent-3'],
+            ['执行动作', '冻结全部招聘流程', 'accent-3'],
+        ],
+        action_pay: [
+            ['目标系统', '财务系统 FMS', 'accent-3'],
+            ['触发条件', '预算使用率 ≥ 95%', 'accent-3'],
+            ['执行动作', '暂停对外付款审批', 'accent-3'],
+        ],
+        action_procure: [
+            ['目标系统', '采购系统 SRM', 'accent-3'],
+            ['触发条件', '薪酬方差>3σ 且预算>85%', 'accent-3'],
+        ],
+        notify: [
+            ['目标', '审批链管理层', 'accent-2'],
+            ['触发方式', '任一 Action 触发后级联', 'accent-2'],
+        ],
+    };
+
+    const stageData = [
+        { name: 'AI 发现', period: '-60天前', desc: '自动识别 42 个概念，建立 128 条关系', convergence: 15, pending: 38, apiCount: 0, visibleNodes: ['employee', 'salary', 'dept'], detail: '系统首次接入 ERP + 工资表，AI 通过聚类和关联分析，初步提取出 42 个候选概念和 128 条潜在关系。此时大部分节点处于"待确认"状态。' },
+        { name: '沙箱验证', period: '-45天前', desc: '15 个 API 通过沙箱测试，进入生产环境', convergence: 35, pending: 28, apiCount: 3, visibleNodes: ['employee', 'regular', 'dispatch', 'salary', 'dept'], detail: '15 个即席 API 在沙箱环境中通过了压力测试和准确性验证，其中 3 个已固化为生产级接口。本体图谱开始收敛，确认的概念数量上升。' },
+        { name: '稳定运行', period: '-30天前', desc: '系统连续运行 30 天，触发反向治理流程', convergence: 52, pending: 20, apiCount: 5, visibleNodes: ['employee', 'regular', 'dispatch', 'salary', 'bonus', 'base', 'dept', 'level'], detail: '系统连续 30 天无故障运行，AI 监控显示所有 API 响应稳定。触发反向治理流程，开始将临时表标准化为 dbt 模型。' },
+        { name: '本体固化', period: '当前', desc: '12 个概念待确认，8 个 API 已沉淀为高可用接口，5 条 Action 规则已激活', convergence: 67, pending: 12, apiCount: 8, visibleNodes: ['employee', 'regular', 'dispatch', 'salary', 'bonus', 'base', 'dept', 'level', 'avg', 'tenure', 'budget', 'action_hire', 'action_pay', 'action_procure', 'notify'], detail: '当前阶段：12 个概念等待人工确认，8 个 API 已沉淀为高可用企业接口。新增 Action 引擎：预算实体监控工资总额，当使用率超阈值时自动触发人事/财务/采购系统联动。入职年限概念存在语义冲突，需人工裁决。' },
+        { name: '知识反哺', period: '未来阶段', desc: '本体固化完成，Action 引擎全自动化运行，回写领域知识库', convergence: 95, pending: 0, apiCount: 15, visibleNodes: ['employee', 'regular', 'dispatch', 'salary', 'bonus', 'base', 'dept', 'level', 'avg', 'tenure', 'budget', 'action_hire', 'action_pay', 'action_procure', 'notify'], detail: '目标阶段：所有概念确认完毕，本体固化为标准知识图谱。Action 引擎全自动化运行，预算监控与跨系统联动形成闭环。治理脚本自动生成 dbt 模型和高可用 API，并回写至领域知识库。' },
+    ];
+
+    function showToast(msg, type = 'info', icon = 'fa-circle-info') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `<i class="fa-solid ${icon}"></i><span>${msg}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(8px)';
+            toast.style.transition = 'all 0.3s';
+            setTimeout(() => toast.remove(), 300);
+        }, 2800);
+    }
+
+    const modalOverlay = document.getElementById('modal-overlay');
+    const modalBox = document.getElementById('modal-box');
+
+    function openModal(html, width) {
+        modalBox.innerHTML = html;
+        if (width) modalBox.style.maxWidth = width;
+        modalOverlay.classList.add('show');
+    }
+
+    function closeModal() {
+        modalOverlay.classList.remove('show');
+    }
+
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) closeModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+    });
+
+    const svg = document.getElementById('canvas-svg');
+    const tooltip = document.getElementById('tooltip');
+    const selectionRing = document.getElementById('selection-ring');
+
+    document.querySelectorAll('.node').forEach(node => {
+        node.addEventListener('click', (e) => {
+            e.stopPropagation();
+            selectNode(node);
+        });
+
+        node.addEventListener('mouseenter', (e) => {
+            const id = node.dataset.id;
+            const d = nodeData[id];
+            if (!d) return;
+            tooltip.innerHTML = `
+      <div class="font-semibold mb-1 text-[var(--fg)]">${d.name} <span class="text-[var(--muted)] font-normal">· ${d.type}</span></div>
+      <div class="text-[var(--fg-2)] mb-1.5">${d.desc}</div>
+      <div class="flex items-center gap-2 text-[10px]">
+        <span class="chip ${d.statusChip}">${d.status}</span>
+        <span class="font-mono text-[var(--muted)]">${d.records} records</span>
+        <span class="font-mono text-[var(--muted)]">${d.props} props</span>
+      </div>
+    `;
+            tooltip.style.opacity = '1';
+        });
+
+        node.addEventListener('mousemove', (e) => {
+            tooltip.style.left = (e.clientX + 14) + 'px';
+            tooltip.style.top = (e.clientY + 14) + 'px';
+        });
+
+        node.addEventListener('mouseleave', () => {
+            tooltip.style.opacity = '0';
+        });
+
+        node.addEventListener('dblclick', (e) => {
+            e.stopPropagation();
+            const id = node.dataset.id;
+            if (node.dataset.status === 'pending') {
+                confirmConcept(node, id);
+            } else if (node.dataset.status === 'confirmed') {
+                showToast(`"${nodeData[id].name}" 已是确认状态`, 'info', 'fa-circle-info');
+            } else if (node.dataset.status === 'conflict') {
+                openConflictResolver(id);
+            }
+        });
+    });
+
+    function selectNode(node) {
+        State.selectedNode = node.dataset.id;
+        document.querySelectorAll('.node').forEach(n => {
+            n.classList.remove('highlight');
+            n.classList.remove('dimmed');
+        });
+
+        const transform = node.getAttribute('transform');
+        const match = transform.match(/translate\(([\d.]+),\s*([\d.]+)\)/);
+        if (match) {
+            const cx = parseFloat(match[1]);
+            const cy = parseFloat(match[2]);
+            selectionRing.setAttribute('cx', cx);
+            selectionRing.setAttribute('cy', cy);
+            selectionRing.style.display = 'block';
+        }
+        updateCopilot(nodeData[State.selectedNode]);
+    }
+
+    function confirmConcept(node, id) {
+        node.dataset.status = 'confirmed';
+        const innerCircle = node.querySelector('circle:nth-child(2)');
+        innerCircle.setAttribute('fill', 'url(#grad-confirmed)');
+        innerCircle.setAttribute('stroke', '#00e6ac');
+
+        nodeData[id].status = '已确认';
+        nodeData[id].statusChip = 'chip-ok';
+
+        State.pendingCount = Math.max(0, State.pendingCount - 1);
+        updateGlobalStats();
+
+        showToast(`概念 "${nodeData[id].name}" 已确认为标准实体`, 'success', 'fa-circle-check');
+
+        if (State.selectedNode === id) {
+            updateCopilot(nodeData[id]);
+        }
+    }
+
+    function updateCopilot(d) {
+        if (!d) return;
+        document.getElementById('ctx-name').textContent = d.name;
+        document.getElementById('ctx-meta').textContent = `${d.type} / ${State.selectedNode} / ${d.props} props`;
+        document.getElementById('ctx-status').textContent = `${d.type} · ${d.status}`;
+        document.getElementById('ctx-status').className = `chip ${d.statusChip}`;
+
+        const iconEl = document.getElementById('ctx-icon');
+        iconEl.innerHTML = `<i class="fa-solid ${d.icon} text-[#061320] text-base"></i>`;
+
+        const propsContainer = document.getElementById('ctx-props');
+        const props = nodeProps[State.selectedNode] || [];
+        propsContainer.innerHTML = props.map(([k, v, color]) => {
+            const colorClass = color === 'accent' ? 'text-[var(--accent)]' :
+                color === 'accent-2' ? 'text-[var(--accent-2)]' :
+                    color === 'accent-3' ? 'text-[var(--accent-3)]' :
+                        color === 'accent-4' ? 'text-[var(--accent-4)]' : 'text-[var(--accent)]';
+            return `<div class="flex items-center justify-between text-[11px] py-1 border-b border-[var(--border)]">
+      <span class="text-[var(--fg-2)]">${k}</span>
+      <span class="font-mono ${colorClass}">${v}</span>
+    </div>`;
+        }).join('');
+
+        const apiCode = document.getElementById('api-code');
+        const endpoint = State.selectedNode === 'employee' ? 'employee' :
+            State.selectedNode === 'regular' ? 'employee?type=regular' :
+                State.selectedNode === 'dispatch' ? 'employee?type=dispatch' :
+                    State.selectedNode === 'salary' ? 'measure/salary_total' :
+                        State.selectedNode === 'bonus' ? 'measure/bonus' :
+                            State.selectedNode === 'base' ? 'measure/base_salary' :
+                                State.selectedNode === 'dept' ? 'department' :
+                                    State.selectedNode === 'level' ? 'job_level' :
+                                        State.selectedNode === 'avg' ? 'measure/avg_salary' :
+                                            State.selectedNode === 'tenure' ? 'measure/tenure' : 'entity';
+
+        apiCode.innerHTML = `
+    <div class="text-[var(--muted)]"># 由画布选区自动生成</div>
+    <div><span class="text-[var(--accent-4)]">GET</span> /api/v1/ontology/<span class="text-[var(--accent)]">${endpoint}</span></div>
+    <div class="text-[var(--muted)]">?dim=dept&filter=status=active</div>
+  `;
+    }
+
+    svg.addEventListener('click', () => {
+        document.querySelectorAll('.node').forEach(n => {
+            n.classList.remove('highlight');
+            n.classList.remove('dimmed');
+        });
+        selectionRing.style.display = 'none';
+        State.selectedNode = null;
+    });
+
+    let viewBox = { x: 0, y: 0, w: 1000, h: 600 };
+    function updateViewBox() {
+        svg.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`);
+    }
+
+    document.getElementById('left-toolbar').addEventListener('click', (e) => {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+        const tool = btn.dataset.tool;
+
+        if (['select', 'hypothesis'].includes(tool)) {
+            document.querySelectorAll('#left-toolbar button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        switch(tool) {
+            case 'select':
+                document.getElementById('canvas-stage').classList.remove('hypothesis-mode');
+                showToast('选择模式已启用', 'info', 'fa-arrow-pointer');
+                break;
+            case 'hypothesis':
+                document.getElementById('canvas-stage').classList.add('hypothesis-mode');
+                showToast('假设画笔已启用 · 在两个节点间拖拽绘制虚拟关系', 'info', 'fa-pen-nib');
+                break;
+            case 'freezeze':
+                showToast('框选固化模式 · 拖拽选中区域以固化为标准主题', 'info', 'fa-vector-square');
+                break;
+            case 'layout':
+                showToast('正在重新计算力导向布局…', 'info', 'fa-wand-sparkles');
+                autoLayout();
+                break;
+            case 'zoom-in':
+                viewBox.w *= 0.85; viewBox.h *= 0.85;
+                viewBox.x += viewBox.w * 0.09;
+                viewBox.y += viewBox.h * 0.09;
+                updateViewBox();
+                break;
+            case 'zoom-out':
+                viewBox.x -= viewBox.w * 0.09;
+                viewBox.y -= viewBox.h * 0.09;
+                viewBox.w /= 0.85; viewBox.h /= 0.85;
+                updateViewBox();
+                break;
+            case 'zoom-fit':
+                viewBox = { x: 0, y: 0, w: 1000, h: 600 };
+                updateViewBox();
+                showToast('已重置视图', 'info', 'fa-expand');
+                break;
+        }
+    });
+
+    function autoLayout() {
+        document.querySelectorAll('.node').forEach((node, i) => {
+            setTimeout(() => {
+                const transform = node.getAttribute('transform');
+                const match = transform.match(/translate\(([\d.]+),\s*([\d.]+)\)/);
+                if (match) {
+                    const x = parseFloat(match[1]) + (Math.random() - 0.5) * 10;
+                    const y = parseFloat(match[2]) + (Math.random() - 0.5) * 10;
+                    node.setAttribute('transform', `translate(${x},${y})`);
+                }
+            }, i * 60);
+        });
+    }
+
+    svg.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const scale = e.deltaY > 0 ? 1.1 : 0.9;
+        viewBox.w *= scale; viewBox.h *= scale;
+        updateViewBox();
+    });
+
+    document.getElementById('view-tabs').addEventListener('click', (e) => {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+        const view = btn.dataset.view;
+
+        document.querySelectorAll('#view-tabs button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        State.currentView = view;
+
+        svg.style.display = view === 'graph' ? '' : 'none';
+        document.getElementById('heatmap-view').classList.toggle('hidden', view !== 'heatmap');
+        document.getElementById('evolution-view').classList.toggle('hidden', view !== 'evolution');
+        document.getElementById('report-view').classList.toggle('hidden', view !== 'report');
+
+        document.getElementById('report-dock').style.display = (view === 'graph' || view === 'report') ? '' : 'none';
+
+        switch(view) {
+            case 'graph': showToast('已切换到认知图谱视图', 'info', 'fa-circle-nodes'); break;
+            case 'heatmap': renderHeatmap(); showToast('已切换到关联热力图视图', 'info', 'fa-fire'); break;
+            case 'evolution': renderEvolutionTimeline(); showToast('已切换到演化时间轴视图', 'info', 'fa-timeline'); break;
+            case 'report': renderReportChart(); showToast('已切换到数据报表视图', 'info', 'fa-chart-line'); break;
+        }
+    });
+
+    function renderHeatmap() {
+        const container = document.getElementById('heatmap-grid');
+        const dims = ['从业人员', '在岗职工', '劳务派遣', '工资总额', '绩效奖金', '部门', '岗位等级', '入职年限'];
+        const data = [
+            [1.0, 0.92, 0.85, 0.88, 0.65, 0.78, 0.72, 0.91],
+            [0.92, 1.0, 0.45, 0.82, 0.68, 0.75, 0.88, 0.95],
+            [0.85, 0.45, 1.0, 0.71, 0.52, 0.61, 0.38, 0.72],
+            [0.88, 0.82, 0.71, 1.0, 0.87, 0.65, 0.78, 0.68],
+            [0.65, 0.68, 0.52, 0.87, 1.0, 0.48, 0.82, 0.55],
+            [0.78, 0.75, 0.61, 0.65, 0.48, 1.0, 0.71, 0.62],
+            [0.72, 0.88, 0.38, 0.78, 0.82, 0.71, 1.0, 0.85],
+            [0.91, 0.95, 0.72, 0.68, 0.55, 0.62, 0.85, 1.0],
+        ];
+
+        let html = '<div></div>';
+        dims.forEach(d => {
+            html += `<div class="text-[10px] text-[var(--fg-2)] font-medium text-center flex items-end justify-center pb-1 -rotate-12 origin-bottom-left" style="height:40px">${d}</div>`;
+        });
+
+        data.forEach((row, i) => {
+            html += `<div class="text-[10px] text-[var(--fg-2)] font-medium flex items-center justify-end pr-2">${dims[i]}</div>`;
+            row.forEach((val, j) => {
+                const isDiagonal = i === j;
+                const color = isDiagonal ? 'rgba(124,158,255,' : val > 0.8 ? 'rgba(0,230,172,' : val > 0.6 ? 'rgba(255,194,102,' : 'rgba(255,123,160,';
+                const textColor = val > 0.6 ? '#060a14' : '#f0f3fa'; // 高对比度文字处理
+                html += `<div class="heatmap-cell rounded flex items-center justify-center text-[9px] font-mono font-medium cursor-pointer hover:ring-2 hover:ring-white/30"
+                    style="width:52px;height:40px;background:${color}${val * 0.85});color:${textColor}"
+                    title="${dims[i]} ↔ ${dims[j]}: ${val.toFixed(2)}">${val.toFixed(2)}</div>`;
+            });
+        });
+
+        container.innerHTML = html;
+    }
+
+    function renderEvolutionTimeline() {
+        const container = document.getElementById('evolution-timeline');
+        const colors = ['#7c9eff', '#ffc266', '#00e6ac', '#00e6ac', '#ff7ba0'];
+
+        let html = '';
+        stageData.forEach((s, i) => {
+            const isCurrent = i === State.currentStage;
+            const isDone = i < State.currentStage;
+            const color = colors[i];
+
+            html += `
+      <div class="relative pl-12 pb-6 cursor-pointer hover:bg-[var(--card)]/30 rounded-lg p-2 -ml-2 transition" data-stage-detail="${i}">
+        <div class="absolute left-0 top-0 bottom-0 w-px bg-[var(--border-2)]" style="margin-left:19px"></div>
+        <div class="absolute left-0 top-1 w-10 h-10 rounded-full flex items-center justify-center border-2"
+             style="border-color:${color};background:${isCurrent ? color : 'var(--bg-2)'}">
+          <span class="font-display font-bold text-sm" style="color:${isCurrent ? '#061320' : color}">${i + 1}</span>
+        </div>
+        <div class="flex items-center gap-3 mb-1">
+          <span class="font-display font-semibold text-base" style="color:${isCurrent ? '#00e6ac' : '#f0f3fa'}">${s.name}</span>
+          <span class="chip ${isCurrent ? 'chip-ok' : isDone ? 'chip-info' : 'chip-wait'}">${s.period}</span>
+          ${isCurrent ? '<span class="chip chip-ok">当前</span>' : ''}
+        </div>
+        <div class="text-[11px] text-[var(--fg-2)] mb-2">${s.desc}</div>
+        <div class="text-[11px] text-[var(--muted)] leading-relaxed mb-2">${s.detail}</div>
+        <div class="flex gap-4 text-[10px]">
+          <span class="text-[var(--muted)]">收敛度: <span class="font-mono font-medium" style="color:${color}">${s.convergence}%</span></span>
+          <span class="text-[var(--muted)]">待确认: <span class="font-mono font-medium text-[var(--fg-2)]">${s.pending}</span></span>
+          <span class="text-[var(--muted)]">已固化API: <span class="font-mono font-medium text-[var(--fg-2)]">${s.apiCount}</span></span>
+        </div>
+      </div>
+    `;
+        });
+
+        container.innerHTML = html;
+
+        container.querySelectorAll('[data-stage-detail]').forEach(el => {
+            el.addEventListener('click', () => {
+                const stageIdx = parseInt(el.dataset.stageDetail);
+                switchStage(stageIdx);
+            });
+        });
+    }
+
+    function renderReportChart() {
+        const chart = document.getElementById('report-chart');
+        if (!chart) return;
+
+        const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+        const salary = [2.1, 2.05, 2.2, 2.15, 2.3, 2.25, 2.4, 2.35, 2.5, 2.6, 2.7, 2.95];
+        const bonus = [0.1, 0.1, 0.15, 0.1, 0.2, 0.15, 0.25, 0.2, 0.3, 0.35, 0.5, 0.8];
+
+        const w = 600, h = 200, pad = 40;
+        const maxVal = 4;
+        const xStep = (w - pad * 2) / 11;
+
+        let path = `M ${pad},${h - pad - (salary[0] / maxVal) * (h - pad * 2)}`;
+        salary.forEach((v, i) => {
+            if (i > 0) path += ` L ${pad + i * xStep},${h - pad - (v / maxVal) * (h - pad * 2)}`;
+        });
+
+        let bonusPath = `M ${pad},${h - pad - (bonus[0] / maxVal) * (h - pad * 2)}`;
+        bonus.forEach((v, i) => {
+            if (i > 0) bonusPath += ` L ${pad + i * xStep},${h - pad - (v / maxVal) * (h - pad * 2)}`;
+        });
+
+        let area = path + ` L ${pad + 11 * xStep},${h - pad} L ${pad},${h - pad} Z`;
+
+        let html = `
+    <defs>
+      <linearGradient id="area-grad" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="#00e6ac" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="#00e6ac" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    ${months.map((m, i) => `<text x="${pad + i * xStep}" y="${h - pad + 14}" text-anchor="middle" font-size="9" fill="#8c98b8" font-family="JetBrains Mono">${m}</text>`).join('')}
+    ${[0, 1, 2, 3, 4].map(v => `<line x1="${pad}" y1="${h - pad - (v / maxVal) * (h - pad * 2)}" x2="${w - pad}" y2="${h - pad - (v / maxVal) * (h - pad * 2)}" stroke="#2c385c" stroke-width="0.5" stroke-dasharray="2 4"/><text x="${pad - 6}" y="${h - pad - (v / maxVal) * (h - pad * 2) + 3}" text-anchor="end" font-size="8" fill="#8c98b8" font-family="JetBrains Mono">${v}w</text>`).join('')}
+    <path d="${area}" fill="url(#area-grad)"/>
+    <path d="${path}" fill="none" stroke="#00e6ac" stroke-width="2"/>
+    <path d="${bonusPath}" fill="none" stroke="#ffc266" stroke-width="1.5" stroke-dasharray="4 3"/>
+    ${salary.map((v, i) => `<circle cx="${pad + i * xStep}" cy="${h - pad - (v / maxVal) * (h - pad * 2)}" r="3" fill="#00e6ac"/>`).join('')}
+    <circle cx="${pad + 11 * xStep}" cy="${h - pad - (salary[11] / maxVal) * (h - pad * 2)}" r="5" fill="#ffc266" filter="drop-shadow(0 0 4px #ffc266)"/>
+    <text x="${pad + 11 * xStep}" y="${h - pad - (salary[11] / maxVal) * (h - pad * 2) - 10}" text-anchor="middle" font-size="10" fill="#ffc266" font-weight="700" font-family="Space Grotesk">2.95w ↑</text>
+    <line x1="${pad}" y1="${h - pad}" x2="${w - pad}" y2="${h - pad}" stroke="#3d4d75" stroke-width="1"/>
+  `;
+
+        chart.innerHTML = html;
+    }
+
+    document.querySelectorAll('.timeline-stage').forEach(stage => {
+        stage.addEventListener('click', () => {
+            const stageIdx = parseInt(stage.dataset.stage);
+            switchStage(stageIdx);
+        });
+    });
+
+    function switchStage(idx) {
+        State.currentStage = idx;
+        const s = stageData[idx];
+
+        document.querySelectorAll('.timeline-stage').forEach((el, i) => {
+            el.classList.remove('current', 'done');
+            if (i < idx) el.classList.add('done');
+            if (i === idx) el.classList.add('current');
+        });
+
+        const progressWidth = (idx / 4) * 100;
+        document.getElementById('timeline-progress').style.width = progressWidth + '%';
+
+        document.getElementById('current-stage-name').textContent = s.name;
+        document.getElementById('footer-stage-name').textContent = s.name + '阶段';
+        document.getElementById('convergence-bar').style.width = s.convergence + '%';
+        document.getElementById('convergence-text').textContent = s.convergence + '%';
+
+        State.convergence = s.convergence;
+        State.pendingCount = s.pending;
+        State.apiCount = s.apiCount;
+        updateGlobalStats();
+
+        document.querySelectorAll('.node').forEach(node => {
+            const nodeId = node.dataset.id;
+            if (s.visibleNodes.includes(nodeId)) {
+                node.classList.remove('stage-hidden');
+            } else {
+                node.classList.add('stage-hidden');
+            }
+        });
+
+        document.querySelectorAll('.edge-group').forEach(edge => {
+            const from = edge.dataset.from;
+            const to = edge.dataset.to;
+            if (s.visibleNodes.includes(from) && s.visibleNodes.includes(to)) {
+                edge.classList.remove('stage-hidden');
+            } else {
+                edge.classList.add('stage-hidden');
+            }
+        });
+
+        showToast(`已切换到「${s.name}」阶段 · ${s.desc}`, 'info', 'fa-clock-rotate-left');
+
+        if (State.currentView === 'evolution') {
+            renderEvolutionTimeline();
+        }
+    }
+
+    function updateGlobalStats() {
+        document.getElementById('pending-count').textContent = State.pendingCount;
+        document.getElementById('api-count').textContent = State.apiCount;
+        document.getElementById('evolution-pct-text').textContent = State.convergence + '%';
+
+        const circumference = 87.96;
+        const offset = circumference - (State.convergence / 100) * circumference;
+        document.getElementById('evolution-ring').setAttribute('stroke-dashoffset', offset);
+    }
+
+    document.querySelectorAll('#workspace-nav .concept-item').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('#workspace-nav .concept-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+
+            const nav = item.dataset.nav;
+            switch(nav) {
+                case 'canvas': showToast('已切换到认知画布', 'info', 'fa-brain'); break;
+                case 'sources': openSourcesModal(); break;
+                case 'apis': openApiListModal(); break;
+                case 'sandbox': openSandboxModal(); break;
+                case 'reports': openFullReport(); break;
+            }
+        });
+    });
+
+    document.querySelectorAll('.source-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const src = item.dataset.source;
+            const names = { salary: '从业人员工资统计', erp: 'ERP订单数据', crm: 'CRM客户画像' };
+            openSourceDetailModal(src, names[src]);
+        });
+    });
+
+    document.querySelectorAll('#insight-list [data-insight]').forEach(item => {
+        item.addEventListener('click', () => {
+            const insight = item.dataset.insight;
+            switch(insight) {
+                case 'conflict':
+                    document.querySelectorAll('.node').forEach(n => {
+                        n.classList.remove('highlight', 'dimmed');
+                        if (n.dataset.id === 'tenure') n.classList.add('highlight');
+                        else n.classList.add('dimmed');
+                    });
+                    const node = document.querySelector('.node[data-id="tenure"]');
+                    if (node) selectNode(node);
+                    showToast('已定位到冲突节点 "入职年限"', 'warn', 'fa-triangle-exclamation');
+                    openConflictResolver('tenure');
+                    break;
+                case 'solidify':
+                    showToast('建议将"工资总额"固化为标准主题', 'info', 'fa-lightbulb');
+                    openSolidifyModal('salary');
+                    break;
+                case 'anomaly':
+                    document.querySelectorAll('.node').forEach(n => {
+                        n.classList.remove('highlight', 'dimmed');
+                        if (n.dataset.id === 'bonus') n.classList.add('highlight');
+                        else n.classList.add('dimmed');
+                    });
+                    const bonusNode = document.querySelector('.node[data-id="bonus"]');
+                    if (bonusNode) selectNode(bonusNode);
+                    showToast('已定位到异常关联节点 "绩效奖金" · 12月方差4.2σ', 'info', 'fa-wave-square');
+                    break;
+            }
+        });
+    });
+
+    document.querySelectorAll('[data-action]').forEach(el => {
+        el.addEventListener('click', (e) => {
+            e.stopPropagation();
+            handleAction(el.dataset.action, el);
+        });
+    });
+
+    function handleAction(action, el) {
+        switch(action) {
+            case 'drill-down':
+                document.querySelectorAll('.node').forEach(n => {
+                    n.classList.remove('highlight', 'dimmed');
+                    if (n.dataset.id === 'bonus' || n.dataset.id === 'level') n.classList.add('highlight');
+                    else n.classList.add('dimmed');
+                });
+                const bonusNode = document.querySelector('.node[data-id="bonus"]');
+                if (bonusNode) selectNode(bonusNode);
+                addToPath('绩效奖金');
+                addToPath('岗位等级');
+                showToast('正在执行下钻分析：绩效奖金 ↔ 岗位等级', 'success', 'fa-play');
+                setTimeout(() => showToast('分析完成 · 发现强相关性 (r=0.82)', 'success', 'fa-circle-check'), 1500);
+                break;
+            case 'dismiss-insight':
+                const card = el.closest('.insight-card');
+                card.style.transition = 'all 0.3s';
+                card.style.opacity = '0';
+                card.style.transform = 'translateX(20px)';
+                setTimeout(() => card.remove(), 300);
+                showToast('洞察已忽略', 'info', 'fa-xmark');
+                break;
+            case 'clear-path':
+                State.pathSteps = ['数据接入', 'EDA', '从业人员'];
+                renderPath();
+                showToast('探索路径已清除至起点', 'info', 'fa-trash');
+                break;
+            case 'solidify-api':
+                State.apiCount++;
+                updateGlobalStats();
+                showToast(`API 已固化为企业级接口 · 当前共 ${State.apiCount} 个`, 'success', 'fa-flask');
+                el.innerHTML = '<i class="fa-solid fa-check text-[9px]"></i>已固化';
+                el.classList.remove('btn-primary');
+                el.classList.add('btn-ghost');
+                el.style.color = 'var(--accent)';
+                el.disabled = true;
+                break;
+            case 'copy-api':
+                const apiText = 'GET /api/v1/ontology/employee?dim=dept&filter=status=active';
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(apiText).then(() => showToast('API 端点已复制到剪贴板', 'success', 'fa-copy'));
+                } else {
+                    showToast('API 端点已复制', 'success', 'fa-copy');
+                }
+                break;
+            case 'open-full-report': openFullReport(); break;
+            case 'add-source': openAddSourceModal(); break;
+            case 'govern': openGovernModal(); break;
+            case 'ai-explore': openAiExploreModal(); break;
+            case 'show-evolution-detail':
+                switchView('evolution');
+                showToast('已跳转到演化时间轴', 'info', 'fa-timeline');
+                break;
+            case 'go-sources': openSourcesModal(); break;
+            case 'go-apis': openApiListModal(); break;
+            case 'go-workbench': showToast('已返回认知画布工作台', 'info', 'fa-brain'); break;
+            case 'show-stability': showToast('系统已连续稳定运行 45 天 · 0 故障', 'success', 'fa-shield-halved'); break;
+            case 'show-profile': openProfileModal(); break;
+        }
+    }
+
+    document.querySelectorAll('#suggestions [data-suggestion]').forEach(item => {
+        item.addEventListener('click', () => {
+            const sug = item.dataset.suggestion;
+            const sugData = {
+                correlation: { name: '薪酬与岗位等级相关性', nodes: ['salary', 'level'] },
+                cluster: { name: '部门维度人员聚类', nodes: ['dept', 'employee'] },
+                turnover: { name: '入职年限与离职率关联', nodes: ['tenure', 'employee'] },
+            };
+            const d = sugData[sug];
+            if (!d) return;
+            document.querySelectorAll('.node').forEach(n => {
+                n.classList.remove('highlight', 'dimmed');
+                if (d.nodes.includes(n.dataset.id)) n.classList.add('highlight');
+                else n.classList.add('dimmed');
+            });
+            addToPath(d.name);
+            showToast(`正在执行：${d.name}`, 'info', 'fa-arrow-trend-up');
+            const firstNode = document.querySelector(`.node[data-id="${d.nodes[0]}"]`);
+            if (firstNode) selectNode(firstNode);
+        });
+    });
+
+    function addToPath(step) {
+        if (State.pathSteps.includes(step)) return;
+        State.pathSteps.push(step);
+        renderPath();
+    }
+
+    function renderPath() {
+        const container = document.getElementById('path-container');
+        let html = '';
+        State.pathSteps.forEach((step, i) => {
+            const isActive = i === State.pathSteps.length - 1;
+            if (i > 0) html += '<i class="fa-solid fa-chevron-right path-arrow"></i>';
+            html += `<span class="path-pill ${isActive ? 'active' : ''}" data-path="${i}">${step}</span>`;
+        });
+        container.innerHTML = html;
+    }
+
+    document.getElementById('report-dock-header').addEventListener('click', () => {
+        document.getElementById('report-dock').classList.toggle('collapsed');
+        const chevron = document.getElementById('dock-chevron');
+        chevron.classList.toggle('fa-chevron-up');
+        chevron.classList.toggle('fa-chevron-down');
+    });
+
+    function openFullReport() {
+        const html = `
+    <div class="flex items-center justify-between p-5 border-b border-[var(--border)]">
+      <div>
+        <div class="font-display text-lg font-semibold flex items-center gap-2 text-[var(--fg)]">
+          <i class="fa-solid fa-file-lines text-[var(--accent)]"></i>
+          从业人员工资数据分析报告
+        </div>
+        <div class="text-[11px] text-[var(--muted)] mt-1">统计口径：国家统计局 I202-3 | 时间范围：2025年1-12月 | 单位性质：事业/科研</div>
+      </div>
+      <div class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></div>
+    </div>
+    <div class="p-5 overflow-y-auto" style="max-height: 60vh">
+      <div class="grid grid-cols-4 gap-3 mb-5">
+        <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+          <div class="text-[10px] text-[var(--muted)]">全年人均薪酬 (税前)</div>
+          <div class="font-display font-semibold text-xl text-[var(--accent)]">30.55w</div>
+          <div class="text-[9px] text-[var(--muted)] mt-1">全年工资总额 ÷ 平均人数</div>
+        </div>
+        <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+          <div class="text-[10px] text-[var(--muted)]">12月单月人均薪酬</div>
+          <div class="font-display font-semibold text-xl text-[var(--accent-2)]">2.95w</div>
+          <div class="text-[9px] text-[var(--muted)] mt-1">含年底集中绩效结算</div>
+        </div>
+        <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+          <div class="text-[10px] text-[var(--muted)]">全年人力成本总额</div>
+          <div class="font-display font-semibold text-xl text-[var(--accent-4)]">¥4.46亿</div>
+          <div class="text-[9px] text-[var(--muted)] mt-1">工资总额总计</div>
+        </div>
+        <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+          <div class="text-[10px] text-[var(--muted)]">年度绩效奖金总池</div>
+          <div class="font-display font-semibold text-xl text-[var(--accent-3)]">¥2588w</div>
+          <div class="text-[9px] text-[var(--muted)] mt-1">约占薪酬总包 5.8%</div>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-lg bg-[var(--card)] border border-[var(--border)] mb-4">
+        <div class="text-sm font-medium mb-3 flex items-center gap-2 text-[var(--fg)]"><i class="fa-solid fa-chart-line text-[var(--accent)] text-xs"></i>月度人均薪酬趋势 & 绩效脉冲</div>
+        <svg viewBox="0 0 600 220" class="w-full h-56" id="modal-chart"></svg>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <div class="p-4 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+          <div class="text-sm font-medium mb-3 flex items-center gap-2 text-[var(--fg)]"><i class="fa-solid fa-chart-pie text-[var(--accent-2)] text-xs"></i>2025年累计薪酬结构</div>
+          <div class="flex items-center gap-4">
+            <svg width="120" height="120" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="40" fill="none" stroke="#7c9eff" stroke-width="20" stroke-dasharray="150.8 251.3" transform="rotate(-90 60 60)"/>
+              <circle cx="60" cy="60" r="40" fill="none" stroke="#00e6ac" stroke-width="20" stroke-dasharray="62.8 251.3" stroke-dashoffset="-150.8" transform="rotate(-90 60 60)"/>
+              <circle cx="60" cy="60" r="40" fill="none" stroke="#ffc266" stroke-width="20" stroke-dasharray="25.1 251.3" stroke-dashoffset="-213.6" transform="rotate(-90 60 60)"/>
+              <circle cx="60" cy="60" r="40" fill="none" stroke="#ff7ba0" stroke-width="20" stroke-dasharray="12.6 251.3" stroke-dashoffset="-238.7" transform="rotate(-90 60 60)"/>
+            </svg>
+            <div class="space-y-1.5 text-[11px] text-[var(--fg-2)]">
+              <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm bg-[var(--accent-4)]"></span>基本工资 <span class="font-mono text-[var(--muted)]">60%</span></div>
+              <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm bg-[var(--accent)]"></span>岗位津贴 <span class="font-mono text-[var(--muted)]">25%</span></div>
+              <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm bg-[var(--accent-2)]"></span>绩效奖金 <span class="font-mono text-[var(--muted)]">10%</span></div>
+              <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm bg-[var(--accent-3)]"></span>其他补贴 <span class="font-mono text-[var(--muted)]">5%</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="p-4 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+          <div class="text-sm font-medium mb-3 flex items-center gap-2 text-[var(--fg)]"><i class="fa-solid fa-users text-[var(--accent-4)] text-xs"></i>人员结构演变</div>
+          <svg viewBox="0 0 280 120" class="w-full">
+            <rect x="10" y="60" width="40" height="50" fill="#00e6ac" rx="3"/>
+            <rect x="55" y="50" width="40" height="60" fill="#00e6ac" rx="3"/>
+            <rect x="100" y="45" width="40" height="65" fill="#00e6ac" rx="3"/>
+            <rect x="145" y="40" width="40" height="70" fill="#00e6ac" rx="3"/>
+            <rect x="190" y="35" width="40" height="75" fill="#00e6ac" rx="3"/>
+            <rect x="235" y="32" width="40" height="78" fill="#00e6ac" rx="3"/>
+            <rect x="10" y="100" width="40" height="10" fill="#ffc266" rx="3"/>
+            <rect x="55" y="100" width="40" height="10" fill="#ffc266" rx="3"/>
+            <rect x="100" y="100" width="40" height="10" fill="#ffc266" rx="3"/>
+            <rect x="145" y="100" width="40" height="10" fill="#ffc266" rx="3"/>
+            <rect x="190" y="100" width="40" height="10" fill="#ffc266" rx="3"/>
+            <rect x="235" y="100" width="40" height="10" fill="#ffc266" rx="3"/>
+            <text x="30" y="118" text-anchor="middle" font-size="8" fill="#8c98b8" font-family="JetBrains Mono">Q1</text>
+            <text x="75" y="118" text-anchor="middle" font-size="8" fill="#8c98b8" font-family="JetBrains Mono">Q2</text>
+            <text x="120" y="118" text-anchor="middle" font-size="8" fill="#8c98b8" font-family="JetBrains Mono">Q3</text>
+            <text x="165" y="118" text-anchor="middle" font-size="8" fill="#8c98b8" font-family="JetBrains Mono">Q4</text>
+            <text x="210" y="118" text-anchor="middle" font-size="8" fill="#8c98b8" font-family="JetBrains Mono">Q1'</text>
+            <text x="255" y="118" text-anchor="middle" font-size="8" fill="#8c98b8" font-family="JetBrains Mono">Q2'</text>
+          </svg>
+          <div class="flex gap-3 text-[10px] mt-1 text-[var(--fg-2)]">
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-[var(--accent)]"></span>在岗职工</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-[var(--accent-2)]"></span>劳务派遣</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-lg bg-gradient-to-br from-[var(--accent)]/5 to-[var(--accent-4)]/5 border border-[var(--accent)]/20 mb-4">
+        <div class="text-sm font-medium mb-3 flex items-center gap-2 text-[var(--fg)]"><i class="fa-solid fa-chart-simple text-[var(--accent)] text-xs"></i>2026年薪酬与成本趋势预测</div>
+        <div class="grid grid-cols-3 gap-3 text-[11px]">
+          <div>
+            <div class="text-[var(--muted)] mb-1">预测 2026 全年人均薪酬</div>
+            <div class="font-display font-semibold text-base text-[var(--accent)]">≈ 32.0 - 33.5w</div>
+            <div class="text-[10px] text-[var(--accent-2)] mt-1">↑ 预计涨幅 4.5% - 9.5%</div>
+          </div>
+          <div>
+            <div class="text-[var(--muted)] mb-1">预测 2026 年末人员规模</div>
+            <div class="font-display font-semibold text-base text-[var(--accent-4)]">≈ 1510 - 1540 人</div>
+            <div class="text-[10px] text-[var(--accent-2)] mt-1">↑ 预计增加 15-40 人</div>
+          </div>
+          <div>
+            <div class="text-[var(--muted)] mb-1">宏观风险预警</div>
+            <div class="text-[10px] text-[var(--accent-3)]">⚠ 社保基数上调致成本+8-10%</div>
+            <div class="text-[10px] text-[var(--accent)] mt-1">✅ 科研经费持续投入</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button class="btn" onclick="closeModal()">关闭</button>
+        <button class="btn-primary" onclick="closeModal(); showToast('报告已导出为 PDF', 'success', 'fa-file-pdf');">
+          <i class="fa-solid fa-download text-[10px]"></i>导出 PDF
+        </button>
+      </div>
+    </div>
+  `;
+        openModal(html, '900px');
+
+        setTimeout(() => {
+            const chart = document.getElementById('modal-chart');
+            if (!chart) return;
+            const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+            const salary = [2.1, 2.05, 2.2, 2.15, 2.3, 2.25, 2.4, 2.35, 2.5, 2.6, 2.7, 2.95];
+            const bonus = [0.1, 0.1, 0.15, 0.1, 0.2, 0.15, 0.25, 0.2, 0.3, 0.35, 0.5, 0.8];
+            const w = 600, h = 220, pad = 40;
+            const maxVal = 4;
+            const xStep = (w - pad * 2) / 11;
+            let path = `M ${pad},${h - pad - (salary[0] / maxVal) * (h - pad * 2)}`;
+            salary.forEach((v, i) => { if (i > 0) path += ` L ${pad + i * xStep},${h - pad - (v / maxVal) * (h - pad * 2)}`; });
+            let bonusPath = `M ${pad},${h - pad - (bonus[0] / maxVal) * (h - pad * 2)}`;
+            bonus.forEach((v, i) => { if (i > 0) bonusPath += ` L ${pad + i * xStep},${h - pad - (v / maxVal) * (h - pad * 2)}`; });
+            let area = path + ` L ${pad + 11 * xStep},${h - pad} L ${pad},${h - pad} Z`;
+            chart.innerHTML = `
+      <defs><linearGradient id="m-area" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#00e6ac" stop-opacity="0.3"/><stop offset="100%" stop-color="#00e6ac" stop-opacity="0"/></linearGradient></defs>
+      ${months.map((m, i) => `<text x="${pad + i * xStep}" y="${h - pad + 14}" text-anchor="middle" font-size="9" fill="#8c98b8" font-family="JetBrains Mono">${m}</text>`).join('')}
+      ${[0, 1, 2, 3, 4].map(v => `<line x1="${pad}" y1="${h - pad - (v / maxVal) * (h - pad * 2)}" x2="${w - pad}" y2="${h - pad - (v / maxVal) * (h - pad * 2)}" stroke="#2c385c" stroke-width="0.5" stroke-dasharray="2 4"/><text x="${pad - 6}" y="${h - pad - (v / maxVal) * (h - pad * 2) + 3}" text-anchor="end" font-size="8" fill="#8c98b8" font-family="JetBrains Mono">${v}w</text>`).join('')}
+      <path d="${area}" fill="url(#m-area)"/>
+      <path d="${path}" fill="none" stroke="#00e6ac" stroke-width="2"/>
+      <path d="${bonusPath}" fill="none" stroke="#ffc266" stroke-width="1.5" stroke-dasharray="4 3"/>
+      ${salary.map((v, i) => `<circle cx="${pad + i * xStep}" cy="${h - pad - (v / maxVal) * (h - pad * 2)}" r="3" fill="#00e6ac"/>`).join('')}
+      <circle cx="${pad + 11 * xStep}" cy="${h - pad - (salary[11] / maxVal) * (h - pad * 2)}" r="5" fill="#ffc266"/>
+      <text x="${pad + 11 * xStep}" y="${h - pad - (salary[11] / maxVal) * (h - pad * 2) - 10}" text-anchor="middle" font-size="10" fill="#ffc266" font-weight="700" font-family="Space Grotesk">2.95w ↑</text>
+    `;
+        }, 50);
+    }
+
+    function openAddSourceModal() {
+        const html = `
+    <div class="flex items-center justify-between p-5 border-b border-[var(--border)]">
+      <div class="font-display text-lg font-semibold flex items-center gap-2 text-[var(--fg)]">
+        <i class="fa-solid fa-database text-[var(--accent)]"></i>添加数据源
+      </div>
+      <div class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></div>
+    </div>
+    <div class="p-5 space-y-4">
+      <div>
+        <label class="text-[11px] text-[var(--muted)] mb-1.5 block">数据源名称</label>
+        <input class="input" placeholder="例如：2025年薪酬明细表" id="new-source-name">
+      </div>
+      <div>
+        <label class="text-[11px] text-[var(--muted)] mb-1.5 block">数据源类型</label>
+        <select class="input" id="new-source-type">
+          <option>数据库</option><option>Excel 文件</option><option>CSV 文件</option><option>IoT 设备</option><option>OCR 文档</option><option>系统日志</option>
+        </select>
+      </div>
+      <div>
+        <label class="text-[11px] text-[var(--muted)] mb-1.5 block">连接配置</label>
+        <textarea class="input" rows="3" placeholder="postgres://user:pass@host:5432/dbname 或文件路径" id="new-source-config"></textarea>
+      </div>
+      <div class="p-3 rounded-lg bg-[var(--accent)]/5 border border-[var(--accent)]/20 text-[11px] text-[var(--fg-2)]">
+        <i class="fa-solid fa-info-circle text-[var(--accent)] mr-1"></i>
+        接入后 AI 将自动执行：元数据读取 → EDA 分析 → 语义推断 → 本体更新
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 p-5 border-t border-[var(--border)]">
+      <button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn-primary" onclick="confirmAddSource()"><i class="fa-solid fa-plus text-[10px]"></i>确认添加</button>
+    </div>
+  `;
+        openModal(html, '520px');
+    }
+
+    function confirmAddSource() {
+        const name = document.getElementById('new-source-name').value || '未命名数据源';
+        closeModal();
+        showToast(`数据源 "${name}" 已接入 · AI 正在分析元数据…`, 'success', 'fa-circle-check');
+        setTimeout(() => showToast('元数据读取完成 · 识别 15 个字段', 'info', 'fa-database'), 1500);
+        setTimeout(() => showToast('EDA 分析完成 · 数据健康度 87%', 'success', 'fa-chart-line'), 3000);
+    }
+
+    function openGovernModal() {
+        const html = `
+    <div class="flex items-center justify-between p-5 border-b border-[var(--border)]">
+      <div class="font-display text-lg font-semibold flex items-center gap-2 text-[var(--fg)]">
+        <i class="fa-solid fa-gavel text-[var(--accent)]"></i>执行治理收敛
+      </div>
+      <div class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></div>
+    </div>
+    <div class="p-5">
+      <div class="text-[11px] text-[var(--muted)] mb-3">系统将自动执行以下治理操作：</div>
+      <div class="space-y-2 mb-4">
+        <div class="flex items-center gap-2 p-2.5 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+          <i class="fa-solid fa-check text-[var(--accent)] text-xs"></i>
+          <span class="text-[11px] text-[var(--fg-2)]">将 8 个临时表标准化为 dbt 主题域模型</span>
+        </div>
+        <div class="flex items-center gap-2 p-2.5 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+          <i class="fa-solid fa-check text-[var(--accent)] text-xs"></i>
+          <span class="text-[11px] text-[var(--fg-2)]">将 5 个临时 API 升级为高可用企业接口</span>
+        </div>
+        <div class="flex items-center gap-2 p-2.5 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+          <i class="fa-solid fa-check text-[var(--accent)] text-xs"></i>
+          <span class="text-[11px] text-[var(--fg-2)]">固化 12 个待确认概念为本体标准实体</span>
+        </div>
+        <div class="flex items-center gap-2 p-2.5 rounded-lg bg-[var(--accent-3)]/5 border border-[var(--accent-3)]/20">
+          <i class="fa-solid fa-triangle-exclamation text-[var(--accent-3)] text-xs"></i>
+          <span class="text-[11px] text-[var(--accent-3)]">"入职年限"语义冲突需人工裁决</span>
+        </div>
+      </div>
+      <div class="p-3 rounded-lg bg-[var(--accent)]/5 border border-[var(--accent)]/20 mb-4">
+        <div class="text-[10px] text-[var(--muted)] mb-1">预期收敛度提升</div>
+        <div class="flex items-center gap-2">
+          <span class="font-mono text-sm text-[var(--accent-2)]">67%</span>
+          <i class="fa-solid fa-arrow-right text-[var(--muted)] text-[10px]"></i>
+          <span class="font-mono text-sm text-[var(--accent)]">92%</span>
+        </div>
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 p-5 border-t border-[var(--border)]">
+      <button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn-primary" onclick="executeGovern()"><i class="fa-solid fa-play text-[10px]"></i>执行治理</button>
+    </div>
+  `;
+        openModal(html, '560px');
+    }
+
+    function executeGovern() {
+        closeModal();
+        showToast('治理流程已启动…', 'info', 'fa-gavel');
+        const steps = [
+            { msg: '正在标准化 8 个临时表为 dbt 模型…', delay: 800 },
+            { msg: 'dbt 模型标准化完成', delay: 2000, type: 'success', icon: 'fa-circle-check' },
+            { msg: '正在升级 5 个临时 API 为高可用接口…', delay: 2800 },
+            { msg: 'API 升级完成 · 当前共 13 个企业级 API', delay: 4000, type: 'success', icon: 'fa-circle-check' },
+            { msg: '正在固化 12 个待确认概念…', delay: 4800 },
+            { msg: '概念固化完成 · 本体已标准化', delay: 6000, type: 'success', icon: 'fa-circle-check' },
+            { msg: '"入职年限"冲突需人工裁决 · 已跳过', delay: 6800, type: 'warn', icon: 'fa-triangle-exclamation' },
+            { msg: '治理收敛完成 · 收敛度 67% → 89%', delay: 7600, type: 'success', icon: 'fa-circle-check' },
+        ];
+        steps.forEach(s => setTimeout(() => showToast(s.msg, s.type || 'info', s.icon || 'fa-spinner'), s.delay));
+        setTimeout(() => {
+            State.convergence = 89; State.pendingCount = 1; State.apiCount = 13;
+            updateGlobalStats();
+        }, 7600);
+    }
+
+    function openConflictResolver(nodeId) {
+        const d = nodeData[nodeId];
+        const html = `
+    <div class="flex items-center justify-between p-5 border-b border-[var(--border)]">
+      <div class="font-display text-lg font-semibold flex items-center gap-2 text-[var(--fg)]">
+        <i class="fa-solid fa-triangle-exclamation text-[var(--accent-3)]"></i>语义冲突解决 · ${d.name}
+      </div>
+      <div class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></div>
+    </div>
+    <div class="p-5">
+      <div class="text-[11px] text-[var(--muted)] mb-3">${d.desc}</div>
+      <div class="space-y-2 mb-4">
+        <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)] cursor-pointer hover:border-[var(--accent)]" onclick="resolveConflict('${nodeId}', 'A')">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-medium text-[var(--fg)]">定义 A：入职至当前自然年</span>
+            <span class="chip chip-info">来源：CRM</span>
+          </div>
+          <div class="text-[10px] text-[var(--muted)]">用于工龄统计、年假计算</div>
+        </div>
+        <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)] cursor-pointer hover:border-[var(--accent)]" onclick="resolveConflict('${nodeId}', 'B')">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-medium text-[var(--fg)]">定义 B：入职至当前合同年</span>
+            <span class="chip chip-info">来源：ERP</span>
+          </div>
+          <div class="text-[10px] text-[var(--muted)]">用于合同续签、派遣期限计算</div>
+        </div>
+        <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)] cursor-pointer hover:border-[var(--accent)]" onclick="resolveConflict('${nodeId}', 'both')">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-medium text-[var(--fg)]">保留两个定义 · 拆分为两个概念</span>
+            <span class="chip chip-ok">推荐</span>
+          </div>
+          <div class="text-[10px] text-[var(--muted)]">"自然工龄" + "合同工龄"</div>
+        </div>
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 p-5 border-t border-[var(--border)]">
+      <button class="btn" onclick="closeModal()">稍后处理</button>
+    </div>
+  `;
+        openModal(html, '560px');
+    }
+
+    function resolveConflict(nodeId, choice) {
+        closeModal();
+        const node = document.querySelector(`.node[data-id="${nodeId}"]`);
+        if (node) {
+            node.dataset.status = 'confirmed';
+            const innerCircle = node.querySelector('circle:nth-child(2)');
+            innerCircle.setAttribute('fill', 'url(#grad-confirmed)');
+            innerCircle.setAttribute('stroke', '#00e6ac');
+            nodeData[nodeId].status = '已确认';
+            nodeData[nodeId].statusChip = 'chip-ok';
+            State.pendingCount = Math.max(0, State.pendingCount - 1);
+            updateGlobalStats();
+        }
+        const msgs = { A: '已采用定义 A（自然年）· 冲突已解决', B: '已采用定义 B（合同年）· 冲突已解决', both: '已拆分为"自然工龄"+"合同工龄"两个概念 · 冲突已解决' };
+        showToast(msgs[choice], 'success', 'fa-circle-check');
+        if (State.selectedNode === nodeId) updateCopilot(nodeData[nodeId]);
+    }
+
+    function openSolidifyModal(nodeId) {
+        const d = nodeData[nodeId];
+        const html = `
+    <div class="flex items-center justify-between p-5 border-b border-[var(--border)]">
+      <div class="font-display text-lg font-semibold flex items-center gap-2 text-[var(--fg)]">
+        <i class="fa-solid fa-lightbulb text-[var(--accent-2)]"></i>固化建议 · ${d.name}
+      </div>
+      <div class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></div>
+    </div>
+    <div class="p-5 space-y-3">
+      <div class="p-3 rounded-lg bg-[var(--accent-2)]/5 border border-[var(--accent-2)]/20">
+        <div class="text-[11px] text-[var(--fg-2)] mb-2">"${d.name}" 主题已稳定运行 7 天，建议固化为标准主题域：</div>
+        <div class="space-y-1 text-[10px] text-[var(--muted)]">
+          <div>· 数据源稳定，无字段变更</div>
+          <div>· API 调用量持续增长（日均 2.3k 次）</div>
+          <div>· 置信度达 96%，无冲突</div>
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-2 text-center">
+        <div class="p-2 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+          <div class="text-[9px] text-[var(--muted)]">稳定天数</div>
+          <div class="font-display font-semibold text-base text-[var(--accent)]">7天</div>
+        </div>
+        <div class="p-2 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+          <div class="text-[9px] text-[var(--muted)]">置信度</div>
+          <div class="font-display font-semibold text-base text-[var(--accent)]">96%</div>
+        </div>
+        <div class="p-2 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+          <div class="text-[9px] text-[var(--muted)]">日调用量</div>
+          <div class="font-display font-semibold text-base text-[var(--accent-2)]">2.3k</div>
+        </div>
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 p-5 border-t border-[var(--border)]">
+      <button class="btn" onclick="closeModal()">稍后再说</button>
+      <button class="btn-primary" onclick="confirmSolidify('${nodeId}')"><i class="fa-solid fa-gavel text-[10px]"></i>立即固化</button>
+    </div>
+  `;
+        openModal(html, '520px');
+    }
+
+    function confirmSolidify(nodeId) {
+        closeModal();
+        showToast(`"${nodeData[nodeId].name}" 已固化为标准主题域`, 'success', 'fa-circle-check');
+        State.convergence = Math.min(100, State.convergence + 3);
+        updateGlobalStats();
+    }
+
+    function openSourceDetailModal(src, name) {
+        const details = {
+            salary: { type: 'Excel', cols: 12, rows: '3,200', health: 95, status: '已确认', fields: ['人员编号', '姓名', '部门', '岗位等级', '基本工资', '绩效奖金', '补贴', '社保', '公积金', '个税', '实发工资', '月份'] },
+            erp: { type: 'CSV', cols: 18, rows: '12,450', health: 62, status: '处理中', fields: ['订单编号', '下单时间', '客户ID', '产品编码', '数量', '单价', '总金额', '销售人员', '部门', '状态', ...Array(7).fill('待识别')] },
+            crm: { type: 'Excel', cols: 22, rows: '3,820', health: 45, status: '同步中', fields: ['客户ID', '企业名称', '联系人', '电话', '邮箱', '行业', '规模', ...Array(15).fill('待识别')] },
+        };
+        const d = details[src];
+        const html = `
+    <div class="flex items-center justify-between p-5 border-b border-[var(--border)]">
+      <div class="font-display text-lg font-semibold flex items-center gap-2 text-[var(--fg)]">
+        <i class="fa-solid fa-database text-[var(--accent)]"></i>${name}
+      </div>
+      <div class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></div>
+    </div>
+    <div class="p-5">
+      <div class="grid grid-cols-4 gap-3 mb-4">
+        <div class="p-2 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+          <div class="text-[9px] text-[var(--muted)]">类型</div>
+          <div class="text-xs font-medium text-[var(--fg)]">${d.type}</div>
+        </div>
+        <div class="p-2 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+          <div class="text-[9px] text-[var(--muted)]">列数</div>
+          <div class="text-xs font-medium font-mono text-[var(--fg)]">${d.cols}</div>
+        </div>
+        <div class="p-2 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+          <div class="text-[9px] text-[var(--muted)]">行数</div>
+          <div class="text-xs font-medium font-mono text-[var(--fg)]">${d.rows}</div>
+        </div>
+        <div class="p-2 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+          <div class="text-[9px] text-[var(--muted)]">健康度</div>
+          <div class="text-xs font-medium font-mono text-[var(--accent)]">${d.health}%</div>
+        </div>
+      </div>
+      <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)] mb-4">
+        <div class="text-xs font-medium mb-2 text-[var(--fg)]">字段识别情况</div>
+        <div class="grid grid-cols-3 gap-1.5">
+          ${d.fields.map((f, i) => `<div class="text-[10px] px-2 py-1 rounded ${f === '待识别' ? 'bg-[var(--accent-3)]/10 text-[var(--accent-3)]' : 'bg-[var(--bg)] text-[var(--fg-2)]'} font-mono">${i + 1}. ${f}</div>`).join('')}
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button class="btn flex-1 justify-center" onclick="closeModal()"><i class="fa-solid fa-chart-bar text-[10px]"></i>分析</button>
+        <button class="btn flex-1 justify-center" onclick="closeModal()"><i class="fa-solid fa-gear text-[10px]"></i>配置</button>
+        <button class="btn-danger btn flex-1 justify-center" onclick="closeModal(); showToast('已重新触发 EDA 分析', 'info', 'fa-rotate')"><i class="fa-solid fa-rotate text-[10px]"></i>重新分析</button>
+      </div>
+    </div>
+  `;
+        openModal(html, '640px');
+    }
+
+    function openSourcesModal() {
+        const html = `
+    <div class="flex items-center justify-between p-5 border-b border-[var(--border)]">
+      <div class="font-display text-lg font-semibold flex items-center gap-2 text-[var(--fg)]">
+        <i class="fa-solid fa-database text-[var(--accent)]"></i>数据源管理
+      </div>
+      <div class="flex gap-2">
+        <button class="btn-primary btn" onclick="closeModal(); openAddSourceModal()"><i class="fa-solid fa-plus text-[10px]"></i>添加</button>
+        <div class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></div>
+      </div>
+    </div>
+    <div class="p-5 overflow-y-auto" style="max-height: 50vh">
+      <table class="w-full text-[11px]">
+        <thead>
+          <tr class="text-[var(--muted)] border-b border-[var(--border)]">
+            <th class="text-left py-2 px-2">名称</th>
+            <th class="text-left py-2 px-2">类型</th>
+            <th class="text-left py-2 px-2">状态</th>
+            <th class="text-right py-2 px-2">记录数</th>
+            <th class="text-right py-2 px-2">字段数</th>
+            <th class="text-right py-2 px-2">识别率</th>
+            <th class="text-right py-2 px-2">操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-[var(--border)] hover:bg-[var(--card)]">
+            <td class="py-2 px-2 font-medium text-[var(--fg)]">从业人员工资统计表</td>
+            <td class="py-2 px-2 text-[var(--muted)]">统计报表</td>
+            <td class="py-2 px-2"><span class="chip chip-ok">已确认</span></td>
+            <td class="py-2 px-2 text-right font-mono text-[var(--fg-2)]">12</td>
+            <td class="py-2 px-2 text-right font-mono text-[var(--fg-2)]">13</td>
+            <td class="py-2 px-2 text-right font-mono text-[var(--accent)]">95%</td>
+            <td class="py-2 px-2 text-right"><button class="btn-ghost btn !p-1 text-[10px]" onclick="closeModal(); showToast('打开分析视图', 'info', 'fa-chart-bar')">分析</button></td>
+          </tr>
+          <tr class="border-b border-[var(--border)] hover:bg-[var(--card)]">
+            <td class="py-2 px-2 font-medium text-[var(--fg)]">ERP订单数据</td>
+            <td class="py-2 px-2 text-[var(--muted)]">CSV</td>
+            <td class="py-2 px-2"><span class="chip chip-wait">处理中</span></td>
+            <td class="py-2 px-2 text-right font-mono text-[var(--fg-2)]">12,450</td>
+            <td class="py-2 px-2 text-right font-mono text-[var(--fg-2)]">18</td>
+            <td class="py-2 px-2 text-right font-mono text-[var(--accent-2)]">62%</td>
+            <td class="py-2 px-2 text-right"><button class="btn-ghost btn !p-1 text-[10px]" onclick="closeModal(); showToast('打开分析视图', 'info', 'fa-chart-bar')">分析</button></td>
+          </tr>
+          <tr class="border-b border-[var(--border)] hover:bg-[var(--card)]">
+            <td class="py-2 px-2 font-medium text-[var(--fg)]">CRM客户画像</td>
+            <td class="py-2 px-2 text-[var(--muted)]">Excel</td>
+            <td class="py-2 px-2"><span class="chip chip-info">同步中</span></td>
+            <td class="py-2 px-2 text-right font-mono text-[var(--fg-2)]">3,820</td>
+            <td class="py-2 px-2 text-right font-mono text-[var(--fg-2)]">22</td>
+            <td class="py-2 px-2 text-right font-mono text-[var(--accent-4)]">45%</td>
+            <td class="py-2 px-2 text-right"><button class="btn-ghost btn !p-1 text-[10px]" onclick="closeModal(); showToast('打开分析视图', 'info', 'fa-chart-bar')">分析</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+        openModal(html, '780px');
+    }
+
+    function openApiListModal() {
+        const apis = [
+            { name: '获取从业人员列表', method: 'GET', path: '/api/v1/ontology/employee', status: '已发布', calls: 12456 },
+            { name: '获取在岗职工数据', method: 'GET', path: '/api/v1/ontology/employee?type=regular', status: '已发布', calls: 8234 },
+            { name: '获取工资总额', method: 'GET', path: '/api/v1/measure/salary_total', status: '已发布', calls: 5612 },
+            { name: '获取部门维度薪酬', method: 'GET', path: '/api/v1/measure/salary_by_dept', status: '已发布', calls: 3421 },
+            { name: '获取绩效奖金明细', method: 'GET', path: '/api/v1/measure/bonus', status: '待审核', calls: 0 },
+            { name: '获取人员聚类', method: 'POST', path: '/api/v1/analysis/cluster', status: '沙箱', calls: 156 },
+        ];
+        const html = `
+    <div class="flex items-center justify-between p-5 border-b border-[var(--border)]">
+      <div class="font-display text-lg font-semibold flex items-center gap-2 text-[var(--fg)]">
+        <i class="fa-solid fa-code-branch text-[var(--accent)]"></i>API 编排中心
+      </div>
+      <div class="flex gap-2">
+        <button class="btn-primary btn" onclick="closeModal(); showToast('打开 API 创建向导', 'info', 'fa-plus')"><i class="fa-solid fa-plus text-[10px]"></i>创建 API</button>
+        <div class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></div>
+      </div>
+    </div>
+    <div class="p-5 overflow-y-auto" style="max-height: 55vh">
+      <div class="space-y-2">
+        ${apis.map(a => `
+          <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)] hover:border-[var(--border-2)] cursor-pointer" onclick="closeModal(); showToast('打开 API: ${a.name}', 'info', 'fa-code')">
+            <div class="flex items-center justify-between mb-1">
+              <div class="flex items-center gap-2">
+                <span class="chip ${a.method === 'GET' ? 'chip-info' : 'chip-wait'} font-mono">${a.method}</span>
+                <span class="text-xs font-medium text-[var(--fg)]">${a.name}</span>
+              </div>
+              <span class="chip ${a.status === '已发布' ? 'chip-ok' : a.status === '待审核' ? 'chip-wait' : 'chip-info'}">${a.status}</span>
+            </div>
+            <div class="flex items-center justify-between text-[10px] text-[var(--muted)]">
+              <span class="font-mono">${a.path}</span>
+              <span class="font-mono">${a.calls.toLocaleString()} 次调用</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+        openModal(html, '680px');
+    }
+
+    function openSandboxModal() {
+        const html = `
+    <div class="flex items-center justify-between p-5 border-b border-[var(--border)]">
+      <div class="font-display text-lg font-semibold flex items-center gap-2 text-[var(--fg)]">
+        <i class="fa-solid fa-flask text-[var(--accent-2)]"></i>假设沙箱
+      </div>
+      <div class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></div>
+    </div>
+    <div class="p-5">
+      <div class="text-[11px] text-[var(--muted)] mb-3">在画布上绘制虚拟关系，AI 将自动运行验证并标注置信度。</div>
+      <div class="space-y-2 mb-4">
+        <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-medium text-[var(--fg)]">假设：绩效奖金 ↔ 岗位等级</span>
+            <span class="chip chip-ok">已验证 · r=0.82</span>
+          </div>
+          <div class="text-[10px] text-[var(--muted)]">强正相关：岗位等级每提升 1 级，绩效奖金平均增加 3.2w</div>
+        </div>
+        <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-medium text-[var(--fg)]">假设：入职年限 ↔ 离职率</span>
+            <span class="chip chip-wait">待验证</span>
+          </div>
+          <div class="text-[10px] text-[var(--muted)]">需先解决"入职年限"语义冲突</div>
+        </div>
+        <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-medium text-[var(--fg)]">假设：部门规模 ↔ 平均薪酬</span>
+            <span class="chip chip-warn">弱相关 · r=-0.23</span>
+          </div>
+          <div class="text-[10px] text-[var(--muted)]">弱负相关：部门越大，平均薪酬略低</div>
+        </div>
+      </div>
+      <button class="btn-primary btn w-full justify-center" onclick="closeModal(); document.querySelector('[data-tool=hypothesis]').click();">
+        <i class="fa-solid fa-pen-nib text-[10px]"></i>新建假设
+      </button>
+    </div>
+  `;
+        openModal(html, '560px');
+    }
+
+    function openAiExploreModal() {
+        const html = `
+    <div class="flex items-center justify-between p-5 border-b border-[var(--border)]">
+      <div class="font-display text-lg font-semibold flex items-center gap-2 text-[var(--fg)]">
+        <i class="fa-solid fa-wand-magic-sparkles text-[var(--accent)]"></i>AI 自主探索
+      </div>
+      <div class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></div>
+    </div>
+    <div class="p-5">
+      <div class="text-[11px] text-[var(--muted)] mb-3">输入自然语言，AI 将自主在画布上执行探索：</div>
+      <textarea class="input" rows="3" placeholder="例如：分析12月薪酬异常的原因，并找出关联因素" id="ai-explore-input"></textarea>
+      <div class="mt-3 space-y-1.5">
+        <div class="text-[10px] text-[var(--muted)]">快捷指令：</div>
+        <div class="flex flex-wrap gap-1.5">
+          <button class="btn text-[10px]" onclick="document.getElementById('ai-explore-input').value='分析12月薪酬异常的原因'">分析12月薪酬异常</button>
+          <button class="btn text-[10px]" onclick="document.getElementById('ai-explore-input').value='找出薪酬最高的3个部门'">薪酬最高部门</button>
+          <button class="btn text-[10px]" onclick="document.getElementById('ai-explore-input').value='对比在岗职工与劳务派遣的薪酬差异'">对比用工形式差异</button>
+          <button class="btn text-[10px]" onclick="document.getElementById('ai-explore-input').value='预测2026年薪酬趋势'">预测2026趋势</button>
+        </div>
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 p-5 border-t border-[var(--border)]">
+      <button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn-primary" onclick="executeAiExplore()"><i class="fa-solid fa-play text-[10px]"></i>开始探索</button>
+    </div>
+  `;
+        openModal(html, '560px');
+    }
+
+    function executeAiExplore() {
+        const input = document.getElementById('ai-explore-input').value || '分析12月薪酬异常的原因';
+        closeModal();
+        showToast('AI 正在自主探索…', 'info', 'fa-wand-magic-sparkles');
+        setTimeout(() => showToast('Step 1/4 · 解析自然语言指令', 'info', 'fa-spinner'), 800);
+        setTimeout(() => showToast('Step 2/4 · 在画布上定位相关概念', 'info', 'fa-spinner'), 1800);
+        setTimeout(() => {
+            showToast('Step 3/4 · 执行统计分析', 'info', 'fa-spinner');
+            document.querySelectorAll('.node').forEach(n => {
+                n.classList.remove('highlight', 'dimmed');
+                if (['bonus', 'level', 'salary'].includes(n.dataset.id)) n.classList.add('highlight');
+                else n.classList.add('dimmed');
+            });
+        }, 2800);
+        setTimeout(() => {
+            showToast('Step 4/4 · 探索完成 · 发现 3 个关键洞察', 'success', 'fa-circle-check');
+            addToPath('AI探索: 12月异常');
+        }, 4000);
+    }
+
+    function openProfileModal() {
+        const html = `
+    <div class="flex items-center justify-between p-5 border-b border-[var(--border)]">
+      <div class="font-display text-lg font-semibold text-[var(--fg)]">个人资料</div>
+      <div class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></div>
+    </div>
+    <div class="p-5 text-center">
+      <div class="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--accent-2)] to-[var(--accent-3)] flex items-center justify-center text-2xl font-bold text-[#1a0a14] mx-auto mb-3">YT</div>
+      <div class="font-display font-semibold text-base text-[var(--fg)]">温一川</div>
+      <div class="text-[11px] text-[var(--muted)] mt-1">数据分析师 · 探索型中台管理员</div>
+      <div class="grid grid-cols-3 gap-2 mt-4 text-center">
+        <div class="p-2 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+          <div class="text-[9px] text-[var(--muted)]">探索次数</div>
+          <div class="font-display font-semibold text-base text-[var(--accent)]">128</div>
+        </div>
+        <div class="p-2 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+          <div class="text-[9px] text-[var(--muted)]">固化概念</div>
+          <div class="font-display font-semibold text-base text-[var(--accent-2)]">42</div>
+        </div>
+        <div class="p-2 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+          <div class="text-[9px] text-[var(--muted)]">贡献API</div>
+          <div class="font-display font-semibold text-base text-[var(--accent-4)]">15</div>
+        </div>
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 p-5 border-t border-[var(--border)]">
+      <button class="btn" onclick="closeModal()">关闭</button>
+      <button class="btn-primary" onclick="closeModal(); showToast('设置功能开发中', 'info', 'fa-gear')"><i class="fa-solid fa-gear text-[10px]"></i>系统设置</button>
+    </div>
+  `;
+        openModal(html, '440px');
+    }
+
+    document.getElementById('global-search').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const q = e.target.value.trim();
+            if (!q) return;
+            const matched = Object.entries(nodeData).filter(([id, d]) => d.name.includes(q) || d.type.includes(q) || d.desc.includes(q));
+            if (matched.length > 0) {
+                const [id, d] = matched[0];
+                const node = document.querySelector(`.node[data-id="${id}"]`);
+                if (node) {
+                    selectNode(node);
+                    showToast(`已定位到 "${d.name}"`, 'success', 'fa-magnifying-glass');
+                }
+            } else {
+                showToast(`未找到匹配 "${q}" 的概念`, 'warn', 'fa-circle-exclamation');
+            }
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+            e.preventDefault();
+            document.getElementById('global-search').focus();
+        }
+    });
+
+    function switchView(view) {
+        const btn = document.querySelector(`#view-tabs button[data-view="${view}"]`);
+        if (btn) btn.click();
+    }
+
+    let dragging = null;
+    let dragOffset = { x: 0, y: 0 };
+
+    document.querySelectorAll('.node').forEach(node => {
+        node.addEventListener('mousedown', (e) => {
+            if (document.getElementById('canvas-stage').classList.contains('hypothesis-mode')) return;
+            e.stopPropagation();
+            dragging = node;
+            const pt = svg.createSVGPoint();
+            pt.x = e.clientX; pt.y = e.clientY;
+            const ctm = svg.getScreenCTM().inverse();
+            const svgPt = pt.matrixTransform(ctm);
+            const transform = node.getAttribute('transform');
+            const match = transform.match(/translate\(([\d.]+),\s*([\d.]+)\)/);
+            dragOffset.x = svgPt.x - parseFloat(match[1]);
+            dragOffset.y = svgPt.y - parseFloat(match[2]);
+        });
+    });
+
+    svg.addEventListener('mousemove', (e) => {
+        if (!dragging) return;
+        const pt = svg.createSVGPoint();
+        pt.x = e.clientX; pt.y = e.clientY;
+        const ctm = svg.getScreenCTM().inverse();
+        const svgPt = pt.matrixTransform(ctm);
+        const nx = svgPt.x - dragOffset.x;
+        const ny = svgPt.y - dragOffset.y;
+        dragging.setAttribute('transform', `translate(${nx},${ny})`);
+        if (dragging.dataset.id === State.selectedNode) {
+            selectionRing.setAttribute('cx', nx);
+            selectionRing.setAttribute('cy', ny);
+        }
+    });
+
+    svg.addEventListener('mouseup', () => { dragging = null; });
+    svg.addEventListener('mouseleave', () => { dragging = null; });
+
+    setTimeout(() => {
+        const empNode = document.querySelector('.node[data-id="employee"]');
+        if (empNode) selectNode(empNode);
+    }, 300);
+
+    setTimeout(() => {
+        showToast('AI 副驾驶已就绪 · 5 条 Action 规则已激活 · 预算监控中', 'info', 'fa-wand-magic-sparkles');
+    }, 800);
+
+    // === Action Rules Engine ===
+    const ActionRules = {
+        rules: [
+            {
+                id: 'budget_hire',
+                name: '预算 → 停止招聘',
+                condition: (ctx) => ctx.budgetPct >= 90,
+                target: 'action_hire',
+                targetSystem: '人事系统 HRMS',
+                action: '冻结全部招聘流程',
+                threshold: 90,
+                status: 'armed', // armed | firing | done
+            },
+            {
+                id: 'budget_pay',
+                name: '预算 → 停止打款',
+                condition: (ctx) => ctx.budgetPct >= 95,
+                target: 'action_pay',
+                targetSystem: '财务系统 FMS',
+                action: '暂停对外付款审批',
+                threshold: 95,
+                status: 'armed',
+            },
+            {
+                id: 'anomaly_procure',
+                name: '异常 → 冻结采购',
+                condition: (ctx) => ctx.salaryVariance > 3 && ctx.budgetPct > 85,
+                target: 'action_procure',
+                targetSystem: '采购系统 SRM',
+                action: '冻结非必要采购',
+                threshold: null,
+                status: 'armed',
+            },
+            {
+                id: 'any_trigger',
+                name: '级联 → 通知管理层',
+                condition: (ctx) => ctx.triggeredActions.length > 0,
+                target: 'notify',
+                targetSystem: '审批链',
+                action: '发送管理层通知',
+                threshold: null,
+                status: 'armed',
+            },
+            {
+                id: 'budget_restore',
+                name: '预算恢复 → 解除限制',
+                condition: (ctx) => ctx.budgetPct < 80 && ctx.triggeredActions.length > 0,
+                target: 'all',
+                targetSystem: '所有系统',
+                action: '解除全部限制',
+                threshold: 80,
+                status: 'armed',
+            },
+        ],
+        triggeredActions: [],
+        executionLog: [],
+    };
+
+    // Budget slider interaction
+    const budgetSlider = document.getElementById('budget-slider');
+    if (budgetSlider) {
+        budgetSlider.addEventListener('input', (e) => {
+            const pct = parseFloat(e.target.value);
+            updateBudgetDisplay(pct);
+        });
+    }
+
+    function updateBudgetDisplay(pct) {
+        const fillEl = document.getElementById('budget-gauge-fill');
+        const pctEl = document.getElementById('budget-pct-display');
+        if (fillEl) {
+            fillEl.style.width = pct + '%';
+            if (pct >= 95) fillEl.style.background = 'linear-gradient(90deg, var(--accent-3), #ff4757)';
+            else if (pct >= 90) fillEl.style.background = 'linear-gradient(90deg, var(--accent-2), var(--accent-3))';
+            else fillEl.style.background = 'linear-gradient(90deg, var(--accent), var(--accent-2))';
+        }
+        if (pctEl) {
+            pctEl.textContent = pct.toFixed(1) + '%';
+            if (pct >= 95) pctEl.style.color = 'var(--accent-3)';
+            else if (pct >= 90) pctEl.style.color = 'var(--accent-2)';
+            else pctEl.style.color = 'var(--accent)';
+        }
+    }
+
+    function simulateTrigger() {
+        const budgetPct = parseFloat(budgetSlider.value);
+        const salaryVariance = 4.2; // from existing data
+        const ctx = {
+            budgetPct,
+            salaryVariance,
+            triggeredActions: [...ActionRules.triggeredActions],
+        };
+
+        addLogEntry('info', `开始模拟 · 预算使用率 ${budgetPct.toFixed(1)}% · 薪酬方差 ${salaryVariance}σ`);
+
+        // Reset previous triggers if budget restored
+        if (budgetPct < 80 && ActionRules.triggeredActions.length > 0) {
+            ActionRules.triggeredActions = [];
+            ActionRules.rules.forEach(r => r.status = 'armed');
+            resetActionTargets();
+            resetRuleCards();
+            addLogEntry('success', '预算已恢复至安全水位 · 全部限制已解除');
+            showToast('预算已恢复 · 全部 Action 限制已解除', 'success', 'fa-circle-check');
+            return;
+        }
+
+        let cascadeTriggered = false;
+
+        ActionRules.rules.forEach(rule => {
+            if (rule.id === 'budget_restore') return; // handled above
+            if (rule.id === 'any_trigger') {
+                // Cascade rule - check after other rules
+                return;
+            }
+
+            if (rule.condition(ctx) && rule.status === 'armed') {
+                rule.status = 'firing';
+                ActionRules.triggeredActions.push(rule.id);
+                cascadeTriggered = true;
+
+                // Update rule card UI
+                const card = document.querySelector(`.rule-card[data-rule="${rule.id}"]`);
+                if (card) {
+                    card.classList.add('triggered');
+                    const statusDot = card.querySelector('.rule-status');
+                    if (statusDot) { statusDot.className = 'rule-status firing'; }
+                    const chip = card.querySelector('.chip');
+                    if (chip) { chip.className = 'chip chip-warn text-[8px]'; chip.textContent = '已触发'; }
+                }
+
+                // Update action target UI
+                const targetEl = document.getElementById(`target-${rule.target.replace('action_', '')}`);
+                if (targetEl) {
+                    targetEl.classList.add('active');
+                    const statusSpan = targetEl.querySelector('.ml-auto');
+                    if (statusSpan) { statusSpan.textContent = '已触发'; statusSpan.style.color = 'var(--accent-3)'; }
+                }
+
+                // Animate SVG node
+                const svgNode = document.querySelector(`.node[data-id="${rule.target}"]`);
+                if (svgNode) {
+                    svgNode.classList.add('action-firing');
+                    setTimeout(() => svgNode.classList.remove('action-firing'), 600);
+                }
+
+                // Animate edge
+                const edgeId = `edge-budget-${rule.target.replace('action_', '')}`;
+                const edge = document.getElementById(edgeId);
+                if (edge) {
+                    edge.classList.add('cascade-edge');
+                    edge.setAttribute('stroke-width', '3');
+                    edge.setAttribute('opacity', '0.9');
+                }
+
+                addLogEntry('error', `⚡ ${rule.name} 已触发 → ${rule.targetSystem}: ${rule.action}`);
+                showToast(`⚡ Action 触发: ${rule.name}`, 'error', 'fa-bolt');
+
+                setTimeout(() => { rule.status = 'done'; }, 1500);
+            }
+        });
+
+        // Cascade: notify management
+        if (cascadeTriggered) {
+            const notifyRule = ActionRules.rules.find(r => r.id === 'any_trigger');
+            if (notifyRule && notifyRule.status === 'armed') {
+                notifyRule.status = 'firing';
+                const targetEl = document.getElementById('target-notify');
+                if (targetEl) {
+                    targetEl.classList.add('active');
+                    const statusSpan = targetEl.querySelector('.ml-auto');
+                    if (statusSpan) { statusSpan.textContent = '已触发'; statusSpan.style.color = 'var(--accent-2)'; }
+                }
+                addLogEntry('warn', '🔔 级联触发 → 管理层审批通知已发送');
+                showToast('🔔 管理层通知已发送', 'warn', 'fa-bell');
+                setTimeout(() => { notifyRule.status = 'done'; }, 1500);
+            }
+        }
+
+        // Check restore rule
+        const restoreRule = ActionRules.rules.find(r => r.id === 'budget_restore');
+        if (restoreRule) restoreRule.status = budgetPct < 80 ? 'firing' : 'armed';
+    }
+
+    function resetSimulation() {
+        ActionRules.triggeredActions = [];
+        ActionRules.rules.forEach(r => r.status = 'armed');
+        resetActionTargets();
+        resetRuleCards();
+        budgetSlider.value = 86;
+        updateBudgetDisplay(86);
+        addLogEntry('info', '模拟已重置');
+        showToast('Action 模拟已重置', 'info', 'fa-rotate-left');
+    }
+
+    function resetActionTargets() {
+        document.querySelectorAll('.action-target').forEach(el => {
+            el.classList.remove('active');
+            const statusSpan = el.querySelector('.ml-auto');
+            if (statusSpan) { statusSpan.textContent = '待命'; statusSpan.style.color = ''; }
+        });
+        // Reset SVG edges
+        ['edge-budget-hire', 'edge-budget-pay', 'edge-budget-procure'].forEach(id => {
+            const edge = document.getElementById(id);
+            if (edge) {
+                edge.classList.remove('cascade-edge');
+                edge.setAttribute('stroke-width', '2');
+                edge.setAttribute('opacity', '0.6');
+            }
+        });
+    }
+
+    function resetRuleCards() {
+        document.querySelectorAll('.rule-card').forEach(card => {
+            card.classList.remove('triggered');
+            const statusDot = card.querySelector('.rule-status');
+            if (statusDot) statusDot.className = 'rule-status armed';
+            const chip = card.querySelector('.chip');
+            if (chip) {
+                const ruleId = card.dataset.rule;
+                if (ruleId === 'any_trigger') { chip.className = 'chip chip-info text-[8px]'; chip.textContent = '联动'; }
+                else if (ruleId === 'budget_restore') { chip.className = 'chip chip-wait text-[8px]'; chip.textContent = '待触发'; }
+                else { chip.className = 'chip chip-ok text-[8px]'; chip.textContent = '已激活'; }
+            }
+        });
+    }
+
+    function addLogEntry(type, message) {
+        const panel = document.getElementById('action-log-panel');
+        const list = document.getElementById('action-log-list');
+        if (!panel || !list) return;
+        panel.style.display = '';
+        const time = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const colors = { info: 'var(--accent-4)', success: 'var(--accent)', warn: 'var(--accent-2)', error: 'var(--accent-3)' };
+        const icons = { info: 'fa-circle-info', success: 'fa-circle-check', warn: 'fa-triangle-exclamation', error: 'fa-bolt' };
+        const entry = document.createElement('div');
+        entry.className = 'log-entry flex items-start gap-2 text-[10px] py-1 border-b border-[var(--border)]/50';
+        entry.innerHTML = `
+            <span class="font-mono text-[8px] text-[var(--muted)] whitespace-nowrap mt-px">${time}</span>
+            <i class="fa-solid ${icons[type]} text-[9px] mt-px" style="color:${colors[type]}"></i>
+            <span class="text-[var(--fg-2)] leading-snug">${message}</span>
+        `;
+        list.insertBefore(entry, list.firstChild);
+        ActionRules.executionLog.unshift({ time, type, message });
+    }
+
+    function openRuleDetail(ruleId) {
+        const rule = ActionRules.rules.find(r => r.id === ruleId);
+        if (!rule) return;
+        const statusMap = { armed: { text: '已激活', chip: 'chip-ok' }, firing: { text: '触发中', chip: 'chip-warn' }, done: { text: '已完成', chip: 'chip-info' } };
+        const st = statusMap[rule.status] || statusMap.armed;
+        const html = `
+    <div class="flex items-center justify-between p-5 border-b border-[var(--border)]">
+        <div class="font-display text-lg font-semibold flex items-center gap-2 text-[var(--fg)]">
+            <i class="fa-solid fa-bolt text-[var(--accent-3)]"></i>规则详情 · ${rule.name}
+        </div>
+        <div class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></div>
+    </div>
+    <div class="p-5 space-y-4">
+        <div class="grid grid-cols-3 gap-3">
+            <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+                <div class="text-[9px] text-[var(--muted)]">状态</div>
+                <span class="chip ${st.chip}">${st.text}</span>
+            </div>
+            <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+                <div class="text-[9px] text-[var(--muted)]">目标系统</div>
+                <div class="text-xs font-medium text-[var(--fg)]">${rule.targetSystem}</div>
+            </div>
+            <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+                <div class="text-[9px] text-[var(--muted)]">执行动作</div>
+                <div class="text-xs font-medium text-[var(--accent-3)]">${rule.action}</div>
+            </div>
+        </div>
+        <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+            <div class="text-[10px] text-[var(--muted)] mb-2">触发条件</div>
+            <div class="font-mono text-[11px] text-[var(--fg-2)]">${rule.threshold !== null ? `预算使用率 ≥ ${rule.threshold}%` : rule.id === 'anomaly_procure' ? '薪酬方差 > 3σ AND 预算 > 85%' : '任一上游 Action 触发后级联'}</div>
+        </div>
+        <div class="p-3 rounded-lg bg-[var(--accent-3)]/5 border border-[var(--accent-3)]/20">
+            <div class="text-[10px] text-[var(--muted)] mb-1">本体论关系</div>
+            <div class="text-[11px] text-[var(--fg-2)]">
+                <span class="text-[var(--accent-3)] font-medium">年度预算</span>
+                <i class="fa-solid fa-arrow-right text-[var(--muted)] text-[9px] mx-1"></i>
+                <span class="text-[var(--accent-3)] font-medium">${nodeData[rule.target]?.name || rule.target}</span>
+                <span class="text-[var(--muted)] ml-1">(触发关系 · 条件驱动)</span>
+            </div>
+        </div>
+    </div>
+    <div class="flex justify-end gap-2 p-5 border-t border-[var(--border)]">
+        <button class="btn" onclick="closeModal()">关闭</button>
+        <button class="btn-danger" onclick="closeModal(); simulateSingleRule('${rule.id}')"><i class="fa-solid fa-play text-[10px]"></i>手动触发</button>
+    </div>`;
+        openModal(html, '560px');
+    }
+
+    function simulateSingleRule(ruleId) {
+        const rule = ActionRules.rules.find(r => r.id === ruleId);
+        if (!rule) return;
+        rule.status = 'firing';
+        const card = document.querySelector(`.rule-card[data-rule="${ruleId}"]`);
+        if (card) {
+            card.classList.add('triggered');
+            const statusDot = card.querySelector('.rule-status');
+            if (statusDot) statusDot.className = 'rule-status firing';
+            const chip = card.querySelector('.chip');
+            if (chip) { chip.className = 'chip chip-warn text-[8px]'; chip.textContent = '已触发'; }
+        }
+        addLogEntry('error', `⚡ 手动触发: ${rule.name} → ${rule.targetSystem}: ${rule.action}`);
+        showToast(`⚡ 手动触发: ${rule.name}`, 'error', 'fa-bolt');
+        setTimeout(() => { rule.status = 'done'; }, 1500);
+    }
+
+    // Wire up action buttons
+    document.querySelectorAll('[data-action]').forEach(el => {
+        el.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const action = el.dataset.action;
+            if (action === 'simulate-trigger') { simulateTrigger(); return; }
+            if (action === 'reset-simulation') { resetSimulation(); return; }
+            if (action === 'clear-log') {
+                const list = document.getElementById('action-log-list');
+                if (list) list.innerHTML = '';
+                const panel = document.getElementById('action-log-panel');
+                if (panel) panel.style.display = 'none';
+                ActionRules.executionLog = [];
+                showToast('执行日志已清除', 'info', 'fa-trash');
+                return;
+            }
+            if (action === 'add-rule') { openAddRuleModal(); return; }
+        });
+    });
+
+    // Override nav handler for actions
+    document.querySelectorAll('#workspace-nav .concept-item').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('#workspace-nav .concept-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            const nav = item.dataset.nav;
+            switch(nav) {
+                case 'canvas': showToast('已切换到认知画布', 'info', 'fa-brain'); break;
+                case 'sources': openSourcesModal(); break;
+                case 'apis': openApiListModal(); break;
+                case 'sandbox': openSandboxModal(); break;
+                case 'reports': openFullReport(); break;
+                case 'actions': openActionEngineModal(); break;
+            }
+        });
+    });
+
+    function openActionEngineModal() {
+        const rules = ActionRules.rules;
+        const html = `
+    <div class="flex items-center justify-between p-5 border-b border-[var(--border)]">
+        <div class="font-display text-lg font-semibold flex items-center gap-2 text-[var(--fg)]">
+            <i class="fa-solid fa-bolt text-[var(--accent-3)]"></i>Action 引擎 · 本体驱动的跨系统联动
+        </div>
+        <div class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></div>
+    </div>
+    <div class="p-5 overflow-y-auto" style="max-height: 60vh">
+        <div class="p-3 rounded-lg bg-gradient-to-br from-[var(--accent-3)]/5 to-[var(--accent-2)]/5 border border-[var(--accent-3)]/20 mb-4">
+            <div class="text-[11px] text-[var(--fg-2)] leading-relaxed">
+                <i class="fa-solid fa-info-circle text-[var(--accent-3)] mr-1"></i>
+                Action 引擎基于本体论中的 <span class="text-[var(--accent-3)] font-medium">实体关系</span> 和 <span class="text-[var(--accent-2)] font-medium">约束条件</span> 自动触发跨系统操作。
+                当预算实体的 <span class="font-mono text-[var(--accent)]">使用率</span> 属性超过阈值时，级联触发下游系统的 Action。
+            </div>
+        </div>
+        <div class="space-y-2 mb-4">
+        ${rules.map(r => {
+            const stMap = { armed: { text: '已激活', chip: 'chip-ok' }, firing: { text: '触发中', chip: 'chip-warn' }, done: { text: '已完成', chip: 'chip-info' } };
+            const st = stMap[r.status] || stMap.armed;
+            return `
+            <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)] hover:border-[var(--accent-3)]/50 cursor-pointer transition" onclick="closeModal(); openRuleDetail('${r.id}')">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-xs font-medium text-[var(--fg)]">${r.name}</span>
+                    <span class="chip ${st.chip}">${st.text}</span>
+                </div>
+                <div class="text-[10px] text-[var(--muted)]">→ ${r.targetSystem}: ${r.action}</div>
+            </div>`;
+        }).join('')}
+        </div>
+        <div class="p-3 rounded-lg bg-[var(--card)] border border-[var(--border)]">
+            <div class="text-xs font-medium mb-2 text-[var(--fg)]">本体论 Action 关系图</div>
+            <div class="font-mono text-[10px] text-[var(--fg-2)] leading-relaxed">
+                <div><span class="text-[var(--accent-3)]">年度预算</span> ──监控──→ <span class="text-[var(--accent-4)]">工资总额</span></div>
+                <div class="ml-4">├── <span class="text-[var(--accent-3)]">≥90%</span> ──触发──→ <span class="text-[var(--accent-3)]">停止招聘</span> → <span class="text-[var(--muted)]">HRMS</span></div>
+                <div class="ml-4">├── <span class="text-[var(--accent-3)]">≥95%</span> ──触发──→ <span class="text-[var(--accent-3)]">停止打款</span> → <span class="text-[var(--muted)]">FMS</span></div>
+                <div class="ml-4">├── <span class="text-[var(--accent-3)]">异常+紧张</span> → <span class="text-[var(--accent-3)]">冻结采购</span> → <span class="text-[var(--muted)]">SRM</span></div>
+                <div class="ml-4">└── <span class="text-[var(--accent-2)]">级联</span> ──触发──→ <span class="text-[var(--accent-2)]">通知管理层</span></div>
+                <div class="mt-2"><span class="text-[var(--accent)]">&lt;80%</span> ──恢复──→ <span class="text-[var(--accent)]">解除全部限制</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="flex justify-end gap-2 p-5 border-t border-[var(--border)]">
+        <button class="btn" onclick="closeModal()">关闭</button>
+        <button class="btn-primary" onclick="closeModal(); document.getElementById('budget-slider').value=92; updateBudgetDisplay(92); simulateTrigger();"><i class="fa-solid fa-play text-[10px]"></i>模拟触发 (92%)</button>
+    </div>`;
+        openModal(html, '680px');
+    }
+
+    function openAddRuleModal() {
+        const html = `
+    <div class="flex items-center justify-between p-5 border-b border-[var(--border)]">
+        <div class="font-display text-lg font-semibold flex items-center gap-2 text-[var(--fg)]">
+            <i class="fa-solid fa-plus text-[var(--accent)]"></i>添加 Action 规则
+        </div>
+        <div class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></div>
+    </div>
+    <div class="p-5 space-y-4">
+        <div>
+            <label class="text-[11px] text-[var(--muted)] mb-1.5 block">规则名称</label>
+            <input class="input" placeholder="例如：超编 → 冻结派遣" id="new-rule-name">
+        </div>
+        <div>
+            <label class="text-[11px] text-[var(--muted)] mb-1.5 block">触发条件</label>
+            <select class="input" id="new-rule-condition">
+                <option>预算使用率 ≥ 阈值</option><option>薪酬方差 > Nσ</option><option>人员编制超限</option><option>绩效异常</option>
+            </select>
+        </div>
+        <div>
+            <label class="text-[11px] text-[var(--muted)] mb-1.5 block">目标系统</label>
+            <select class="input" id="new-rule-target">
+                <option>人事系统 HRMS</option><option>财务系统 FMS</option><option>采购系统 SRM</option><option>审批链</option>
+            </select>
+        </div>
+        <div class="p-3 rounded-lg bg-[var(--accent)]/5 border border-[var(--accent)]/20 text-[11px] text-[var(--fg-2)]">
+            <i class="fa-solid fa-info-circle text-[var(--accent)] mr-1"></i>
+            新规则将基于本体论关系自动关联预算实体和目标系统实体。
+        </div>
+    </div>
+    <div class="flex justify-end gap-2 p-5 border-t border-[var(--border)]">
+        <button class="btn" onclick="closeModal()">取消</button>
+        <button class="btn-primary" onclick="closeModal(); showToast('新规则已添加到本体 Action 引擎', 'success', 'fa-circle-check')"><i class="fa-solid fa-plus text-[10px]"></i>添加规则</button>
+    </div>`;
+        openModal(html, '520px');
+    }
+
+    window.closeModal = closeModal;
+    window.confirmAddSource = confirmAddSource;
+    window.executeGovern = executeGovern;
+    window.resolveConflict = resolveConflict;
+    window.confirmSolidify = confirmSolidify;
+    window.executeAiExplore = executeAiExplore;
+    window.showToast = showToast;
+    window.openRuleDetail = openRuleDetail;
+    window.simulateSingleRule = simulateSingleRule;
+</script>
+
+</body>
+</html>
