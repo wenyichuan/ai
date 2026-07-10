@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Button 组件 - 详情 · 离线 UI</title>
+  <style>
+  :root{
+    --primary:#2575F5;--primary-weak:#e8f1ff;--success:#52c41a;--warning:#faad14;--danger:#ff4d4f;
+    --text:#1f1f1f;--muted:#6b7280;--border:#eef2f6;--bg:#f5f7fb;--card:#fff;--radius:10px;--shadow:0 6px 20px rgba(15,23,42,.06);--top:64px;
+  }
+  *{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans SC",sans-serif;color:var(--text);background:var(--bg)}a{color:inherit;text-decoration:none}
+  .top{position:fixed;left:0;right:0;top:0;height:var(--top);display:flex;align-items:center;padding:0 20px;background:rgba(255,255,255,.94);border-bottom:1px solid var(--border);z-index:20}
+  .logo{display:flex;gap:10px;align-items:center;font-weight:700}.logo-mark{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--primary),#69b1ff);display:grid;place-items:center;color:#fff}
+  .container{max-width:1180px;margin:calc(var(--top) + 28px) auto;padding:24px}
+  .embedded .container{margin:16px auto;padding:24px}
+  .hero{background:linear-gradient(180deg,#fff,#f7fbff);border:1px solid var(--border);border-radius:16px;padding:24px;box-shadow:var(--shadow)}
+  h1{margin:0;font-size:30px;letter-spacing:-.03em}
+  h2{margin:0 0 16px;font-size:22px}
+  h3{margin:0 0 14px;font-size:18px}
+  p,li{line-height:1.75;color:var(--muted)}
+  .meta{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+  .keypoint{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:var(--primary-weak);color:var(--primary);font-size:13px}
+  .section{margin-top:28px;scroll-margin-top:110px}
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow)}
+  .panel p{margin:0}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+  .code{margin-top:14px}
+  .btn{border:1px solid #d9d9d9;border-radius:6px;background:#fff;padding:0 16px;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:36px;height:36px;line-height:1;font-size:14px}
+  .btn:hover{transform:translateY(-1px);border-color:var(--primary)}
+  .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+  .btn.default{color:var(--text)}
+  .btn.outline{background:transparent;border-color:var(--primary);color:var(--primary)}
+  .btn.dashed{border-style:dashed;background:transparent}
+  .btn.text{border-color:transparent;color:var(--text);background:transparent}
+  .btn.link{border-color:transparent;color:var(--primary);background:transparent;padding:8px 12px}
+  .btn.ghost{border-color:rgba(255,255,255,.8);color:#fff;background:transparent;box-shadow:0 0 0 1px rgba(255,255,255,.08)}
+  .btn.large{min-height:44px;height:44px;padding:0 22px;font-size:16px;border-radius:6px}
+  .btn.medium{min-height:36px;height:36px;padding:0 16px;font-size:14px;border-radius:6px}
+  .btn.small{min-height:28px;height:28px;padding:0 14px;font-size:13px;border-radius:4px}
+  .btn.block{width:100%}
+  .btn.danger{background:#ff4d4f;border-color:#ff4d4f;color:#fff}
+  .btn.disabled{opacity:.48;cursor:not-allowed}
+  .btn.loading{position:relative;color:var(--text)}
+  .btn.loading:after{content:'· · ·';position:absolute;right:12px;font-size:16px;letter-spacing:.15em;color:var(--muted)}
+  .code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f6f8fa;padding:14px;border-radius:12px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+  .table-wrap{overflow:auto}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{padding:12px 14px;border:1px solid var(--border);text-align:left}
+  th{background:#f7fafc;color:var(--text)}
+  .badge{display:inline-flex;align-items:center;justify-content:center;padding:4px 10px;border-radius:999px;background:#e8f1ff;color:var(--primary);font-size:12px}
+  .toc{position:sticky;top:88px;padding:18px 16px;border:1px solid var(--border);border-radius:16px;background:#fff;box-shadow:var(--shadow);max-height:calc(100vh - 120px);overflow:auto}
+  .toc h3{font-size:16px;margin-bottom:10px}
+  .toc a{display:block;color:#1d4ed8;text-decoration:none;padding:4px 0;border-radius:6px;transition:.18s}
+  .toc a:hover{text-decoration:underline}
+  .toc a.active{color:var(--primary);font-weight:700;background:#f0f6ff;padding:6px 8px}
+  .layout{display:grid;grid-template-columns:minmax(180px,220px) minmax(0,1fr);gap:22px}
+  .note{padding:14px 16px;border-left:4px solid var(--primary);background:#f0f6ff;border-radius:12px;color:var(--text)}
+  .section-note{font-size:14px;color:var(--muted);margin-top:8px}
+  .highlight{font-weight:600;color:var(--text)}
+  .tag{display:inline-flex;gap:6px;align-items:center;padding:4px 10px;border-radius:999px;background:#f0f7ff;color:var(--primary);font-size:13px}
+  @media(max-width:960px){.layout{grid-template-columns:1fr}.toc{position:relative;top:auto;max-height:none}}
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="logo"><span class="logo-mark">UI</span><span>数据中台 · 组件文档</span></div>
+    <nav style="margin-left:auto"><a href="preview.html" style="color:var(--primary);font-weight:600">返回组件总览</a></nav>
+  </header>
+  <div class="container">
+    <div class="hero">
+      <div class="meta">
+        <div>
+          <h1>Button 按钮</h1>
+          <p>按钮用于触发一个操作或事件，适用于提交、跳转、打开弹层、执行业务命令等场景。本页面结合 Ant Design 中文文档，展示按钮类型、用法、API 及主题变量。</p>
+        </div>
+        <span class="badge">主色 #2575F5</span>
+      </div>
+      <div class="section-note">本页面为离线版本示例，支持嵌入式展示；如果在 iframe 中加载会自动隐藏重复顶部。</div>
+    </div>
+    <div class="layout">
+      <aside class="toc">
+        <h3>页面目录</h3>
+        <a href="#usage">何时使用</a>
+        <a href="#basic">基础类型</a>
+        <a href="#variants">颜色与变体</a>
+        <a href="#icon">图标按钮</a>
+        <a href="#icon-placement">图标位置</a>
+        <a href="#sizes">按钮尺寸</a>
+        <a href="#disabled">不可用状态</a>
+        <a href="#loading">加载中状态</a>
+        <a href="#group">多个按钮组合</a>
+        <a href="#ghost">幽灵按钮</a>
+        <a href="#danger">危险按钮</a>
+        <a href="#block">Block 按钮</a>
+        <a href="#gradient">渐变按钮</a>
+        <a href="#custom">自定义按钮</a>
+        <a href="#api">API</a>
+        <a href="#semantic">Semantic DOM</a>
+        <a href="#token">主题变量</a>
+        <a href="#faq">FAQ</a>
+      </aside>
+      <main>
+        <section id="usage" class="section panel">
+          <h2>何时使用</h2>
+          <p>按钮用于标记一个（或封装一组）操作命令，响应用户点击行为，并触发相应的业务逻辑。一个操作区域建议只出现一个主按钮。</p>
+          <ul>
+            <li>🔵 主按钮：用于主要行动点。</li>
+            <li>⚪ 默认按钮：用于没有主次之分的一组行动点。</li>
+            <li>➕ 虚线按钮：常用于添加或辅助操作。</li>
+            <li>🔤 文本按钮：用于最次级行动点。</li>
+            <li>🔗 链接按钮：用于导航到其他页面或位置。</li>
+          </ul>
+          <p class="section-note">Ant Design Button 还支持危险、高亮、加载、幽灵、Block、渐变、自定义禁用样式等多种状态与风格。</p>
+        </section>
+
+        <section id="basic" class="section panel">
+          <h2>基础类型</h2>
+          <div class="controls">
+            <button class="btn primary">主按钮</button>
+            <button class="btn default">默认按钮</button>
+            <button class="btn dashed">虚线按钮</button>
+            <button class="btn text">文本按钮</button>
+            <button class="btn link">链接按钮</button>
+          </div>
+          <div class="code">&lt;button class="btn primary"&gt;主按钮&lt;/button&gt;<br>&lt;button class="btn default"&gt;默认按钮&lt;/button&gt;<br>&lt;button class="btn dashed"&gt;虚线按钮&lt;/button&gt;<br>&lt;button class="btn text"&gt;文本按钮&lt;/button&gt;<br>&lt;button class="btn link"&gt;链接按钮&lt;/button&gt;</div>
+        </section>
+
+        <section id="variants" class="section panel">
+          <h2>颜色与变体</h2>
+          <p>通过 type、color、variant 等属性控制按钮风格。推荐主按钮用于主要操作，危险按钮用于危险操作，其他按钮用于补充操作。</p>
+          <div class="controls">
+            <button class="btn primary">Primary</button>
+            <button class="btn outline">描边按钮</button>
+            <button class="btn default">Default</button>
+            <button class="btn dashed">Dashed</button>
+            <button class="btn text">Text</button>
+            <button class="btn link">Link</button>
+          </div>
+          <div class="code">蓝色描边按钮可使用类似 <code>.btn.outline</code> 的样式类。</div>
+        </section>
+
+        <section id="icon" class="section panel">
+          <h2>按钮图标</h2>
+          <p>通过 icon 属性可以向按钮中添加图标，增强语义与视觉提示。</p>
+          <div class="controls">
+            <button class="btn primary">✨ 主按钮</button>
+            <button class="btn default">⭐ 默认按钮</button>
+            <button class="btn dashed">➕ 添加</button>
+          </div>
+          <div class="code">&lt;button class="btn primary"&gt;✨ 主按钮&lt;/button&gt;</div>
+        </section>
+
+        <section id="icon-placement" class="section panel">
+          <h2>图标位置</h2>
+          <p>通过 iconPlacement 可设置图标在按钮中的起始或结束位置。</p>
+          <div class="controls">
+            <button class="btn primary">✨ Start</button>
+            <button class="btn primary" style="flex-direction:row-reverse">End ✨</button>
+          </div>
+          <div class="code">&lt;button class="btn primary"&gt;✨ Start&lt;/button&gt;<br>&lt;button class="btn primary" style="flex-direction:row-reverse"&gt;End ✨&lt;/button&gt;</div>
+        </section>
+
+        <section id="sizes" class="section panel">
+          <h2>按钮尺寸</h2>
+          <p>按钮尺寸分为三种：大按钮 44px 高度，中等按钮 36px 高度，小按钮 28px 高度，分别适用于不同场景。</p>
+          <div class="controls">
+            <button class="btn primary large">大按钮</button>
+            <button class="btn primary medium">中等按钮</button>
+            <button class="btn primary small">小按钮</button>
+          </div>
+          <div class="code">&lt;button class="btn primary large"&gt;大按钮&lt;/button&gt;<br>&lt;button class="btn primary medium"&gt;中等按钮&lt;/button&gt;<br>&lt;button class="btn primary small"&gt;小按钮&lt;/button&gt;</div>
+        </section>
+
+        <section id="disabled" class="section panel">
+          <h2>不可用状态</h2>
+          <p>添加 disabled 属性后按钮会变为不可操作状态，同时样式也会变更。</p>
+          <div class="controls">
+            <button class="btn primary">主要操作</button>
+            <button class="btn default disabled" disabled>不可用</button>
+          </div>
+          <div class="code">&lt;button class="btn disabled" disabled&gt;不可用&lt;/button&gt;</div>
+        </section>
+
+        <section id="loading" class="section panel">
+          <h2>加载中状态</h2>
+          <p>按钮支持 loading 状态，用于异步操作等待反馈，避免重复触发。</p>
+          <div class="controls">
+            <button class="btn loading">加载中</button>
+            <button class="btn primary" onclick="startLoading(this)">点击加载</button>
+          </div>
+          <div class="code">&lt;button class="btn loading"&gt;加载中&lt;/button&gt;</div>
+        </section>
+
+        <section id="group" class="section panel">
+          <h2>多个按钮组合</h2>
+          <p>在操作区域内建议使用 1 个主按钮 + n 个次按钮。超过 3 个操作时可考虑使用 Dropdown 汇总更多操作。</p>
+          <div class="controls">
+            <button class="btn primary">主操作</button>
+            <button class="btn default">次要操作</button>
+            <button class="btn dashed">更多</button>
+          </div>
+        </section>
+
+        <section id="ghost" class="section panel">
+          <h2>幽灵按钮</h2>
+          <p>幽灵按钮适合放在色块背景上，背景透明，边框和文字更显轻盈。</p>
+          <div style="background:#2575F5;padding:18px;border-radius:18px;">
+            <button class="btn ghost" style="color:#fff;border-color:rgba(255,255,255,.8)">幽灵按钮</button>
+          </div>
+        </section>
+
+        <section id="danger" class="section panel">
+          <h2>危险按钮</h2>
+          <p>危险按钮用于删除、移除、重置等风险操作，建议搭配二次确认。</p>
+          <div class="controls">
+            <button class="btn danger">Danger</button>
+            <button class="btn dashed" style="color:#ff4d4f;border-color:#ff4d4f;background:transparent">Danger</button>
+          </div>
+        </section>
+
+        <section id="block" class="section panel">
+          <h2>Block 按钮</h2>
+          <p>Block 按钮会将宽度铺满父容器，适用于横幅 CTA 或表单提交。</p>
+          <button class="btn primary block">全宽主按钮</button>
+        </section>
+
+        <section id="gradient" class="section panel">
+          <h2>渐变按钮</h2>
+          <p>渐变按钮用于品牌类或营销类场景，可以提升视觉表现力。</p>
+          <button class="btn" style="background:linear-gradient(135deg,#2575F5,#69b1ff);border:none;color:#fff;box-shadow:0 10px 30px rgba(37,117,245,.18)">渐变按钮</button>
+        </section>
+
+        <section id="custom" class="section panel">
+          <h2>自定义按钮</h2>
+          <p>Button 支持 autoInsertSpace、classNames、styles 等属性，用于精细化控制按钮显示与语义结构。</p>
+          <ul>
+            <li><span class="highlight">autoInsertSpace</span>：是否在两个汉字之间自动添加空格。</li>
+            <li><span class="highlight">classNames</span>：用于自定义内部语义化 DOM 的 class。</li>
+            <li><span class="highlight">styles</span>：传入对象或函数定制内联样式。</li>
+          </ul>
+        </section>
+
+        <section id="api" class="section panel">
+          <h2>API</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>属性</th><th>说明</th><th>类型</th><th>默认值</th></tr></thead>
+              <tbody>
+                <tr><td>autoInsertSpace</td><td>是否在两个汉字之间插入空格</td><td>boolean</td><td>true</td></tr>
+                <tr><td>block</td><td>是否撑满父容器宽度</td><td>boolean</td><td>false</td></tr>
+                <tr><td>classNames</td><td>自定义内部语义化结构 class</td><td>Object | Function</td><td>-</td></tr>
+                <tr><td>color</td><td>按钮颜色设置</td><td>string</td><td>primary</td></tr>
+                <tr><td>danger</td><td>危险按钮语法糖</td><td>boolean</td><td>false</td></tr>
+                <tr><td>disabled</td><td>禁用状态</td><td>boolean</td><td>false</td></tr>
+                <tr><td>ghost</td><td>幽灵按钮</td><td>boolean</td><td>false</td></tr>
+                <tr><td>href</td><td>链接地址</td><td>string</td><td>-</td></tr>
+                <tr><td>htmlType</td><td>原生按钮 type</td><td>submit | reset | button</td><td>button</td></tr>
+                <tr><td>icon</td><td>按钮图标</td><td>ReactNode</td><td>-</td></tr>
+                <tr><td>iconPlacement</td><td>图标位置</td><td>start | end</td><td>start</td></tr>
+                <tr><td>loading</td><td>加载状态</td><td>boolean | object</td><td>false</td></tr>
+                <tr><td>shape</td><td>按钮形状</td><td>default | circle | round</td><td>default</td></tr>
+                <tr><td>size</td><td>按钮尺寸</td><td>large | medium | small</td><td>medium</td></tr>
+                <tr><td>style</td><td>行内样式</td><td>Object</td><td>-</td></tr>
+                <tr><td>type</td><td>按钮类型语法糖</td><td>primary | dashed | text | link | default</td><td>default</td></tr>
+                <tr><td>variant</td><td>按钮变体</td><td>outlined | dashed | solid | filled | text | link</td><td>outlined</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="section-note">按钮同样支持原生 button 的其它属性，例如 name、value、form。</p>
+        </section>
+
+        <section id="semantic" class="section panel">
+          <h2>Semantic DOM</h2>
+          <p>Ant Design Button 的语义结构常见节点包含 root、icon、content，便于样式扩展与主题定制。</p>
+          <ul>
+            <li><span class="highlight">root</span>：根元素，包含边框、背景、圆角、过渡、光标等。</li>
+            <li><span class="highlight">icon</span>：图标元素，控制图标大小与间距。</li>
+            <li><span class="highlight">content</span>：文本内容容器，负责排版与对齐。</li>
+          </ul>
+        </section>
+
+        <section id="token" class="section panel">
+          <h2>主题变量（Design Token）</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Token</th><th>说明</th><th>默认值</th></tr></thead>
+              <tbody>
+                <tr><td>primaryColor</td><td>主色文本颜色</td><td>#fff</td></tr>
+                <tr><td>dangerColor</td><td>危险按钮文本颜色</td><td>#fff</td></tr>
+                <tr><td>defaultBg</td><td>默认按钮背景色</td><td>#ffffff</td></tr>
+                <tr><td>defaultBorderColor</td><td>默认边框颜色</td><td>#d9d9d9</td></tr>
+                <tr><td>ghostBg</td><td>幽灵按钮背景</td><td>transparent</td></tr>
+                <tr><td>paddingInline</td><td>横向内间距</td><td>15</td></tr>
+                <tr><td>borderRadius</td><td>圆角</td><td>6</td></tr>
+                <tr><td>controlHeight</td><td>控件高度</td><td>32</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="faq" class="section panel">
+          <h2>FAQ</h2>
+          <h3>类型和颜色与变体如何选择？</h3>
+          <p>类型本质上是颜色与变体的语法糖，内部映射为颜色和风格。如果同时设置 variant 和 color，优先使用后者。</p>
+          <h3>如何关闭点击波纹效果？</h3>
+          <p>若不需要点击波纹效果，可通过 ConfigProvider 的 wave={{ disabled: true }} 关闭。</p>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+  function startLoading(el){const original=el.textContent;el.textContent='加载中...';el.disabled=true;setTimeout(()=>{el.textContent=original;el.disabled=false},1200)}
+  function showToast(text){const t=document.createElement('div');t.textContent=text;document.body.appendChild(t);Object.assign(t.style,{position:'fixed',right:'20px',bottom:'24px',background:'#fff',border:'1px solid var(--border)',padding:'10px 12px',borderRadius:'8px',boxShadow:'0 6px 18px rgba(0,0,0,.08)'});setTimeout(()=>t.remove(),1600)}
+  if(window.self !== window.top){
+    try{
+      document.documentElement.classList.add('embedded');
+      const topEl = document.querySelector('.top'); if(topEl) topEl.style.display='none';
+      const cont = document.querySelector('.container'); if(cont){ cont.style.margin = '16px auto'; cont.style.padding = '12px'; }
+      document.body.style.background = 'transparent';
+    }catch(e){}
+  }
+  (function(){
+    let lastSent = 0; let timer = null;
+    function doPost(){
+      try{
+        const h = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+        if(Math.abs(h - lastSent) > 6){ parent.postMessage({type:'embed-height',height:h}, '*'); lastSent = h; }
+      }catch(e){}
+      timer = null;
+    }
+    function postHeight(){ if(timer) return; timer = setTimeout(doPost, 120); }
+    window.addEventListener('load', ()=>{ postHeight(); setTimeout(postHeight,300); });
+    window.addEventListener('resize', ()=>{ postHeight(); });
+    const mo = new MutationObserver(()=>{ postHeight(); });
+    mo.observe(document.body, {subtree:true,childList:true,attributes:true});
+  })();
+  </script>
+</body>
+</html>

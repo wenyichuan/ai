@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>中台 Design 离线组件总览</title>
+<style>
+:root{
+  --primary:#1677ff;--primary-weak:#e6f4ff;--success:#52c41a;--warning:#faad14;--danger:#ff4d4f;
+  --text:#1f1f1f;--muted:#8c8c8c;--border:#f0f0f0;--bg:#f5f7fb;--card:#fff;--code:#f6f8fa;
+  --radius:12px;--shadow:0 6px 20px rgba(15,23,42,.06);--side:286px;--top:64px;
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans SC",sans-serif;color:var(--text);background:var(--bg)}
+a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}.app{min-height:100vh}.topbar{position:fixed;z-index:20;top:0;left:0;right:0;height:var(--top);display:flex;align-items:center;gap:18px;padding:0 28px;background:rgba(255,255,255,.88);backdrop-filter:blur(18px);border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px}.logo-mark{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#1677ff,#69b1ff);display:grid;place-items:center;color:#fff;font-weight:800}.search{margin-left:auto;position:relative;width:min(440px,42vw)}.search input{width:100%;height:38px;border:1px solid #d9d9d9;border-radius:20px;padding:0 42px;background:#fff;outline:none}.search input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(22,119,255,.12)}.search:before{content:"⌘K";position:absolute;right:12px;top:9px;font-size:12px;color:#bfbfbf}.layout{display:flex;padding-top:var(--top)}
+.sidebar{position:fixed;top:var(--top);bottom:0;left:0;width:var(--side);overflow:auto;padding:18px 14px;background:#fff;border-right:1px solid var(--border)}.side-title{padding:8px 14px;color:#8c8c8c;font-size:12px}.nav-group{margin-bottom:10px}.nav-head{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-radius:9px;font-weight:600;cursor:pointer}.nav-head:hover,.nav-head.active{background:var(--primary-weak);color:var(--primary)}.count{font-size:12px;color:#999}.nav-items{padding:3px 0 6px}.nav-item{display:block;padding:7px 14px 7px 28px;border-radius:8px;color:#595959;font-size:14px}.nav-item:hover,.nav-item.active{background:#f5f5f5;color:var(--primary)}
+.main{margin-left:var(--side);width:calc(100% - var(--side));padding:calc(var(--top) + 16px) clamp(24px,4vw,56px) 80px}.hero{background:linear-gradient(135deg,#fff 0%,#f0f7ff 100%);border:1px solid var(--border);border-radius:22px;padding:34px;box-shadow:var(--shadow);position:relative;overflow:hidden}.hero:after{content:"";position:absolute;right:-90px;top:-80px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,#91caff44,#1677ff05 70%)}.eyebrow{display:inline-flex;gap:8px;align-items:center;padding:5px 10px;border-radius:999px;background:var(--primary-weak);color:var(--primary);font-size:13px;font-weight:600}.hero h1{margin:16px 0 10px;font-size:38px;letter-spacing:-.04em}.hero p{max-width:760px;line-height:1.8;color:#595959;margin:0}.hero-actions{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}.btn{border:1px solid #d9d9d9;border-radius:8px;background:#fff;padding:8px 16px;cursor:pointer;transition:.2s}.btn:hover{border-color:var(--primary);color:var(--primary)}.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}.btn.dashed{border-style:dashed}.stats{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:14px;margin:22px 0}.stat{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}.stat b{display:block;font-size:28px}.stat span{color:var(--muted);font-size:13px}.section{margin-top:34px;scroll-margin-top:86px}.section-head{display:flex;align-items:end;justify-content:space-between;margin-bottom:14px}.section h2{font-size:24px;margin:0}.section-desc{color:var(--muted);font-size:14px;margin-top:6px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:16px}.card{background:#fff;border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow);min-height:142px;display:flex;flex-direction:column;gap:12px;transition:.18s}.card:hover{transform:translateY(-2px);border-color:#91caff;box-shadow:0 10px 26px rgba(22,119,255,.1)}.card-top{display:flex;align-items:center;gap:12px}.icon{width:38px;height:38px;border-radius:11px;background:var(--primary-weak);color:var(--primary);display:grid;place-items:center;font-weight:700}.card h3{font-size:16px;margin:0}.card p{color:#737373;font-size:13px;line-height:1.55;margin:0;flex:1}.tag{display:inline-flex;align-items:center;width:max-content;font-size:12px;padding:3px 8px;border-radius:999px;background:#fafafa;border:1px solid var(--border);color:#666}.tag.new{background:#f6ffed;color:#389e0d;border-color:#b7eb8f}.demo{margin-top:34px;background:#fff;border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}.demo-head{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}.demo-body{padding:22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}.panel{border:1px solid var(--border);border-radius:14px;padding:18px;background:#fff}.panel h3{margin:0 0 14px;font-size:16px}.input{height:36px;border:1px solid #d9d9d9;border-radius:8px;padding:0 12px;width:100%;outline:none}.input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(22,119,255,.1)}.fake-table{width:100%;border-collapse:collapse;font-size:13px}.fake-table th,.fake-table td{padding:10px;border-bottom:1px solid var(--border);text-align:left}.badge{display:inline-flex;min-width:20px;height:20px;border-radius:10px;align-items:center;justify-content:center;background:var(--danger);color:#fff;font-size:12px}.alert{padding:10px 12px;border-radius:9px;background:#e6f4ff;border:1px solid #91caff;color:#0958d9}.progress{height:8px;background:#f5f5f5;border-radius:99px;overflow:hidden}.progress i{display:block;height:100%;width:68%;background:var(--primary);border-radius:99px}.tabs{display:flex;border-bottom:1px solid var(--border);gap:18px}.tabs span{padding:9px 0;color:#666}.tabs .on{color:var(--primary);border-bottom:2px solid var(--primary)}.drawer{position:fixed;right:-380px;top:0;bottom:0;width:360px;background:#fff;box-shadow:-8px 0 30px rgba(0,0,0,.12);z-index:30;transition:.25s;padding:22px}.drawer.open{right:0}.toast{position:fixed;top:78px;right:28px;background:#fff;border:1px solid var(--border);box-shadow:var(--shadow);padding:12px 16px;border-radius:10px;display:none;z-index:35}.toast.show{display:block}.empty{display:none;padding:56px;text-align:center;color:var(--muted);background:#fff;border:1px dashed #d9d9d9;border-radius:16px}.footer{margin-top:40px;color:var(--muted);font-size:13px;text-align:center}.code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--code);padding:2px 6px;border-radius:6px}@media(max-width:900px){:root{--side:0}.sidebar{display:none}.main{margin-left:0;width:100%;padding:calc(var(--top) + 16px) 16px 56px}.topbar{padding:0 16px}.search{width:45vw}.hero h1{font-size:30px}.stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <a class="logo" href="#top"><span class="logo-mark">UI</span><span>数据中台 Offline UI</span></a>
+    <nav style="display:flex;gap:16px;color:#666;font-size:14px"><a href="#overview">组件总览</a><a href="#demo">交互示例</a></nav>
+    <div class="search"><input id="search" placeholder="搜索组件，例如 Button / 表格 / Modal" /></div>
+  </header>
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main" id="top">
+    <section class="hero" id="overview">
+      <span class="eyebrow">离线单文件 · 组件库总览</span>
+      <h1>数据中台风格组件导航页</h1>
+      <p>这是一个参考 Ant Design 组件总览结构制作的离线版本。所有样式和交互都内嵌在本 HTML 中，可直接保存、打开、修改，也可以继续扩展为你的内部组件资产库。</p>
+      <div class="hero-actions"><button class="btn primary" onclick="document.querySelector('#demo').scrollIntoView()">查看示例</button><button class="btn" onclick="toggleTheme()">切换主题</button><button class="btn dashed" onclick="showToast('已复制组件库结构，可继续二次开发')">模拟复制结构</button></div>
+    </section>
+    <div class="stats"><div class="stat"><b id="statComponents">0</b><span>组件条目</span></div><div class="stat"><b id="statGroups">0</b><span>分类</span></div><div class="stat"><b>2</b><span>HTML 文件</span></div><div class="stat"><b>0</b><span>外部依赖</span></div></div>
+    <div id="content"></div>
+    <div class="empty" id="empty">没有找到匹配的组件，请尝试其他关键词。</div>
+    <section class="demo" id="demo">
+      <div class="demo-head"><div><b>常用组件示例</b><div class="section-desc">纯 HTML/CSS/JS 模拟，适合离线展示和二次改造。</div></div><button class="btn primary" onclick="showToast('操作成功')">Message</button><a class="btn" href="button-cn.html" style="margin-left:12px">按钮详情</a><a class="btn" href="typography-cn.html" style="margin-left:8px">排版详情</a></div>
+      <div class="demo-body">
+        <div class="panel"><h3>Button / Form</h3><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px"><button class="btn primary">主按钮</button><button class="btn">默认按钮</button><button class="btn dashed">虚线按钮</button></div><input class="input" placeholder="请输入内容" /></div>
+        <div class="panel"><h3>Tabs / Progress</h3><div class="tabs"><span class="on">基础</span><span>高级</span><span>禁用</span></div><p style="color:#666;font-size:13px">当前任务完成度</p><div class="progress"><i></i></div></div>
+        <div class="panel"><h3>Table / Badge</h3><table class="fake-table"><tr><th>名称</th><th>状态</th><th>数量</th></tr><tr><td>订单</td><td><span class="tag new">运行中</span></td><td><span class="badge">8</span></td></tr><tr><td>用户</td><td><span class="tag">待处理</span></td><td>24</td></tr></table></div>
+        <div class="panel"><h3>Alert / Drawer</h3><div class="alert">这是一条信息提示，用于反馈操作状态。</div><button class="btn" style="margin-top:12px" onclick="openDrawer()">打开抽屉</button></div>
+      </div>
+    </section>
+    <div class="footer">Offline UI Components · 可作为内部设计系统入口页继续扩展</div>
+  </main>
+</div>
+<div class="drawer" id="drawer"><h2>Drawer 抽屉</h2><p style="color:#666;line-height:1.7">这里可以放置表单、详情信息、筛选条件或快捷操作。</p><button class="btn primary" onclick="closeDrawer()">关闭</button></div>
+<div class="toast" id="toast"></div>
+<script>
+const groups = [
+  {name:'通用',desc:'最基础的展示与操作组件。',items:[['Button','按钮','用于开始一个即时操作。'],['FloatButton','悬浮按钮','固定在页面边缘的快捷操作入口。'],['Icon','图标','语义化图形符号集合。'],['Typography','排版','标题、文本、段落等基础排版。']]},
+  {name:'布局',desc:'用于页面结构、间距与响应式布局。',items:[['Divider','分割线','区隔内容区域。'],['Flex','弹性布局','快速设置弹性排列。'],['Grid','栅格','24 栅格响应式布局。'],['Layout','布局','页面级基础框架。'],['Masonry','瀑布流','适合不等高卡片布局。','new'],['Space','间距','控制组件间距。'],['Splitter','分隔面板','可拖拽调整区域大小。']]},
+  {name:'导航',desc:'帮助用户在页面、流程和层级之间移动。',items:[['Anchor','锚点','页面内定位导航。'],['Breadcrumb','面包屑','显示当前位置层级。'],['Dropdown','下拉菜单','收纳一组操作。'],['Menu','导航菜单','侧边或顶部导航。'],['Pagination','分页','拆分长列表数据。'],['Steps','步骤条','展示任务流程。'],['Tabs','标签页','同层级内容切换。']]},
+  {name:'数据录入',desc:'采集、校验和提交用户输入。',items:[['AutoComplete','自动完成','输入建议与补全。'],['Cascader','级联选择','多层级数据选择。'],['Checkbox','多选框','选择多个选项。'],['ColorPicker','颜色选择器','选择颜色值。'],['DatePicker','日期选择框','选择日期或日期范围。'],['Form','表单','数据录入和校验容器。'],['Input','输入框','基础文本输入。'],['InputNumber','数字输入框','数值输入。'],['Mentions','提及','输入 @ 提及内容。'],['Radio','单选框','从多个选项中选一个。'],['Rate','评分','星级评价输入。'],['Select','选择器','下拉选择。'],['Slider','滑动输入条','范围或数值选择。'],['Switch','开关','开/关状态切换。'],['TimePicker','时间选择框','选择时间。'],['Transfer','穿梭框','双栏数据迁移。'],['TreeSelect','树选择','树形数据选择。'],['Upload','上传','文件上传入口。']]},
+  {name:'数据展示',desc:'承载数据、状态和详情展示。',items:[['Avatar','头像','展示用户或实体图像。'],['Badge','徽标数','提示数量或状态。'],['Calendar','日历','日期维度展示。'],['Card','卡片','承载独立信息块。'],['Carousel','走马灯','轮播展示内容。'],['Collapse','折叠面板','折叠/展开内容区。'],['Descriptions','描述列表','成组展示字段。'],['Empty','空状态','无数据时的占位提示。'],['Image','图片','图片预览和展示。'],['List','列表','基础列表展示。'],['Popover','气泡卡片','悬浮信息层。'],['QRCode','二维码','生成二维码内容。'],['Segmented','分段控制器','轻量级选项切换。'],['Statistic','统计数值','展示关键指标。'],['Table','表格','结构化数据展示。'],['Tag','标签','分类或状态标记。'],['Timeline','时间轴','按时间排序展示事件。'],['Tooltip','文字提示','鼠标悬浮说明。'],['Tour','漫游式引导','新手引导流程。'],['Tree','树形控件','层级结构展示。']]},
+  {name:'反馈',desc:'对用户操作、加载和结果进行提示。',items:[['Alert','警告提示','页面内提示信息。'],['Drawer','抽屉','侧边滑出面板。'],['Message','全局提示','轻量级操作反馈。'],['Modal','对话框','重要信息确认。'],['Notification','通知提醒框','较复杂的全局通知。'],['Popconfirm','气泡确认框','二次确认操作。'],['Progress','进度条','展示进度状态。'],['Result','结果','展示成功、失败等结果页。'],['Skeleton','骨架屏','加载占位。'],['Spin','加载中','局部加载状态。'],['Watermark','水印','页面水印标记。']]},
+  {name:'其他',desc:'全局能力、固定定位与工具组件。',items:[['Affix','固钉','固定元素到视口。'],['App','包裹组件','全局上下文容器。'],['BorderBeam','边框流光','强调边框动效。','new'],['ConfigProvider','全局化配置','统一配置主题和语言。'],['Util','工具类','辅助能力集合。']]},
+  {name:'重型组件',desc:'面向中后台场景的高级组件。',items:[['ProLayout','高级布局','中后台页面框架。'],['ProForm','高级表单','复杂表单封装。'],['ProTable','高级表格','查询、表格、工具栏组合。'],['ProDescriptions','高级定义列表','详情页字段展示。'],['ProList','高级列表','列表页业务封装。'],['EditableProTable','可编辑表格','表格内编辑场景。']]}
+];
+const content = document.getElementById('content'); const sidebar = document.getElementById('sidebar'); const empty = document.getElementById('empty');
+function slug(s){return encodeURIComponent(s)}
+function iconText(name){return name.slice(0,1).toUpperCase()}
+function render(filter=''){
+  content.innerHTML=''; sidebar.innerHTML='<div class="side-title">组件分类</div>'; let shown=0;
+  groups.forEach((g,gi)=>{
+    const filtered = g.items.filter(i => (i[0]+i[1]+i[2]+g.name).toLowerCase().includes(filter.toLowerCase()));
+    const groupId='g-'+slug(g.name);
+    const nav = document.createElement('div'); nav.className='nav-group'; nav.innerHTML=`<a class="nav-head" href="#${groupId}"><span>${g.name}</span><span class="count">${filtered.length}</span></a><div class="nav-items">${filtered.slice(0,12).map(i=>`<a class="nav-item" href="#${groupId}">${i[0]} ${i[1]}</a>`).join('')}</div>`; sidebar.appendChild(nav);
+    if(!filtered.length) return; shown += filtered.length;
+    const section = document.createElement('section'); section.className='section'; section.id=groupId;
+    section.innerHTML=`<div class="section-head"><div><h2>${g.name} <span class="count">${filtered.length}</span></h2><div class="section-desc">${g.desc}</div></div></div><div class="grid">${filtered.map(i=>`<article class="card" onclick='openComponent("${i[0]}")'><div class="card-top"><div class="icon">${iconText(i[0])}</div><div><h3>${i[0]} ${i[1]}</h3></div></div><p>${i[2]}</p><span class="tag ${i[3]==='new'?'new':''}">${i[3]==='new'?'New':'Component'}</span></article>`).join('')}</div>`;
+    content.appendChild(section);
+  });
+  empty.style.display = shown ? 'none' : 'block'; document.getElementById('statComponents').textContent = groups.reduce((n,g)=>n+g.items.length,0); document.getElementById('statGroups').textContent = groups.length;
+}
+render();
+document.getElementById('search').addEventListener('input',e=>render(e.target.value));
+function showToast(text){const t=document.getElementById('toast');t.textContent=text;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
+function openDrawer(){document.getElementById('drawer').classList.add('open')}function closeDrawer(){document.getElementById('drawer').classList.remove('open')}
+let dark=false; function toggleTheme(){dark=!dark;document.documentElement.style.setProperty('--bg',dark?'#101828':'#f5f7fb');document.documentElement.style.setProperty('--card',dark?'#111827':'#fff');document.body.style.filter=dark?'invert(1) hue-rotate(180deg)':'none';showToast(dark?'已切换暗色预览':'已切换浅色预览')}
+
+function updateActiveToc(hash){const main=document.querySelector('.main');if(!main)return;main.querySelectorAll('a[href^="#"]').forEach(a=>a.classList.toggle('active', a.getAttribute('href')===hash));}
+function scrollToHash(hash){const id=hash.replace(/^#/,'');const target=document.getElementById(id);if(target){const topbarH=document.querySelector('.topbar')?.offsetHeight||64;const offset=topbarH+18;const top=target.getBoundingClientRect().top+window.scrollY-offset;window.scrollTo({top,behavior:'smooth'});updateActiveToc(hash);return true;}return false;}
+function syncActiveTocByScroll(){const main=document.querySelector('.main');if(!main)return;const sections=[...main.querySelectorAll('[id]')].filter(el=>el.id && !['top'].includes(el.id));let current='';const offset=140;sections.forEach(section=>{const rect=section.getBoundingClientRect();if(rect.top<=offset) current=section.id;});if(current){updateActiveToc('#'+current);} }
+document.querySelector('.main').addEventListener('click',function(e){const link=e.target.closest('a[href^="#"]');if(link){const hash=link.getAttribute('href');if(hash&&hash.startsWith('#')){if(scrollToHash(hash)){e.preventDefault();if(window.history.replaceState){history.replaceState(history.state,'',window.location.pathname+hash);}}}}});
+window.addEventListener('scroll', syncActiveTocByScroll, {passive:true});
+
+// SPA-like loader: load external detail HTML into the main area while keeping sidebar
+const initialMainHTML = document.querySelector('.main').innerHTML;
+let lastIframeCleanup = null;
+function openComponent(name){
+  const map = {Button:'button-cn.html', Typography:'typography-cn.html'};
+  const url = map[name];
+  if(url) loadDetail(url);
+}
+function loadDetail(url, push=true){
+  if(lastIframeCleanup){ lastIframeCleanup(); lastIframeCleanup = null; }
+  // try fetch first (works when served over http); if it fails (file:// or CORS), fall back to iframe
+  fetch(url).then(r=>{
+    if(!r.ok) throw new Error('http status '+r.status);
+    return r.text();
+  }).then(text=>{
+    const doc = new DOMParser().parseFromString(text,'text/html');
+    // inject styles from fetched page (prevent duplicates)
+    doc.querySelectorAll('style').forEach(s=>{
+      const marker = 'injected-from-'+url;
+      if(!document.head.querySelector('style[data-src="'+marker+'"]')){
+        const ns = document.createElement('style'); ns.setAttribute('data-src',marker); ns.textContent = s.textContent; document.head.appendChild(ns);
+      }
+    });
+    const container = doc.querySelector('.container') || doc.querySelector('main') || doc.body;
+    document.querySelector('.main').innerHTML = container.innerHTML;
+    setTimeout(syncActiveTocByScroll, 0);
+    const canPushHistory = window.location.protocol === 'http:' || window.location.protocol === 'https:';
+    if(push && canPushHistory) history.pushState({url,iframe:false}, '', url);
+    // clear any previous iframe cleanup
+    if(lastIframeCleanup){ lastIframeCleanup(); lastIframeCleanup = null; }
+  }).catch(err=>{
+    // fallback: use iframe so file:// pages can load in local preview
+    console.warn('fetch failed, falling back to iframe for',url,err);
+    const main = document.querySelector('.main');
+    main.innerHTML = '';
+    const iframe = document.createElement('iframe');
+    iframe.src = url;
+    iframe.style.width = '100%';
+    iframe.style.height = '360px';
+    iframe.style.border = '0';
+    iframe.style.borderRadius = '12px';
+    main.appendChild(iframe);
+    // listen for height message from this iframe and resize accordingly
+    function onMsg(e){
+      try{
+        if(e.data && e.data.type==='embed-height' && e.source === iframe.contentWindow){
+          const reported = Number(e.data.height) || iframe.clientHeight;
+          const desired = Math.max(120, reported + 8);
+          const cur = iframe.clientHeight;
+          // only adjust when change is significant to avoid tiny oscillations
+          if(Math.abs(cur - desired) > 6){
+            iframe.style.height = desired + 'px';
+          }
+        }
+      }catch(err){}
+    }
+    window.addEventListener('message', onMsg, false);
+    // attach cleanup so popstate handler can remove listener if needed
+    iframe._cleanup = ()=> window.removeEventListener('message', onMsg);
+    lastIframeCleanup = iframe._cleanup;
+    if(push && canPushHistory) history.pushState({url,iframe:true}, '', url);
+  });
+}
+window.addEventListener('popstate', (e)=>{
+  if(e.state && e.state.url) loadDetail(e.state.url, false);
+  else {
+    if(lastIframeCleanup){ lastIframeCleanup(); lastIframeCleanup = null; }
+    document.querySelector('.main').innerHTML = initialMainHTML;
+  }
+});
+</script>
+</body>
+</html>
