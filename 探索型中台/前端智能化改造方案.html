@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>前端智能化改造方案 · 从"点按钮"到"说人话"</title>
+<style>
+:root{
+  --bg:#F4F5F3;
+  --card:#FFFFFF;
+  --ink:#14161A;
+  --ink-2:#3C424B;
+  --muted:#757C87;
+  --line:#E4E6EB;
+  --line-2:#D3D7DE;
+  --accent:#1B4DFF;
+  --accent-soft:#EDF1FF;
+  --accent-line:#B9C6FF;
+  --red:#D33A2C;
+  --red-soft:#FCEDEB;
+  --green:#0E9F6E;
+  --green-soft:#E8F7F1;
+  --amber:#B26B00;
+  --amber-soft:#FDF3E3;
+  --code-bg:#F5F6F8;
+  --mono:"JetBrains Mono","SFMono-Regular",Consolas,"Cascadia Code","Courier New",monospace;
+  --sans:system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;overflow:hidden}
+
+/* ---------- stage ---------- */
+#viewport{position:fixed;inset:48px 0 56px;display:flex;align-items:center;justify-content:center}
+#stage{width:1280px;height:720px;position:relative;transform-origin:center center;flex:none}
+.deck{position:absolute;inset:0}
+.frame{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .26s ease}
+.frame.is-active{opacity:1;pointer-events:auto}
+.slide{
+  width:1280px;height:720px;background:var(--card);
+  border:1px solid var(--line);border-radius:14px;
+  box-shadow:0 10px 40px rgba(20,22,26,.07);
+  padding:46px 62px 42px;display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+}
+.slide::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--accent),#7AA2FF 45%,#FFD166)}
+
+/* ---------- typography ---------- */
+.kicker{font-size:12px;letter-spacing:.16em;color:var(--accent);font-weight:700}
+h1.title{font-size:38px;line-height:1.25;font-weight:750;letter-spacing:-.01em}
+h2.title{font-size:28px;line-height:1.3;font-weight:730;letter-spacing:-.005em}
+.sub{font-size:15px;color:var(--muted);line-height:1.6;margin-top:8px}
+.rule{height:1px;background:var(--line);margin:14px 0 18px;flex:none}
+.body{flex:1;min-height:0;display:flex;flex-direction:column}
+.lead{font-size:16px;line-height:1.75;color:var(--ink-2)}
+strong{font-weight:700;color:var(--ink)}
+em.hl{font-style:normal;background:linear-gradient(transparent 62%,#FFE9A8 62%);font-weight:700}
+
+.slide-footer{position:absolute;left:62px;right:62px;bottom:15px;display:flex;justify-content:space-between;
+  font-size:11.5px;color:#9AA1AC;border-top:1px solid var(--line);padding-top:8px}
+
+/* ---------- layout ---------- */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.row{display:flex;gap:16px}
+.col{display:flex;flex-direction:column}
+.grow{flex:1;min-height:0;min-width:0}
+
+/* ---------- cards ---------- */
+.card{background:#FCFCFD;border:1px solid var(--line);border-radius:11px;padding:15px 17px}
+.card.accent{background:var(--accent-soft);border-color:var(--accent-line)}
+.card.red{background:var(--red-soft);border-color:#F3C9C3}
+.card.green{background:var(--green-soft);border-color:#BFE7D8}
+.card.amber{background:var(--amber-soft);border-color:#F0DCB4}
+.card h4{font-size:15px;font-weight:700;margin-bottom:7px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card p{font-size:13.5px;line-height:1.65;color:var(--ink-2)}
+.card p + p{margin-top:6px}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--ink);color:#fff}
+.tag.a{background:var(--accent)}.tag.r{background:var(--red)}.tag.g{background:var(--green)}.tag.m{background:var(--amber)}
+.tag.o{background:#fff;color:var(--ink-2);border:1px solid var(--line-2)}
+
+ul.list{list-style:none;font-size:14px;line-height:1.8;color:var(--ink-2)}
+ul.list li{padding-left:19px;position:relative}
+ul.list li::before{content:"";position:absolute;left:6px;top:11px;width:5px;height:5px;border-radius:50%;background:var(--accent)}
+ul.list.tight{line-height:1.62;font-size:13px}
+ol.num{margin:0;padding-left:20px;font-size:13.5px;line-height:1.78;color:var(--ink-2)}
+
+/* ---------- nodes ---------- */
+.stack{display:flex;flex-direction:column;gap:0}
+.node{border:1.5px solid var(--line-2);border-radius:10px;background:#fff;padding:9px 14px}
+.node .n-t{font-size:14px;font-weight:700}
+.node .n-d{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.5}
+.node.blue{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.node.blue .n-d{color:#4C6BC4}
+.node.solid{background:var(--accent);border-color:var(--accent);color:#fff}
+.node.solid .n-d{color:#DCE4FF}
+.node.ghost{background:#FAFBFC;border-style:dashed}
+.arrow{text-align:center;color:#B7BCC6;font-size:15px;line-height:1.3;padding:4px 0}
+.arrow small{display:block;font-size:10.5px;color:var(--muted)}
+
+/* ---------- table ---------- */
+table.tbl{width:100%;border-collapse:collapse;font-size:13px}
+table.tbl th{text-align:left;font-weight:700;font-size:12px;color:var(--muted);letter-spacing:.05em;
+  padding:7px 12px;border-bottom:1.5px solid var(--line-2);background:#FAFBFC}
+table.tbl td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.6}
+table.tbl tr:last-child td{border-bottom:none}
+table.tbl td.k{font-weight:700}
+.bar{display:inline-block;height:7px;border-radius:5px;background:var(--accent);vertical-align:middle;margin-right:7px}
+.bar.light{background:var(--line-2)}
+
+/* ---------- code ---------- */
+pre.code{background:var(--code-bg);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:8px;padding:11px 14px;font-family:var(--mono);font-size:11px;line-height:1.56;
+  color:#1F2430;overflow:hidden;white-space:pre;tab-size:2}
+pre.code.danger{border-left-color:var(--red)}
+pre.code.ok{border-left-color:var(--green)}
+.code-cap{font-size:11.5px;color:var(--muted);margin-bottom:6px;font-weight:600}
+.tok-c{color:#8A94A6;font-style:italic}
+.tok-s{color:#0B7A5F}
+.tok-k{color:#8B2BBF;font-weight:600}
+.tok-n{color:#B26B00}
+.tok-t{color:#1B4DFF}
+
+/* ---------- chips ---------- */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-size:12.5px;padding:5px 11px;border-radius:7px;background:#F2F3F6;color:var(--ink-2);border:1px solid var(--line)}
+.chip.a{background:var(--accent-soft);border-color:var(--accent-line);color:#27418F}
+.chip.r{background:var(--red-soft);border-color:#F3C9C3;color:#9B2C20}
+.chip.g{background:var(--green-soft);border-color:#BFE7D8;color:#0A7A54}
+
+.metric{border:1px solid var(--line);border-radius:10px;padding:11px 13px;background:#fff}
+.metric .m-v{font-size:25px;font-weight:750;letter-spacing:-.02em;line-height:1.15}
+.metric .m-l{font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.45}
+.metric .m-u{font-size:13px;font-weight:600;color:var(--muted);margin-left:2px}
+
+/* ---------- cover ---------- */
+.cover{display:flex;flex-direction:column;justify-content:center;height:100%}
+.cover h1{font-size:50px;line-height:1.18;font-weight:780;letter-spacing:-.02em;margin-top:14px}
+.cover .desc{font-size:17px;color:var(--ink-2);line-height:1.8;margin-top:18px;max-width:840px}
+.cover-meta{margin-top:32px;display:flex;gap:34px;font-size:13px;color:var(--muted)}
+.cover-meta b{display:block;color:var(--ink);font-size:15px;margin-bottom:3px;font-weight:700}
+.deco{position:absolute;right:-90px;top:-90px;width:420px;height:420px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#EDF1FF,rgba(237,241,255,0))}
+.deco2{position:absolute;right:80px;bottom:-140px;width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle at 50% 50%,#FFF6E0,rgba(255,246,224,0))}
+
+/* ---------- svg ---------- */
+svg .lane-h{fill:#FAFBFC;stroke:var(--line-2)}
+svg .lane-t{font-size:13px;font-weight:700;fill:var(--ink)}
+svg .lifeline{stroke:#D8DCE3;stroke-width:1.4;stroke-dasharray:5 5}
+svg .msg{stroke:var(--accent);stroke-width:1.8;marker-end:url(#ah)}
+svg .msg.dashed{stroke:#9AA1AC;stroke-dasharray:6 4;marker-end:url(#ah2)}
+svg .mlabel{font-size:11.5px;fill:var(--ink-2)}
+
+/* ---------- chrome ---------- */
+#topbar{position:fixed;top:0;left:0;right:0;height:48px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 18px;font-size:12.5px;color:var(--muted);z-index:50;background:rgba(244,245,243,.92);
+  backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+#topbar .brand{font-weight:700;color:var(--ink)}
+#bar{position:fixed;left:0;top:0;height:2px;background:var(--accent);z-index:60;transition:width .25s ease;width:0}
+#bottombar{position:fixed;bottom:0;left:0;right:0;height:56px;display:flex;align-items:center;justify-content:center;gap:10px;
+  background:rgba(244,245,243,.92);backdrop-filter:blur(6px);border-top:1px solid var(--line);z-index:50}
+.btn{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink);background:#fff;border:1px solid var(--line-2);
+  border-radius:8px;padding:7px 15px;cursor:pointer;transition:.15s;box-shadow:0 1px 2px rgba(20,22,26,.04)}
+.btn:hover{border-color:var(--ink)}
+.btn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+#counter{font-variant-numeric:tabular-nums;color:var(--ink-2);min-width:60px;text-align:center;font-size:13px;font-weight:600}
+#hint{font-size:11.5px;color:#9AA1AC;margin-left:8px}
+
+#notes{position:fixed;left:0;right:0;bottom:56px;max-height:32vh;overflow:auto;background:#fff;
+  border-top:1.5px solid var(--line-2);padding:13px 22px;display:none;z-index:45;box-shadow:0 -8px 24px rgba(20,22,26,.06)}
+#notes.show{display:block}
+#notes .n-h{font-size:11.5px;letter-spacing:.14em;color:var(--accent);font-weight:700;margin-bottom:6px}
+#notes .n-b{font-size:13.5px;line-height:1.85;color:var(--ink-2);max-width:1120px}
+.slide > .notes{display:none}
+
+.deck.overview{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:14px;overflow:auto;align-content:start}
+.deck.overview .frame{position:relative;inset:auto;width:100%;height:0;padding-bottom:56.25%;opacity:1;pointer-events:auto}
+.deck.overview .slide{position:absolute;top:0;left:0;transform-origin:top left;transform:scale(var(--tscale,.25));
+  cursor:pointer;box-shadow:0 4px 14px rgba(20,22,26,.1)}
+.deck.overview .frame.is-active .slide{outline:3px solid var(--accent)}
+.deck.overview .slide:hover{box-shadow:0 8px 24px rgba(20,22,26,.22)}
+
+@media print{
+  body{overflow:visible;background:#fff}
+  #topbar,#bottombar,#notes,#bar{display:none!important}
+  #viewport{position:static!important;inset:auto!important;height:auto!important;display:block!important}
+  #stage{transform:none!important;width:auto!important;height:auto!important}
+  .deck{position:static}
+  .frame{position:relative!important;inset:auto!important;opacity:1!important;height:730px;page-break-after:always}
+  .slide{box-shadow:none}
+}
+</style>
+</head>
+<body>
+
+<div id="bar"></div>
+<div id="topbar">
+  <span class="brand">前端智能化改造方案 · 从"点按钮"到"说人话"</span>
+  <span id="hint">← → 翻页 · O 概览 · S 讲稿 · F 全屏</span>
+</div>
+
+<div id="viewport">
+  <div id="stage"><div class="deck" id="deck">
+
+<!-- ============ 1 封面 ============ -->
+<div class="frame"><section class="slide">
+  <div class="deco"></div><div class="deco2"></div>
+  <div class="cover" style="position:relative;z-index:1">
+    <span class="kicker">Frontend × AI · 架构升级提案</span>
+    <h1>前端智能化改造：<br>从"点按钮"到"说人话"</h1>
+    <p class="desc">
+      不是"前端不接后端"，而是 <em class="hl">前端的接入层在变薄，智能决策层在上移</em>。<br>
+      前端越过传统业务后端，直连 <strong>AI 执行层</strong>（MCP / Harness Agent）；传统后端被挤压为纯粹的<strong>数据与事务执行层</strong>。
+    </p>
+    <div class="cover-meta">
+      <div><b>四条路径</b>交互 · 数据 · 路由 · 运维</div>
+      <div><b>一个核心</b>AI 决策网关</div>
+      <div><b>两条底线</b>权限不外包 · 事务不外包</div>
+    </div>
+    <div class="chips" style="margin-top:30px">
+      <span class="chip a">Vue 3 + MCP Client</span>
+      <span class="chip a">意图 → 受控 Tool Call</span>
+      <span class="chip a">动态页面生成</span>
+      <span class="chip a">自我修复</span>
+      <span class="chip">含治理护栏 · 成本模型 · 落地路线图</span>
+    </div>
+  </div>
+  <div class="slide-footer"><span>前端架构升级 · 内部交流汇报</span><span>01 / 19</span></div>
+</section></div>
+
+<!-- ============ 2 痛点 ============ -->
+<div class="frame"><section class="slide">
+  <span class="kicker">01 · 为什么现在要改</span>
+  <h2 class="title">三个正在放大的痛点</h2>
+  <div class="rule"></div>
+  <div class="body">
+    <div class="grid3 grow">
+      <div class="card red">
+        <h4><span class="tag r">痛点 1</span>UI 意图被后端排期卡住</h4>
+        <p>用户只是想"优先看高优先级、快截止的任务"，前端却要等后端加一个排序参数。<strong>一次交互诉求 = 一次跨端排期</strong>。</p>
+      </div>
+      <div class="card red">
+        <h4><span class="tag r">痛点 2</span>功能越多，路径越深</h4>
+        <p>筛选、排序、导出、对比、下钻……能力在增长，入口在堆叠。<strong>用户找不到、培训成本高</strong>，新功能使用率持续走低。</p>
+      </div>
+      <div class="card red">
+        <h4><span class="tag r">痛点 3</span>数据会说话，界面不会</h4>
+        <p>异常值、趋势拐点、环比突变都躺在表格里，靠人肉扫描。<strong>系统发现了问题，却没有机会告诉你</strong>。</p>
+      </div>
+    </div>
+    <div class="card accent" style="margin-top:18px">
+      <h4 style="color:var(--accent)">判断</h4>
+      <p>这三件事的共同点：都不是"数据问题"，而是 <em class="hl">意图到执行之间缺少一层可编排的翻译器</em>。这一层，就是 AI 执行层。</p>
+    </div>
+  </div>
+  <div class="slide-footer"><span>现状与问题</span><span>02 / 19</span></div>
+  <div class="notes"><div class="n-h">讲稿</div><div class="n-b">开场不要先讲 AI，先讲痛：业务部门提一个排序需求走三周排期，这个例子最扎心。三个痛点都指向同一个根因——意图到执行之间缺一层翻译器。</div></div>
+</section></div>
+
+<!-- ============ 3 核心判断 ============ -->
+<div class="frame"><section class="slide">
+  <span class="kicker">02 · 核心判断</span>
+  <h2 class="title">一句话讲清这次改造的方向</h2>
+  <div class="rule"></div>
+  <div class="body">
+    <div class="card accent" style="padding:26px 32px;text-align:center">
+      <p style="font-size:24px;line-height:1.7;font-weight:700;color:var(--ink)">
+        趋势不是"前端不接后端"<br>
+        而是 <em class="hl">前端的接入层在变薄，智能决策层在上移</em>
+      </p>
+      <p style="margin-top:14px;font-size:15px;color:var(--ink-2);line-height:1.8">
+        前端正在越过传统的"业务后端"，直连 <strong>AI 能力层</strong>（模型 / MCP / Harness）；<br>
+        传统后端正在被挤压成纯粹的 <strong>数据与事务执行层</strong>。
+      </p>
+    </div>
+    <div class="grid3" style="margin-top:18px">
+      <div class="card">
+        <h4><span class="tag o">变薄</span>前端接入层</h4>
+        <p>不再为每个 UI 意图定制一个 HTTP 接口，而是把页面能力注册成一组<strong>可被调度的工具</strong>。</p>
+      </div>
+      <div class="card">
+        <h4><span class="tag a">上移</span>智能决策层</h4>
+        <p>意图理解、任务拆解、工具编排、对话记忆，统一收敛到 <strong>MCP Server / Agent 网关</strong>。</p>
+      </div>
+      <div class="card">
+        <h4><span class="tag o">下沉</span>传统后端</h4>
+        <p>退化为网关可调用的众多 Tools 之一：<strong>只做 CRUD、事务、权限</strong>，不再负责决策。</p>
+      </div>
+    </div>
+    <div class="card amber" style="margin-top:18px">
+      <h4><span class="tag m">纠偏</span>别理解成"前端直连大模型"</h4>
+      <p>前端直连模型 = Key 泄漏 + 成本失控 + 无权限边界。正确姿势是 <strong>前端当 MCP 的客户端</strong>，后端把自己封装成 MCP 的 Tools。</p>
+    </div>
+  </div>
+  <div class="slide-footer"><span>核心判断</span><span>03 / 19</span></div>
+  <div class="notes"><div class="n-h">讲稿</div><div class="n-b">这是全场唯一需要所有人记住的一句话。如果只留一页，留这页。补一句纠偏，避免被理解成"那我们直接调 DeepSeek 就好了"。</div></div>
+</section></div>
+
+<!-- ============ 4 架构演进 ============ -->
+<div class="frame"><section class="slide">
+  <span class="kicker">03 · 架构演进</span>
+  <h2 class="title">从"三层"到"四层"：AI 决策网关成为新核心</h2>
+  <div class="rule"></div>
+  <div class="body">
+    <div class="grid2 grow" style="gap:24px">
+      <div class="col">
+        <div style="font-size:13px;font-weight:700;color:var(--muted);margin-bottom:9px">BEFORE · 传统三层</div>
+        <div class="stack">
+          <div class="node"><div class="n-t">Vue 前端</div><div class="n-d">展示 + 交互</div></div>
+          <div class="arrow">↓<small>HTTP 接口</small></div>
+          <div class="node"><div class="n-t">业务后端</div><div class="n-d">业务逻辑 · 权限 · 数据聚合</div></div>
+          <div class="arrow">↓<small>SQL</small></div>
+          <div class="node"><div class="n-t">数据库</div><div class="n-d">持久化</div></div>
+        </div>
+        <div class="card red" style="margin-top:12px">
+          <p style="font-size:13px"><strong>痛点：</strong>任何 UI 意图变化（比如"按相关性排序"），前端都得等后端改接口——<strong>前端的表达能力被后端接口的数量锁死</strong>。</p>
+        </div>
+      </div>
+      <div class="col">
+        <div style="font-size:13px;font-weight:700;color:var(--accent);margin-bottom:9px">AFTER · AI 时代四层</div>
+        <div class="stack">
+          <div class="node blue"><div class="n-t">Vue 3 前端（展示与交互层）</div><div class="n-d">自然语言输入框 · 传统按钮（保留）· 响应式渲染（等待指令）</div></div>
+          <div class="arrow">↕<small>MCP / SSE 长连接</small></div>
+          <div class="node solid"><div class="n-t">AI 决策网关（MCP Server / Harness Agent）</div><div class="n-d">对话记忆 · 意图分类 · 任务拆解 · 工具调度</div></div>
+          <div class="arrow">↓<small>按需要调用</small></div>
+          <div class="row" style="gap:8px">
+            <div class="node ghost grow" style="padding:8px 6px"><div class="n-t" style="font-size:12.5px">传统后端</div><div class="n-d" style="font-size:10.5px">CRUD / 事务</div></div>
+            <div class="node ghost grow" style="padding:8px 6px"><div class="n-t" style="font-size:12.5px">大模型 API</div><div class="n-d" style="font-size:10.5px">生成 / 总结 / 规划</div></div>
+            <div class="node ghost grow" style="padding:8px 6px"><div class="n-t" style="font-size:12.5px">第三方 / 浏览器</div><div class="n-d" style="font-size:10.5px">地图 / 文件 / 自动化</div></div>
+          </div>
+        </div>
+        <div class="card accent" style="margin-top:12px">
+          <p style="font-size:13px"><strong>关键变化：</strong>网关成为唯一的"大脑"。前端和后端<em class="hl">不再直接对话</em>，都听它调度；模型也只是它手里的一个工具。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>架构演进：三层 → 四层</span><span>04 / 19</span></div>
+  <div class="notes"><div class="n-h">讲稿</div><div class="n-b">左边讲"为什么痛"，右边讲"换了什么"。强调网关是新增的一层，不是在后端里加个 AI 模块——位置和归属不一样，负责团队也不一样。</div></div>
+</section></div>
+
+<!-- ============ 5 前端在接什么 ============ -->
+<div class="frame"><section class="slide">
+  <span class="kicker">04 · 职责边界</span>
+  <h2 class="title">前端到底在接什么？——两样都接，但权重完全不同</h2>
+  <div class="rule"></div>
+  <div class="body">
+    <table class="tbl">
+      <thead><tr>
+        <th style="width:20%">接入对象</th><th style="width:17%">接入方式</th><th style="width:16%">权重（趋势）</th><th>负责什么</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td class="k">AI 执行层<br><span style="font-weight:400;color:var(--muted);font-size:12px">MCP / Harness</span></td>
+          <td>MCP 协议<br>SSE / WebSocket</td>
+          <td><span class="bar" style="width:88px"></span><strong>核心 · 越来越重</strong></td>
+          <td>意图理解、任务拆解、工具调度、对话记忆、权限校验前置</td>
+        </tr>
+        <tr>
+          <td class="k">传统业务后端<br><span style="font-weight:400;color:var(--muted);font-size:12px">CRUD / BFF</span></td>
+          <td>HTTP / GraphQL<br>tRPC</td>
+          <td><span class="bar light" style="width:44px"></span><strong>附属 · 越来越轻</strong></td>
+          <td>纯数据增删改查、支付、发邮件等<strong>原子且强一致</strong>的操作</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="grid2" style="margin-top:18px">
+      <div class="card">
+        <h4><span class="tag o">以前</span>点"智能排序"</h4>
+        <p>前端 → 后端排序接口 → 执行 SQL 排序 → 返回数据。<br><span style="color:var(--muted)">每个新诉求 = 一个新接口。</span></p>
+      </div>
+      <div class="card accent">
+        <h4><span class="tag a">现在</span>说"优先展示高优先级且快要截止的任务"</h4>
+        <p>前端把意图发给 MCP Server → Agent 拆解 → 调后端取原始任务集 → 需要时调模型生成排序函数 → 回调前端 render → <strong>全程前端与后端不直接对话</strong>。</p>
+      </div>
+    </div>
+    <div class="card green" style="margin-top:16px">
+      <p style="font-size:13.5px"><strong>一句话：</strong>前端依然要接后端，但中间夹了一层 AI 执行层。<strong>前端现在主要的对接对象，是这个执行层。</strong></p>
+    </div>
+  </div>
+  <div class="slide-footer"><span>职责边界：前端接什么</span><span>05 / 19</span></div>
+  <div class="notes"><div class="n-h">讲稿</div><div class="n-b">这张表回答领导最常问的一句："那后端团队是不是没事干了？"——不是，后端从决策者变成被调度的执行者，事务和权限反而更纯粹、更重要。</div></div>
+</section></div>
+
+<!-- ============ 6 为什么不能抛开后端 ============ -->
+<div class="frame"><section class="slide">
+  <span class="kicker">05 · 边界与红线</span>
+  <h2 class="title">为什么绝对不能完全抛开后端？</h2>
+  <div class="rule"></div>
+  <div class="body">
+    <div class="grid3 grow">
+      <div class="card">
+        <h4><span class="tag r">红线 1</span>数据安全与权限</h4>
+        <p>数据库账号、用户令牌、付费逻辑<strong>永远不能交给大模型</strong>。身份、租户隔离、字段级脱敏必须留在自建后端或 Harness 执行引擎内。</p>
+        <div class="chips" style="margin-top:10px"><span class="chip r">✕ Key 放前端</span><span class="chip r">✕ 模型直连 DB</span></div>
+      </div>
+      <div class="card">
+        <h4><span class="tag r">红线 2</span>事务一致性</h4>
+        <p>"下单 + 扣库存 + 发货"这类强一致操作必须由后端事务保证。<strong>模型不保证幂等、不保证顺序</strong>，干不了这个细活。</p>
+        <div class="chips" style="margin-top:10px"><span class="chip r">✕ Agent 写多表</span><span class="chip g">✓ 单个事务型 Tool</span></div>
+      </div>
+      <div class="card">
+        <h4><span class="tag r">红线 3</span>成本与延迟</h4>
+        <p>每次操作都过一遍大模型，成本和延迟都扛不住。执行层要把"翻下一页"这种<strong>高频确定操作直接路由给后端</strong>，只有模糊意图才过模型。</p>
+        <div class="chips" style="margin-top:10px"><span class="chip g">✓ 规则优先</span><span class="chip g">✓ 结果缓存</span><span class="chip g">✓ 模型分级</span></div>
+      </div>
+    </div>
+    <div class="card accent" style="margin-top:18px">
+      <h4 style="color:var(--accent)">落地原则：三条不可让渡</h4>
+      <div class="grid3" style="gap:14px;margin-top:2px">
+        <p style="font-size:13.5px"><strong>① 权限不外包</strong><br>模型只能<em>提议</em>调用哪个 Tool，能不能调由网关 + 后端说了算。</p>
+        <p style="font-size:13.5px"><strong>② 事务不外包</strong><br>涉及写操作，一律封装成<em>单一、幂等、可审计</em>的事务型 Tool。</p>
+        <p style="font-size:13.5px"><strong>③ 成本不失控</strong><br>默认走规则，模糊才过模型；按人 / 按会话设<em>配额与预算上限</em>。</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>边界：为什么不能抛开后端</span><span>06 / 19</span></div>
+  <div class="notes"><div class="n-h">讲稿</div><div class="n-b">这一页是"防守页"。一定会有人问"那直接上大模型不就完了"。三条红线对应三类真实事故：Key 泄漏、重复扣款、账单爆炸。</div></div>
+</section></div>
+
+<!-- ============ 7 四路径总览 ============ -->
+<div class="frame"><section class="slide">
+  <span class="kicker">06 · 改造全景</span>
+  <h2 class="title">四条路径：价值 / 风险 / 建议优先级</h2>
+  <div class="rule"></div>
+  <div class="body">
+    <div class="grid4 grow">
+      <div class="card accent">
+        <h4><span class="tag a">路径一</span>智能交互层</h4>
+        <p style="font-size:12.5px">自然语言操作界面，意图 → 受控 Tool Call。</p>
+        <p style="font-size:12px;color:var(--muted);margin-top:8px">价值 <strong style="color:var(--green)">★★★★★</strong><br>风险 <strong style="color:var(--red)">★★★☆☆</strong><br>落地 <strong>2 周见 Demo</strong></p>
+        <div class="chips" style="margin-top:9px"><span class="chip a">P0 优先</span></div>
+      </div>
+      <div class="card accent">
+        <h4><span class="tag a">路径二</span>智能数据层</h4>
+        <p style="font-size:12.5px">数据主动预警、解释、推荐，界面会说话。</p>
+        <p style="font-size:12px;color:var(--muted);margin-top:8px">价值 <strong style="color:var(--green)">★★★★☆</strong><br>风险 <strong style="color:var(--red)">★★☆☆☆</strong><br>落地 <strong>1 周见效果</strong></p>
+        <div class="chips" style="margin-top:9px"><span class="chip a">P0 优先</span></div>
+      </div>
+      <div class="card">
+        <h4><span class="tag o">路径三</span>智能路由层</h4>
+        <p style="font-size:12.5px">按意图动态生成页面结构与路由。</p>
+        <p style="font-size:12px;color:var(--muted);margin-top:8px">价值 <strong style="color:var(--green)">★★★☆☆</strong><br>风险 <strong style="color:var(--red)">★★★★★</strong><br>落地 <strong>需先建模板库</strong></p>
+        <div class="chips" style="margin-top:9px"><span class="chip">P2 试点</span></div>
+      </div>
+      <div class="card">
+        <h4><span class="tag o">路径四</span>智能运维层</h4>
+        <p style="font-size:12.5px">前端自监控、自降级、自修复。</p>
+        <p style="font-size:12px;color:var(--muted);margin-top:8px">价值 <strong style="color:var(--green)">★★★☆☆</strong><br>风险 <strong style="color:var(--red)">★★☆☆☆</strong><br>落地 <strong>可增量接入</strong></p>
+        <div class="chips" style="margin-top:9px"><span class="chip">P1 并行</span></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:18px">
+      <h4>推进节奏建议</h4>
+      <div class="grid4" style="gap:12px;margin-top:2px">
+        <div><div style="font-size:12px;font-weight:700;color:var(--accent)">第 1 步</div><p style="font-size:12.5px">路径二（数据层）先做：不改架构、纯前端、一周见效，用来<strong>建立组织信心</strong>。</p></div>
+        <div><div style="font-size:12px;font-weight:700;color:var(--accent)">第 2 步</div><p style="font-size:12.5px">路径一（交互层）+ 网关落地：<strong>这才是主战场</strong>，护栏一次做齐。</p></div>
+        <div><div style="font-size:12px;font-weight:700;color:var(--accent)">第 3 步</div><p style="font-size:12.5px">路径四（运维层）并行接：为前两条路径<strong>兜底稳定性</strong>。</p></div>
+        <div><div style="font-size:12px;font-weight:700;color:var(--accent)">第 4 步</div><p style="font-size:12.5px">路径三（路由层）小范围试点：先做<strong>受控模板</strong>，不开放自由生成。</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>四条路径总览</span><span>07 / 19</span></div>
+  <div class="notes"><div class="n-h">讲稿</div><div class="n-b">不要四条一起上。路径三是"看起来最酷、最容易翻车"的一条，明确放到最后并设边界——这是给评审会的定心丸。</div></div>
+</section></div>
+
+<!-- ============ 8 路径一 代码 ============ -->
+<div class="frame"><section class="slide">
+  <span class="kicker">07 · 路径一 · 智能交互层</span>
+  <h2 class="title">让界面"听懂人话"：意图 → 受控的 Tool Call</h2>
+  <div class="rule"></div>
+  <div class="body">
+    <div class="row grow" style="gap:18px">
+      <div class="col" style="flex:1.12;min-width:0">
+        <div class="code-cap">// composables/useAIExecutor.ts —— 关键：AI 只"点菜"，不"下厨"</div>
+        <pre class="code" data-lang="ts">type Tool = {
+  schema: ZodSchema                       <span class="tok-c">// 参数白名单</span>
+  risk: 'low' | 'high'
+  run: (p: unknown) =&gt; Promise&lt;unknown&gt;
+}
+export function useAIExecutor(tools: Record&lt;string, Tool&gt;, ctx: string) {
+  const loading = ref(false)
+  const trace = ref&lt;string[]&gt;([])    <span class="tok-c">// 执行轨迹：让用户看得见 AI 干了什么</span>
+  async function executeIntent(input: string) {
+    loading.value = true
+    try {
+      <span class="tok-c">// ① 确定性意图先走规则，命中就不花钱过模型</span>
+      const plan = matchRule(input)
+        ?? await post('/api/ai/parse-intent', { input, ctx, tools: describe(tools) })
+
+      <span class="tok-c">// ② 工具必须在注册表内：杜绝模型"自己发明一个函数"</span>
+      const tool = tools[plan.name]
+      if (!tool) throw new Error(`未注册的工具: ${plan.name}`)
+
+      const params = tool.schema.parse(plan.params)        <span class="tok-c">// ③ 参数契约</span>
+      if (tool.risk === 'high' &amp;&amp; !(await confirmRisky(plan))) return   <span class="tok-c">// ④ 高危确认</span>
+
+      await tool.run(params)
+      trace.value.push(`${plan.name} ← ${input}`)
+      audit.log('ai.intent', { input, plan })              <span class="tok-c">// ⑤ 审计留痕</span>
+    } finally { loading.value = false }
+  }
+  return { executeIntent, loading, trace }
+}</pre>
+      </div>
+      <div class="col" style="flex:.88;min-width:0">
+        <div class="code-cap">// 页面侧：把已有操作注册成工具</div>
+        <pre class="code ok" data-lang="ts">const { executeIntent, trace } = useAIExecutor({
+  filterOrders: { risk: 'low',  schema: FilterSchema,
+                  run: p =&gt; tableRef.value.filter(p) },
+  sortOrders:   { risk: 'low',  schema: SortSchema,
+                  run: p =&gt; tableRef.value.sort(p) },
+  exportData:   { risk: 'high', schema: ExportSchema,
+                  run: p =&gt; tableRef.value.export(p) },
+}, '订单管理页：列表 / 筛选 / 导出')</pre>
+        <div class="card green" style="margin-top:12px">
+          <h4><span class="tag g">效果</span>一步到位</h4>
+          <p style="font-size:13px">用户说"我要看最近一周北京地区的订单"，AI 自动组合<strong>筛选条件 + 时间范围 + 排序</strong>，跨多个控件一次完成。</p>
+        </div>
+        <div class="card amber" style="margin-top:10px">
+          <h4><span class="tag m">保留</span>传统按钮不删</h4>
+          <p style="font-size:12.5px">自然语言是<strong>加速带</strong>不是替代品：高频操作保留按钮，长尾操作交给意图。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>路径一 · 智能交互层</span><span>08 / 19</span></div>
+  <div class="notes"><div class="n-h">讲稿</div><div class="n-b">重点讲三处对原方案的强化：注册表白名单（模型不能凭空造函数）、参数 schema 校验、高危二次确认。trace 既是给用户的可解释性，也是给客服的排查线索。</div></div>
+</section></div>
+
+<!-- ============ 9 路径一 护栏 ============ -->
+<div class="frame"><section class="slide">
+  <span class="kicker">08 · 路径一 · 治理护栏</span>
+  <h2 class="title">没有护栏的"AI 操作系统"，就是一个提权漏洞</h2>
+  <div class="rule"></div>
+  <div class="body">
+    <div class="grid3 grow" style="gap:14px">
+      <div class="card"><h4><span class="tag">闸 1</span>工具白名单</h4>
+        <p>模型只能从<strong>已注册的工具名</strong>里选，未知工具直接拒绝并记 badcase。绝不允许"生成一段代码然后执行"。</p></div>
+      <div class="card"><h4><span class="tag">闸 2</span>参数 Schema 校验</h4>
+        <p>用 Zod / JSON Schema 校验参数，枚举值闭合。<strong>前端校验体验，网关校验安全</strong>，两侧都要做。</p></div>
+      <div class="card"><h4><span class="tag">闸 3</span>权限二次校验</h4>
+        <p>模型说"调导出"≠ 有权导出。<strong>网关与后端各校验一次</strong>，前端的权限判断只用于隐藏入口。</p></div>
+      <div class="card"><h4><span class="tag">闸 4</span>高危二次确认</h4>
+        <p>导出全量、批量删除、发起支付等 <code style="font-family:var(--mono)">risk: 'high'</code> 动作，必须把<strong>执行计划讲给人听并等待确认</strong>。</p></div>
+      <div class="card"><h4><span class="tag">闸 5</span>审计与回放</h4>
+        <p>记录 <strong>原始输入 → 解析计划 → 执行结果</strong> 三段式日志，支持按人 / 按工具回放，badcase 可归因、可加规则。</p></div>
+      <div class="card red"><h4><span class="tag r">禁止</span>三类反模式</h4>
+        <p>✕ 前端直连大模型（Key 泄漏）<br>✕ eval / new Function 执行模型输出<br>✕ 让模型直接拼 SQL 或写多表事务</p></div>
+    </div>
+    <div class="card accent" style="margin-top:18px">
+      <p style="font-size:13.5px"><strong>一句话记住：</strong>模型负责<em class="hl">提议</em>，网关负责<em class="hl">裁决</em>，后端负责<em class="hl">落地</em>。<strong>提议权可以给 AI，执行权必须留在系统里。</strong></p>
+    </div>
+  </div>
+  <div class="slide-footer"><span>路径一 · 治理护栏</span><span>09 / 19</span></div>
+  <div class="notes"><div class="n-h">讲稿</div><div class="n-b">这一页是整份方案的安全资质。安全 / 合规同学如果只听一页，就听这页。"提议权 vs 执行权"这句适合直接被引用。</div></div>
+</section></div>
+
+<!-- ============ 10 路径二 ============ -->
+<div class="frame"><section class="slide">
+  <span class="kicker">09 · 路径二 · 智能数据层</span>
+  <h2 class="title">让数据"自己会说话"：主动预警、解释、推荐</h2>
+  <div class="rule"></div>
+  <div class="body">
+    <div class="row grow" style="gap:18px">
+      <div style="flex:1.1;min-width:0">
+        <div class="code-cap">// composables/useSmartData.ts —— 修掉两个性能陷阱</div>
+        <pre class="code" data-lang="ts">export function useSmartData&lt;T&gt;(source: Ref&lt;T[]&gt;, rules: Rule&lt;T&gt;[]) {
+  const insights = ref&lt;Insight[]&gt;([])
+  const alerts   = ref&lt;Alert[]&gt;([])
+
+  <span class="tok-c">// ① 别对大数组深度侦听：每帧全量跑规则 = 主线程爆炸</span>
+  <span class="tok-c">//    改为先算"数据指纹"（行数 / 极值 / 环比），指纹变了才跑</span>
+  const fp = computed(() =&gt; summaryOf(source.value))
+
+  watchDebounced(fp, async (f) =&gt; {
+    <span class="tok-c">// ② 重规则丢进 Worker，主线程只负责渲染</span>
+    const r = await runRulesInWorker(rules, f)
+    insights.value = r.insights
+    alerts.value   = r.alerts
+    r.alerts.filter(a =&gt; a.severity === 'high')
+            .forEach(a =&gt; ElNotification.warning(a.message))
+  }, { debounce: 300, maxWait: 1000 })
+
+  return { insights, alerts }
+}</pre>
+        <div class="card red" style="margin-top:12px">
+          <p style="font-size:13px"><strong>原方案的两处隐患：</strong>① 对万行表格做深度侦听是灾难；② 规则同步跑在主线程，直接拖垮 FPS。已改为<strong>指纹 + 防抖 + Worker</strong>。</p>
+        </div>
+      </div>
+      <div style="flex:.9;min-width:0">
+        <div class="code-cap">三个最快见效的场景</div>
+        <div class="col" style="gap:10px">
+          <div class="card"><h4><span class="tag a">智能表格</span></h4>
+            <p style="font-size:13px">异常值自动高亮并解释：<em>"这笔交易额是同类均值的 3.2 倍，建议关注"</em>——<strong>把"发现"变成"提示"</strong>。</p></div>
+          <div class="card"><h4><span class="tag a">智能表单</span></h4>
+            <p style="font-size:13px">输入即校验、补全、推荐：<em>"邮箱格式有误，是否修正为 xxx@xx.com？"</em>——<strong>报错同时给解药</strong>。</p></div>
+          <div class="card"><h4><span class="tag a">智能图表</span></h4>
+            <p style="font-size:13px">趋势变化时自动切换图表类型、标注关键拐点：<strong>减少"自己调图表"的操作</strong>。</p></div>
+        </div>
+        <div class="card green" style="margin-top:10px">
+          <p style="font-size:13px"><strong>为什么先做它：</strong>纯前端增量改造、<strong>不触碰现有架构与权限</strong>，一周可见效果，是最低风险的"信心工程"。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>路径二 · 智能数据层</span><span>10 / 19</span></div>
+  <div class="notes"><div class="n-h">讲稿</div><div class="n-b">明确说"我修了原方案的两个性能坑"，体现方案经过工程审视而不是照抄。同时点出这是最该先做的一条。</div></div>
+</section></div>
+
+<!-- ============ 11 路径三 ============ -->
+<div class="frame"><section class="slide">
+  <span class="kicker">10 · 路径三 · 智能路由层</span>
+  <h2 class="title">让页面"动态生成"：可以，但必须是受控生成</h2>
+  <div class="rule"></div>
+  <div class="body">
+    <div class="row grow" style="gap:18px">
+      <div style="flex:1;min-width:0">
+        <div class="code-cap">✕ 反模式：模板字符串动态 import</div>
+        <pre class="code danger" data-lang="ts">import(`@/components/${pageConfig.componentType}.vue`)</pre>
+        <div class="card red" style="margin-top:12px">
+          <p style="font-size:13px"><strong>三个问题：</strong></p>
+          <ul class="list tight" style="margin-top:6px">
+            <li><strong>路径不可控</strong>：模型返回的字符串可能指向任意组件 → 越权渲染</li>
+            <li><strong>产物 404</strong>：Vite 需 glob 预置，运行时拼接在构建产物里根本不存在</li>
+            <li><strong>无类型约束</strong>：拼错名字只能运行时才炸</li>
+          </ul>
+        </div>
+      </div>
+      <div style="flex:1.25;min-width:0">
+        <div class="code-cap">✓ 正解：白名单注册表 + 类型约束</div>
+        <pre class="code ok" data-lang="ts">export const WIDGETS = {
+  kpi:   () =&gt; import('@/widgets/KpiCard.vue'),
+  table: () =&gt; import('@/widgets/DataTable.vue'),
+  chart: () =&gt; import('@/widgets/EChart.vue'),
+  map:   () =&gt; import('@/widgets/AMap.vue'),
+} as const
+
+<span class="tok-c">// 模型只能输出 key，越界在编译期就报错</span>
+export function resolve(t: keyof typeof WIDGETS) {
+  return defineAsyncComponent(WIDGETS[t])
+}
+
+<span class="tok-c">// 网关返回的不是"代码"，而是受约束的页面 DSL</span>
+const pageConfig = {
+  layout: 'dashboard-2col',
+  widgets: [{ type: 'kpi',   bind: 'gmv' },
+            { type: 'chart', bind: 'trend', chart: 'line' }]
+}</pre>
+      </div>
+    </div>
+    <div class="grid3" style="margin-top:16px">
+      <div class="card amber"><h4><span class="tag m">收敛 1</span>组件有限集</h4><p style="font-size:12.5px">先沉淀 <strong>15~20 个业务组件</strong>构成模板库，模型只在库内组合。</p></div>
+      <div class="card amber"><h4><span class="tag m">收敛 2</span>DSL 而非代码</h4><p style="font-size:12.5px">网关输出<strong>声明式配置</strong>（布局 + 组件 + 数据绑定），前端只做渲染，永不执行生成的代码。</p></div>
+      <div class="card amber"><h4><span class="tag m">收敛 3</span>可保存可分享</h4><p style="font-size:12.5px">生成结果<strong>落库为正式路由</strong>并纳入权限体系，避免"每次都现生成"。</p></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <p style="font-size:13.5px"><strong>效果：</strong>用户说"给我一个销售数据看板"，页面自动生成 KPI 卡片 + 趋势图 + 明细表；但<em class="hl">生成的是配置，不是代码</em>——这是路径三能上线的前提。</p>
+    </div>
+  </div>
+  <div class="slide-footer"><span>路径三 · 智能路由层</span><span>11 / 19</span></div>
+  <div class="notes"><div class="n-h">讲稿</div><div class="n-b">这页技术含金量最高。原方案的动态 import 是真实存在的安全与构建问题，当面修掉很有说服力。</div></div>
+</section></div>
+
+<!-- ============ 12 路径四 ============ -->
+<div class="frame"><section class="slide">
+  <span class="kicker">11 · 路径四 · 智能运维层</span>
+  <h2 class="title">让应用"自我修复"：只修已知模式，绝不猜业务</h2>
+  <div class="rule"></div>
+  <div class="body">
+    <div class="row grow" style="gap:18px">
+      <div style="flex:1.15;min-width:0">
+        <div class="code-cap">// plugins/self-healing.ts —— 修正原方案的两处致命写法</div>
+        <pre class="code" data-lang="ts">export const SelfHealingPlugin = {
+  install(app: App) {
+    <span class="tok-c">// ✅ 原写法在同步回调里 await（SyntaxError）；</span>
+    <span class="tok-c">//    errorHandler 本身可返回 Promise，声明 async 即可</span>
+    app.config.errorHandler = async (err, instance, info) =&gt; {
+      const fix = await analyzeError(err, instance, info)
+      if (fix.strategy === 'retry')   { retryRender(instance);   return }
+      if (fix.strategy === 'degrade') { swapToFallback(instance); return }
+      reportError(err, fix.suggestion)  <span class="tok-c">// 未知错误：只上报，不猜</span>
+    }
+
+    <span class="tok-c">// 性能守护：采样 FPS，低于阈值才上报</span>
+    <span class="tok-c">// 注意 performance.memory 仅 Chromium 可用，需可选链兜底</span>
+    useIntervalFn(() =&gt; {
+      const fps = sampleFPS()
+      if (fps &lt; 30) suggestOptimization({ fps,
+        heap: (performance as any).memory?.usedJSHeapSize })
+    }, 5000)
+  }
+}</pre>
+      </div>
+      <div style="flex:.85;min-width:0">
+        <div class="card"><h4><span class="tag o">能力边界</span>能自愈什么</h4>
+          <ul class="list tight" style="margin-top:6px">
+            <li>组件渲染异常 → <strong>降级为备用组件 / 重试渲染</strong></li>
+            <li>资源加载失败 → <strong>CDN 切换、重试</strong></li>
+            <li>FPS 低于阈值 → <strong>关动效、开虚拟滚动、降级图表</strong></li>
+            <li>接口超时 → <strong>切缓存 / 只读模式</strong></li>
+          </ul>
+        </div>
+        <div class="card red" style="margin-top:10px"><h4><span class="tag r">绝不</span>自愈什么</h4>
+          <ul class="list tight" style="margin-top:6px">
+            <li>数据 / 业务错误 → 只上报，<strong>不自动重试写操作</strong>（幂等风险）</li>
+            <li>权限 / 鉴权失败 → <strong>不重试</strong>，直接引导重新登录</li>
+            <li>未知异常 → <strong>不猜、不改业务代码</strong>，生成报告给开发者</li>
+          </ul>
+        </div>
+        <div class="card accent" style="margin-top:10px">
+          <p style="font-size:13px"><strong>定位：</strong>它是前三条路径的<em class="hl">稳定性兜底</em>，不是独立卖点。AI 引入的不确定性，需要它来对冲。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>路径四 · 智能运维层</span><span>12 / 19</span></div>
+  <div class="notes"><div class="n-h">讲稿</div><div class="n-b">原代码里有两处真问题：同步回调里的 await 是语法错误；instance 可能为 null。直接指出，说明方案已过工程校验。</div></div>
+</section></div>
+
+<!-- ============ 13 MCP Tool ============ -->
+<div class="frame"><section class="slide">
+  <span class="kicker">12 · 执行层落地</span>
+  <h2 class="title">后端的新工作：把自己封装成 MCP 的 Tools</h2>
+  <div class="rule"></div>
+  <div class="body">
+    <div class="row grow" style="gap:18px">
+      <div style="flex:1.05;min-width:0">
+        <div class="code-cap">// tools/query_orders.json —— 把一个查询接口升级为可被 Agent 调度的工具</div>
+        <pre class="code" data-lang="ts">{
+  "name": "query_orders",
+  "description": "按条件查询订单；仅返回聚合后的非敏感字段",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "region": { "type": "string",
+                  "enum": ["北京", "上海", "深圳"] },
+      "status": { "type": "string",
+                  "enum": ["paid", "unpaid", "refunded"] },
+      "days":   { "type": "integer", "minimum": 1, "maximum": 90 }
+    },
+    "required": ["days"],
+    "additionalProperties": false  <span class="tok-c">// ← 关键：不允许模型自由发挥字段</span>
+  },
+  "annotations": { "readOnlyHint": true, "risk": "low" }
+}</pre>
+        <div class="card accent" style="margin-top:12px">
+          <p style="font-size:13px"><strong>description 就是给模型看的接口文档。</strong>写清楚"能干什么、不能干什么、边界在哪"，比加更多参数更有效——<em class="hl">工具描述的质量直接决定调用成功率</em>。</p>
+        </div>
+      </div>
+      <div style="flex:.95;min-width:0">
+        <div class="code-cap">Vue 项目里的新分层（架构师视角）</div>
+        <div class="stack">
+          <div class="node blue" style="text-align:left;padding:9px 14px">
+            <div class="n-t" style="font-size:13px">Vue 3 前端（展示与交互层）</div>
+            <div class="n-d" style="font-size:11px">意图输入框 · 传统按钮（保留）· 响应式渲染</div>
+          </div>
+          <div class="arrow" style="padding:4px 0">↕<small>MCP 协议（长连接）</small></div>
+          <div class="node solid" style="text-align:left;padding:9px 14px">
+            <div class="n-t" style="font-size:13px">MCP Server / Harness Agent（执行网关）</div>
+            <div class="n-d" style="font-size:11px">对话记忆 · 意图分类（点按钮 or 模糊意图？）· 任务拆解与调度</div>
+          </div>
+          <div class="arrow" style="padding:4px 0">↓<small>HTTP 调用　　　　　　　　API 调用</small></div>
+          <div class="row" style="gap:10px">
+            <div class="node ghost grow" style="text-align:left;padding:8px 12px"><div class="n-t" style="font-size:12.5px">传统后端</div><div class="n-d" style="font-size:10.5px">CRUD / 事务 / 权限</div></div>
+            <div class="node ghost grow" style="text-align:left;padding:8px 12px"><div class="n-t" style="font-size:12.5px">大模型 API</div><div class="n-d" style="font-size:10.5px">生成 / 总结 / 规划</div></div>
+          </div>
+        </div>
+        <div class="card green" style="margin-top:12px">
+          <p style="font-size:13px"><strong>职责转换表：</strong><br>
+          后端：下单接口 → <strong>create_order Tool</strong>，注册到 MCP Server<br>
+          前端：直接发 HTTP 请求 → <strong>MCP Client 发起 tool call</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>执行层落地：MCP Tool 契约</span><span>13 / 19</span></div>
+  <div class="notes"><div class="n-h">讲稿</div><div class="n-b">给后端同学一句话：你们的工作不是变少了，是变了——从"写接口给前端"变成"写工具给大脑"。additionalProperties: false 是这页的技术重点。</div></div>
+</section></div>
+
+<!-- ============ 14 时序图 ============ -->
+<div class="frame"><section class="slide">
+  <span class="kicker">13 · 全链路</span>
+  <h2 class="title">一次意图的完整链路：谁在什么时刻被调用</h2>
+  <div class="rule"></div>
+  <div class="body">
+    <svg viewBox="0 0 1160 330" style="width:100%;flex:none;font-family:var(--sans)">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#1B4DFF"/>
+        </marker>
+        <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#9AA1AC"/>
+        </marker>
+      </defs>
+      <g>
+        <rect class="lane-h" x="14" y="6" width="150" height="32" rx="8"/>
+        <text class="lane-t" x="89" y="27" text-anchor="middle">用　户</text>
+        <rect class="lane-h" x="252" y="6" width="150" height="32" rx="8"/>
+        <text class="lane-t" x="327" y="27" text-anchor="middle">Vue 前端</text>
+        <rect class="lane-h" x="490" y="6" width="180" height="32" rx="8" style="fill:#EDF1FF;stroke:#1B4DFF"/>
+        <text class="lane-t" x="580" y="27" text-anchor="middle" style="fill:#1B4DFF">MCP / Agent 网关</text>
+        <rect class="lane-h" x="758" y="6" width="150" height="32" rx="8"/>
+        <text class="lane-t" x="833" y="27" text-anchor="middle">业务后端</text>
+        <rect class="lane-h" x="996" y="6" width="150" height="32" rx="8"/>
+        <text class="lane-t" x="1071" y="27" text-anchor="middle">大模型</text>
+      </g>
+      <g class="lifeline">
+        <line x1="89" y1="40" x2="89" y2="292"/><line x1="327" y1="40" x2="327" y2="292"/>
+        <line x1="580" y1="40" x2="580" y2="292"/><line x1="833" y1="40" x2="833" y2="292"/>
+        <line x1="1071" y1="40" x2="1071" y2="292"/>
+      </g>
+      <g>
+        <line class="msg" x1="100" y1="64" x2="316" y2="64"/>
+        <text class="mlabel" x="208" y="57" text-anchor="middle">① 说出意图</text>
+
+        <line class="msg" x1="338" y1="92" x2="569" y2="92"/>
+        <text class="mlabel" x="453" y="85" text-anchor="middle">② intent + 上下文 + 工具清单</text>
+
+        <line class="msg dashed" x1="591" y1="120" x2="1060" y2="120" marker-end="url(#ah2)"/>
+        <text class="mlabel" x="825" y="113" text-anchor="middle">③ 任务规划（仅模糊意图）</text>
+
+        <line class="msg dashed" x1="1060" y1="148" x2="591" y2="148" marker-end="url(#ah2)"/>
+        <text class="mlabel" x="825" y="141" text-anchor="middle">④ N 个 tool_call</text>
+
+        <line class="msg" x1="591" y1="176" x2="822" y2="176"/>
+        <text class="mlabel" x="706" y="169" text-anchor="middle">⑤ query_orders(…)</text>
+
+        <line class="msg" x1="822" y1="204" x2="591" y2="204"/>
+        <text class="mlabel" x="706" y="197" text-anchor="middle">⑥ 原始数据（脱敏）</text>
+
+        <line class="msg" x1="569" y1="232" x2="338" y2="232"/>
+        <text class="mlabel" x="453" y="225" text-anchor="middle">⑦ render 指令 + 一句话解释</text>
+
+        <line class="msg" x1="316" y1="260" x2="100" y2="260"/>
+        <text class="mlabel" x="208" y="253" text-anchor="middle">⑧ 表格 + 为什么这么排</text>
+      </g>
+    </svg>
+    <div class="grid2" style="margin-top:12px">
+      <div class="card accent">
+        <p style="font-size:13px"><strong>虚线（③④）可以整段跳过。</strong>意图命中规则或缓存时，网关直接走 ⑤——这是<em class="hl">成本与延迟的主要优化点</em>。</p>
+      </div>
+      <div class="card">
+        <p style="font-size:13px"><strong>全程没有"前端 ↔ 后端"的直接对话。</strong>所有跨端协调都由网关居中调度，因此<strong>新增意图不需要改任何接口契约</strong>。</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>一次意图的完整链路</span><span>14 / 19</span></div>
+  <div class="notes"><div class="n-h">讲稿</div><div class="n-b">按编号念一遍链路即可。重点落在"虚线可跳过"和"前后端不直接对话"——前者省钱，后者省排期。</div></div>
+</section></div>
+
+<!-- ============ 15 成本 ============ -->
+<div class="frame"><section class="slide">
+  <span class="kicker">14 · 成本与性能</span>
+  <h2 class="title">三级路由：把 80% 的请求拦在模型之前</h2>
+  <div class="rule"></div>
+  <div class="body">
+    <div class="grid3 grow">
+      <div class="card green">
+        <h4><span class="tag g">L1</span>规则 / 缓存优先</h4>
+        <p>高频确定操作（翻页、排序、筛选、导出）走<strong>正则规则 + 意图缓存</strong>。</p>
+        <p style="margin-top:8px;font-size:12.5px;color:var(--muted)">占比目标 <strong style="color:var(--ink)">~70%</strong> · 延迟 <strong style="color:var(--ink)">&lt; 50ms</strong> · 成本 <strong style="color:var(--ink)">0</strong></p>
+      </div>
+      <div class="card amber">
+        <h4><span class="tag m">L2</span>小模型做结构化解析</h4>
+        <p>半确定意图（多条件组合、模糊时间）走<strong>小模型做意图解析</strong>，只输出 tool + params。</p>
+        <p style="margin-top:8px;font-size:12.5px;color:var(--muted)">占比目标 <strong style="color:var(--ink)">~25%</strong> · 延迟 <strong style="color:var(--ink)">200~600ms</strong> · 成本 <strong style="color:var(--ink)">低</strong></p>
+      </div>
+      <div class="card red">
+        <h4><span class="tag r">L3</span>大模型规划</h4>
+        <p>真正的模糊意图（跨页面编排、生成看板、多步任务）才请<strong>大模型做规划</strong>。</p>
+        <p style="margin-top:8px;font-size:12.5px;color:var(--muted)">占比目标 <strong style="color:var(--ink)">~5%</strong> · 延迟 <strong style="color:var(--ink)">1~3s</strong> · 成本 <strong style="color:var(--ink)">高（设上限）</strong></p>
+      </div>
+    </div>
+    <div class="grid2" style="margin-top:18px">
+      <div class="card">
+        <h4>四条降本手段</h4>
+        <ul class="list tight" style="margin-top:6px">
+          <li><strong>意图缓存</strong>：同一意图模板命中即复用解析结果（TTL + 参数槽位）</li>
+          <li><strong>工具描述精简</strong>：只把<em>当前页面相关</em>的 5~8 个工具发给模型，别全量塞</li>
+          <li><strong>流式优先</strong>：SSE 先回"我打算这么做"再执行，感知延迟降低一半</li>
+          <li><strong>预算与配额</strong>：按人 / 按会话设 Token 上限，超限自动降级到 L1</li>
+        </ul>
+      </div>
+      <div class="card accent">
+        <h4 style="color:var(--accent)">降级策略（必须内置）</h4>
+        <ul class="list tight" style="margin-top:6px">
+          <li>模型超时 / 不可用 → <strong>自动回落 L1 规则</strong>，提示"当前为快捷模式"</li>
+          <li>连续 2 次解析失败 → <strong>弹出结构化筛选面板</strong>，让用户手动补齐</li>
+          <li>工具执行失败 → <strong>展示失败原因 + 建议的替代意图</strong>，而不是干报错</li>
+          <li>传统按钮全程保留，<strong>AI 永远不是唯一路径</strong></li>
+        </ul>
+      </div>
+    </div>
+    <div class="card green" style="margin-top:16px">
+      <p style="font-size:13.5px"><strong>核心原则：</strong>AI 是<em class="hl">可选的加速器</em>，不是必经的关卡。<strong>任何时候把它拔掉，系统都能正常用。</strong></p>
+    </div>
+  </div>
+  <div class="slide-footer"><span>成本与性能治理</span><span>15 / 19</span></div>
+  <div class="notes"><div class="n-h">讲稿</div><div class="n-b">成本是评审必问项。给出 L1/L2/L3 的占比目标，等于给出可验收的成本预算。最后一句"拔掉也能用"是给运维和业务方的承诺。</div></div>
+</section></div>
+
+<!-- ============ 16 路线图 ============ -->
+<div class="frame"><section class="slide">
+  <span class="kicker">15 · 落地路线图</span>
+  <h2 class="title">12 周四阶段：每个阶段都有可验收产出</h2>
+  <div class="rule"></div>
+  <div class="body">
+    <div class="grid4 grow">
+      <div class="card">
+        <h4><span class="tag g">P0</span>第 1–2 周<br>信心工程</h4>
+        <p style="font-size:12.5px"><strong>做：</strong>路径二（智能数据层）+ 前端埋点基线</p>
+        <p style="font-size:12.5px;margin-top:6px"><strong>产出：</strong>异常高亮与解释、表单智能校验</p>
+        <p style="font-size:12.5px;margin-top:6px"><strong>验收：</strong>异常发现耗时下降；不改架构、零权限风险</p>
+      </div>
+      <div class="card accent">
+        <h4><span class="tag a">P1</span>第 3–6 周<br>主战场</h4>
+        <p style="font-size:12.5px"><strong>做：</strong>MCP 网关 + 路径一（智能交互层）</p>
+        <p style="font-size:12.5px;margin-top:6px"><strong>产出：</strong>3 个高频页面接入；20+ Tool 注册；五道护栏齐备</p>
+        <p style="font-size:12.5px;margin-top:6px"><strong>验收：</strong>意图成功率 ≥ 85%；高危动作 100% 二次确认</p>
+      </div>
+      <div class="card">
+        <h4><span class="tag o">P2</span>第 5–9 周<br>并行兜底</h4>
+        <p style="font-size:12.5px"><strong>做：</strong>路径四（自愈 + 性能守护）+ 成本三级路由</p>
+        <p style="font-size:12.5px;margin-top:6px"><strong>产出：</strong>错误分级处理、FPS 守护、预算与配额</p>
+        <p style="font-size:12.5px;margin-top:6px"><strong>验收：</strong>渲染类崩溃自愈率 ≥ 60%；L1 命中率 ≥ 60%</p>
+      </div>
+      <div class="card">
+        <h4><span class="tag o">P3</span>第 10–12 周<br>受控试点</h4>
+        <p style="font-size:12.5px"><strong>做：</strong>路径三（动态页面），限内部 1 个场景</p>
+        <p style="font-size:12.5px;margin-top:6px"><strong>产出：</strong>15~20 个业务组件模板库 + 页面 DSL</p>
+        <p style="font-size:12.5px;margin-top:6px"><strong>验收：</strong>看板生成成功率 ≥ 80%；结果可保存为正式路由</p>
+      </div>
+    </div>
+    <div class="grid2" style="margin-top:18px">
+      <div class="card">
+        <h4>依赖关系（不能颠倒）</h4>
+        <ul class="list tight" style="margin-top:6px">
+          <li>网关（P1）是路径一 / 三的<strong>共同前置</strong>——先建网关，别各页面各接一套</li>
+          <li>护栏（P1）与网关<strong>同期上线</strong>，不允许"先跑起来再加锁"</li>
+          <li>模板库（P3）依赖 P1 沉淀的<strong>组件规范</strong>，需在 P1 阶段提前约束</li>
+        </ul>
+      </div>
+      <div class="card amber">
+        <h4><span class="tag m">风险预案</span>三个如果</h4>
+        <ul class="list tight" style="margin-top:6px">
+          <li>如果<strong>意图成功率不达标</strong>：工具集收缩到 5 个以内，先做深再做广</li>
+          <li>如果<strong>成本超预算</strong>：下调 L3 占比 / 提高缓存 TTL / 换更小模型</li>
+          <li>如果<strong>用户不买账</strong>：入口改成"操作建议卡"，被动推荐而非主动输入框</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>落地路线图</span><span>16 / 19</span></div>
+  <div class="notes"><div class="n-h">讲稿</div><div class="n-b">每阶段都带验收数字，方便立项。强调"护栏与网关同期上线"，防止被压缩成二期。</div></div>
+</section></div>
+
+<!-- ============ 17 度量 ============ -->
+<div class="frame"><section class="slide">
+  <span class="kicker">16 · 度量</span>
+  <h2 class="title">怎么算成功：八个数，上线前先埋好</h2>
+  <div class="rule"></div>
+  <div class="body">
+    <div class="grid4" style="gap:13px">
+      <div class="metric"><div class="m-v">≥85<span class="m-u">%</span></div><div class="m-l"><strong>意图成功率</strong><br>一次解析即命中正确 Tool 且参数无误</div></div>
+      <div class="metric"><div class="m-v">↓60<span class="m-u">%</span></div><div class="m-l"><strong>平均操作步骤</strong><br>完成同一任务的点击 / 跳转次数降幅</div></div>
+      <div class="metric"><div class="m-v">&lt;800<span class="m-u">ms</span></div><div class="m-l"><strong>P95 意图首字节</strong><br>从回车到界面出现首个变化的耗时</div></div>
+      <div class="metric"><div class="m-v">≥60<span class="m-u">%</span></div><div class="m-l"><strong>L1 规则命中率</strong><br>不过模型直接完成的请求占比</div></div>
+    </div>
+    <div class="grid4" style="gap:13px;margin-top:13px">
+      <div class="metric"><div class="m-v">≥30<span class="m-u">%</span></div><div class="m-l"><strong>意图功能采用率</strong><br>用过自然语言入口的活跃用户占比</div></div>
+      <div class="metric"><div class="m-v">≤X<span class="m-u">元/人/月</span></div><div class="m-l"><strong>Token 成本</strong><br>按人均月度预算设硬上限并告警</div></div>
+      <div class="metric"><div class="m-v">≥60<span class="m-u">%</span></div><div class="m-l"><strong>渲染类自愈率</strong><br>可自愈异常中成功恢复的比例</div></div>
+      <div class="metric"><div class="m-v">0<span class="m-u">起</span></div><div class="m-l"><strong>安全事件</strong><br>越权调用 / Key 泄漏 / 未确认的高危执行</div></div>
+    </div>
+    <div class="card accent" style="margin-top:18px">
+      <h4 style="color:var(--accent)">埋点要求（P0 阶段就要做，别事后补）</h4>
+      <p style="font-size:13px">每一条意图记录四段式日志：<strong>原始输入 → 解析计划（含是否过模型）→ 执行结果 → 用户是否撤销</strong>。<em class="hl">"用户撤销"是最有价值的负样本</em>，它直接告诉你哪些解析需要固化成规则（转入 L1，既提效又降本）。</p>
+    </div>
+    <div class="card green" style="margin-top:12px">
+      <p style="font-size:13.5px"><strong>正向飞轮：</strong>用户使用 → 产生日志 → badcase 归因 → 沉淀为 L1 规则 → <strong>更快、更准、更便宜</strong> → 更多人用。</p>
+    </div>
+  </div>
+  <div class="slide-footer"><span>度量指标</span><span>17 / 19</span></div>
+  <div class="notes"><div class="n-h">讲稿</div><div class="n-b">强调埋点要在 P0 就做，否则后期无法归因。"用户撤销"作为负样本这一点很实用，容易被忽略。</div></div>
+</section></div>
+
+<!-- ============ 18 风险反模式 ============ -->
+<div class="frame"><section class="slide">
+  <span class="kicker">17 · 风险清单</span>
+  <h2 class="title">风险与反模式：提前说清，比事后救火便宜</h2>
+  <div class="rule"></div>
+  <div class="body">
+    <table class="tbl">
+      <thead><tr><th style="width:24%">风险 / 反模式</th><th style="width:9%">等级</th><th style="width:31%">后果</th><th>应对</th></tr></thead>
+      <tbody>
+        <tr><td class="k">前端直连大模型 API</td><td><span class="tag r">高</span></td><td>Key 泄漏、成本失控、无权限边界</td><td>统一走自建网关；前端只持会话态，永不持 Key</td></tr>
+        <tr><td class="k">eval / new Function 执行模型输出</td><td><span class="tag r">高</span></td><td>远程代码执行，等同于开放后门</td><td>工具注册表白名单；模型只能选名字 + 填参数</td></tr>
+        <tr><td class="k">模板字符串动态 import 组件</td><td><span class="tag r">高</span></td><td>越权渲染、构建产物 404、运行时崩溃</td><td>静态组件注册表 + keyof 类型约束</td></tr>
+        <tr><td class="k">把权限判断放在前端</td><td><span class="tag r">高</span></td><td>绕过 UI 即可越权调用工具</td><td>网关与后端各校验一次；前端判断仅用于隐藏入口</td></tr>
+        <tr><td class="k">对大数组深度侦听跑规则</td><td><span class="tag m">中</span></td><td>主线程阻塞、FPS 暴跌、页面假死</td><td>数据指纹 + 防抖 + Web Worker</td></tr>
+        <tr><td class="k">每次操作都过模型</td><td><span class="tag m">中</span></td><td>延迟与成本双高，用户流失</td><td>L1/L2/L3 三级路由 + 意图缓存 + 配额上限</td></tr>
+        <tr><td class="k">让 Agent 直接写多表事务</td><td><span class="tag r">高</span></td><td>部分成功、数据不一致、重复扣款</td><td>封装为单一、幂等、可审计的事务型 Tool</td></tr>
+        <tr><td class="k">AI 入口替代全部按钮</td><td><span class="tag m">中</span></td><td>AI 不可用时系统瘫痪，用户抵触</td><td>传统路径全保留；AI 只做加速带与建议卡</td></tr>
+      </tbody>
+    </table>
+    <div class="card amber" style="margin-top:14px">
+      <p style="font-size:13px"><strong>治理节奏：</strong>每条风险对应一个<em class="hl">可自动检查的卡点</em>——CI 静态扫描禁止危险动态执行 / 动态 import；MR 模板强制填写"新增工具的权限与风险等级"；网关侧对未注册工具的调用自动告警。</p>
+    </div>
+  </div>
+  <div class="slide-footer"><span>风险与反模式清单</span><span>18 / 19</span></div>
+  <div class="notes"><div class="n-h">讲稿</div><div class="n-b">这一页可以留作附件发给评审。等级为"高"的四条需要在 P1 阶段前完成整改，中等级在各自路径落地时处理。</div></div>
+</section></div>
+
+<!-- ============ 19 结论 ============ -->
+<div class="frame"><section class="slide">
+  <span class="kicker">18 · 结论与 Ask</span>
+  <h2 class="title">结论，以及需要今天的三个决定</h2>
+  <div class="rule"></div>
+  <div class="body">
+    <div class="grid2 grow" style="gap:20px">
+      <div class="col">
+        <div class="card accent" style="padding:18px 20px">
+          <h4 style="color:var(--accent);font-size:16px">结论：三句话</h4>
+          <ol class="num" style="margin-top:8px">
+            <li><strong>架构上</strong>：新增 AI 执行层（MCP / Harness），前端接入层变薄、智能决策层上移，后端退化为数据与事务执行层。</li>
+            <li><strong>前端的新职责</strong>：当好 MCP 的客户端——把用户操作转成受控的 tool call，再把结果渲染出来。<strong>不要再在 Vue 里直接调大模型。</strong></li>
+            <li><strong>后端的新职责</strong>：把自己封装成 MCP 的 Tools，让网关调度，而不是让前端直调。</li>
+          </ol>
+        </div>
+        <div class="card green" style="margin-top:12px">
+          <p style="font-size:13.5px"><strong>底线不变：</strong>权限不外包、事务不外包、成本不失控。模型只有<em class="hl">提议权</em>，执行权始终留在系统里。</p>
+        </div>
+        <div class="card" style="margin-top:12px">
+          <p style="font-size:13.5px"><strong>最后一句：</strong>前端依然要接后端，但中间夹了一个 AI 执行层。<strong>前端现在主要对接这个执行层</strong>，由它决定是调后端、调模型，还是直接操作浏览器。</p>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card" style="padding:18px 20px">
+          <h4 style="font-size:16px">需要今天的三个决定</h4>
+          <ul class="list" style="margin-top:8px">
+            <li><strong>立项范围</strong>：是否批准 P0 + P1（前 6 周：路径二 + 网关 + 路径一）作为一期范围？</li>
+            <li><strong>组织与归属</strong>：AI 执行网关由谁 owner？建议<strong>平台侧建网关、业务线注册 Tools</strong>，并明确各自 KPI。</li>
+            <li><strong>资源与预算</strong>：确认前端 2 人 + 后端 1 人 + 平台 1 人；模型预算按人均上限试运行一个月后复盘。</li>
+          </ul>
+          <div class="chips" style="margin-top:14px">
+            <span class="chip a">下一步：选 1 个高频页面做 POC</span>
+            <span class="chip a">两周后回来过一次网关设计评审</span>
+          </div>
+        </div>
+        <div class="card amber" style="margin-top:12px">
+          <h4><span class="tag m">待确认</span>三个待补充输入</h4>
+          <ul class="list tight" style="margin-top:6px">
+            <li>候选 <strong>POC 页面</strong>：建议选操作步骤多、长尾诉求多的那个</li>
+            <li>模型选型与部署形态：<strong>公有云 API / 自建推理</strong>（影响成本与合规路径）</li>
+            <li>现有后端接口清单：用于评估<strong>改造为 Tools 的工作量</strong></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>结论与下一步</span><span>19 / 19</span></div>
+  <div class="notes"><div class="n-h">讲稿</div><div class="n-b">收尾要给明确的 Ask，不要开放式结尾。三个决定 + 三个待确认输入，让会议能当场形成决议或指派 action。</div></div>
+</section></div>
+
+  </div></div>
+</div>
+
+<div id="notes"></div>
+<div id="bottombar">
+  <button class="btn" id="btnPrev">← 上一页</button>
+  <span id="counter">1 / 19</span>
+  <button class="btn" id="btnNext">下一页 →</button>
+  <button class="btn" id="btnNotes">讲稿 (S)</button>
+  <button class="btn" id="btnOverview">概览 (O)</button>
+  <button class="btn" id="btnFull">全屏 (F)</button>
+</div>
+
+<script>
+/* ---------- 代码高亮（单遍扫描，避免嵌套替换） ---------- */
+(function highlight(){
+  var KW = /^(const|let|var|function|return|await|async|import|export|default|from|if|else|for|of|in|new|class|extends|try|catch|finally|throw|typeof|interface|type|as|null|true|false|undefined|this|void|satisfies)$/;
+  var RE = /(\/\/[^\n]*|\/\*[\s\S]*?\*\/)|('(?:\\.|[^'\\\n])*'|"(?:\\.|[^"\\\n])*"|`(?:\\.|[^`\\])*`)|\b([A-Za-z_$][\w$]*)\b|\b(\d+(?:\.\d+)?)\b/g;
+  document.querySelectorAll('pre.code').forEach(function(pre){
+    var src = pre.textContent;
+    var out = '';
+    var last = 0, m;
+    RE.lastIndex = 0;
+    while ((m = RE.exec(src)) !== null) {
+      out += esc(src.slice(last, m.index));
+      if (m[1]) out += '<span class="tok-c">' + esc(m[1]) + '</span>';
+      else if (m[2]) out += '<span class="tok-s">' + esc(m[2]) + '</span>';
+      else if (m[3]) out += KW.test(m[3]) ? '<span class="tok-k">' + esc(m[3]) + '</span>'
+                          : /^[A-Z]/.test(m[3]) ? '<span class="tok-t">' + esc(m[3]) + '</span>' : esc(m[3]);
+      else if (m[4]) out += '<span class="tok-n">' + esc(m[4]) + '</span>';
+      last = m.index + m[0].length;
+    }
+    out += esc(src.slice(last));
+    pre.innerHTML = out;
+  });
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+})();
+
+/* ---------- 幻灯片引擎 ---------- */
+(function(){
+  var frames = Array.prototype.slice.call(document.querySelectorAll('.frame'));
+  var deck = document.getElementById('deck');
+  var stage = document.getElementById('stage');
+  var counter = document.getElementById('counter');
+  var bar = document.getElementById('bar');
+  var notesBox = document.getElementById('notes');
+  var i = 0, overview = false, notesOn = false;
+
+  function fit(){
+    var pad = 24;
+    var w = window.innerWidth - pad, h = window.innerHeight - 104 - pad;
+    var s = Math.min(w / 1280, h / 720);
+    stage.style.transform = 'scale(' + s + ')';
+  }
+  function tscale(){
+    var cell = (window.innerWidth - 60) / 4;
+    var k = cell / 1280;
+    deck.style.setProperty('--tscale', k);
+  }
+  function render(){
+    frames.forEach(function(f, n){ f.classList.toggle('is-active', n === i); });
+    counter.textContent = (i + 1) + ' / ' + frames.length;
+    bar.style.width = ((i + 1) / frames.length * 100) + '%';
+    var n = frames[i].querySelector('.notes');
+    if (notesOn) {
+      notesBox.innerHTML = n ? n.innerHTML
+        : '<div class="n-h">讲稿</div><div class="n-b" style="color:#9AA1AC">（本页无讲稿）</div>';
+    }
+    if (!overview) notesBox.classList.toggle('show', notesOn);
+    else notesBox.classList.remove('show');
+  }
+  function go(n){
+    i = Math.max(0, Math.min(frames.length - 1, n));
+    if (overview) setOverview(false);
+    render();
+  }
+  function setOverview(on){
+    overview = on;
+    deck.classList.toggle('overview', on);
+    document.getElementById('btnOverview').classList.toggle('on', on);
+    if (on) { tscale(); notesBox.classList.remove('show'); }
+    frames.forEach(function(f){ f.classList.toggle('is-active', on); });
+    if (!on) render();
+  }
+  document.getElementById('btnPrev').onclick = function(){ go(i - 1); };
+  document.getElementById('btnNext').onclick = function(){ go(i + 1); };
+  document.getElementById('btnNotes').onclick = function(){
+    notesOn = !notesOn;
+    this.classList.toggle('on', notesOn);
+    render();
+  };
+  document.getElementById('btnOverview').onclick = function(){ setOverview(!overview); };
+  document.getElementById('btnFull').onclick = function(){
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen();
+  };
+  frames.forEach(function(f, n){
+    f.addEventListener('click', function(){ if (overview) { setOverview(false); go(n); } });
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(i + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(i - 1); }
+    else if (e.key === 'Home') { go(0); }
+    else if (e.key === 'End') { go(frames.length - 1); }
+    else if (e.key === 'o' || e.key === 'O') { setOverview(!overview); }
+    else if (e.key === 's' || e.key === 'S') { document.getElementById('btnNotes').click(); }
+    else if (e.key === 'Escape') { if (overview) setOverview(false); }
+  });
+  window.addEventListener('resize', function(){ fit(); if (overview) tscale(); });
+  fit(); tscale(); render();
+  window.addEventListener('beforeprint', function(){
+    document.querySelectorAll('.frame').forEach(function(f){ f.style.opacity = 1; });
+  });
+})();
+</script>
+</body>
+</html>

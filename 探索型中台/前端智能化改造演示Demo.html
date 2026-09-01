@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>前端智能化改造 · 交互演示 Demo</title>
+<style>
+:root{
+  --bg:#F4F5F3;--card:#FFFFFF;--ink:#14161A;--ink-2:#3C424B;--muted:#757C87;
+  --line:#E4E6EB;--line-2:#D3D7DE;
+  --accent:#1B4DFF;--accent-soft:#EDF1FF;--accent-line:#B9C6FF;
+  --red:#D33A2C;--red-soft:#FCEDEB;--green:#0E9F6E;--green-soft:#E8F7F1;
+  --amber:#B26B00;--amber-soft:#FDF3E3;
+  --mono:"JetBrains Mono",Consolas,"Cascadia Code",monospace;
+  --sans:system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased;padding-bottom:60px}
+
+/* ---------- topbar ---------- */
+.topbar{position:sticky;top:0;z-index:60;background:rgba(244,245,243,.94);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;
+  padding:0 22px;height:54px}
+.topbar .brand{font-weight:750;font-size:15px;letter-spacing:.01em}
+.topbar .badge{font-size:12px;color:var(--muted);border:1px solid var(--line-2);border-radius:20px;padding:4px 12px;background:#fff}
+.topbar nav{display:flex;gap:6px}
+.topbar nav a{font-size:12.5px;color:var(--ink-2);text-decoration:none;padding:6px 11px;border-radius:7px;border:1px solid transparent}
+.topbar nav a:hover{background:#fff;border-color:var(--line-2);color:var(--ink)}
+
+/* ---------- hero ---------- */
+.hero{max-width:1240px;margin:26px auto 4px;padding:0 18px}
+.hero h1{font-size:30px;font-weight:780;letter-spacing:-.01em}
+.hero p{color:var(--muted);font-size:14px;margin-top:8px;line-height:1.7}
+.hero .hl{background:linear-gradient(transparent 60%,#FFE9A8 60%);font-weight:700;color:var(--ink)}
+
+/* ---------- grid ---------- */
+.grid{max-width:1240px;margin:18px auto 0;padding:0 18px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:1000px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;
+  box-shadow:0 6px 22px rgba(20,22,26,.05)}
+.panel-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.panel-head .num{font-size:12px;font-weight:800;color:#fff;background:var(--ink);border-radius:6px;padding:3px 8px;letter-spacing:.04em}
+.panel-head h2{font-size:19px;font-weight:740}
+.panel-head .sub{font-size:12px;color:var(--muted)}
+.panel-head .demo-tag{margin-left:auto;font-size:11px;color:var(--accent);background:var(--accent-soft);
+  border:1px solid var(--accent-line);border-radius:20px;padding:3px 10px;font-weight:600}
+
+/* ---------- common widgets ---------- */
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.chip{font-size:12px;padding:4px 11px;border-radius:20px;background:#F2F3F6;border:1px solid var(--line);color:var(--ink-2);cursor:pointer;transition:.15s;user-select:none}
+.chip:hover{border-color:var(--ink);color:var(--ink)}
+.btn{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink);background:#fff;border:1px solid var(--line-2);
+  border-radius:8px;padding:7px 14px;cursor:pointer;transition:.15s;box-shadow:0 1px 2px rgba(20,22,26,.05)}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.primary:hover{background:#2b2f36}
+.btn.danger:hover{border-color:var(--red);color:var(--red)}
+.btn.sm{padding:4px 10px;font-size:12px;border-radius:7px}
+.btn:active{transform:translateY(1px)}
+.mono{font-family:var(--mono)}
+.tag{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:5px}
+.tag.paid{background:var(--green-soft);color:#0A7A54}
+.tag.unpaid{background:var(--amber-soft);color:#8A5A00}
+.tag.refunded{background:#F0F1F4;color:#5A6472}
+.tag.high{background:var(--red-soft);color:#9B2C20}
+.tag.mid{background:var(--amber-soft);color:#8A5A00}
+.tag.low{background:#F0F1F4;color:#5A6472}
+
+/* ---------- toast ---------- */
+#toasts{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:9px;z-index:100}
+.toast{background:#fff;border:1px solid var(--line-2);border-left:4px solid var(--accent);border-radius:9px;
+  padding:11px 15px;font-size:13px;line-height:1.55;box-shadow:0 8px 26px rgba(20,22,26,.13);
+  max-width:340px;animation:tin .25s ease}
+.toast.warn{border-left-color:var(--amber)}
+.toast.ok{border-left-color:var(--green)}
+.toast.err{border-left-color:var(--red)}
+.toast b{font-weight:700}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ================= P1 智能交互层 ================= */
+.cmd{display:flex;gap:8px}
+.cmd input{flex:1;font-family:var(--sans);font-size:13.5px;padding:9px 13px;border:1.5px solid var(--line-2);
+  border-radius:9px;outline:none;transition:.15s}
+.cmd input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.trace{margin-top:11px;background:#FAFBFC;border:1px solid var(--line);border-radius:9px;padding:10px 13px;min-height:64px;font-size:12px;line-height:1.75}
+.tlog{color:var(--ink-2);display:flex;gap:8px;align-items:baseline;opacity:0;transform:translateX(-6px);transition:.25s}
+.tlog.show{opacity:1;transform:none}
+.tlog .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none;align-self:center;animation:blink 1s infinite}
+.tlog.done .dot{background:var(--green);animation:none}
+.tlog.done{color:var(--ink)}
+@keyframes blink{50%{opacity:.25}}
+.p1-table{margin-top:13px;width:100%;border-collapse:collapse;font-size:12.8px}
+.p1-table th{text-align:left;font-size:11px;color:var(--muted);letter-spacing:.05em;padding:7px 10px;border-bottom:1.5px solid var(--line-2);background:#FAFBFC}
+.p1-table td{padding:8px 10px;border-bottom:1px solid var(--line);transition:.3s}
+.p1-table tr.dim td{opacity:.22}
+.p1-table tr{transition:opacity .3s}
+.p1-table .amt{font-variant-numeric:tabular-nums;font-weight:600}
+.confirmbar{margin-top:11px;display:none;align-items:center;gap:11px;background:var(--amber-soft);border:1px solid #F0DCB4;
+  border-radius:9px;padding:10px 14px;font-size:13px}
+.confirmbar.show{display:flex}
+.confirmbar .w{font-weight:700;color:#7A4E00}
+
+/* ================= P2 智能数据层 ================= */
+.p2-top{display:flex;gap:14px}
+.p2-table{flex:1.2;border-collapse:collapse;font-size:12.8px;width:100%}
+.p2-table th{text-align:left;font-size:11px;color:var(--muted);padding:6px 10px;border-bottom:1.5px solid var(--line-2);background:#FAFBFC}
+.p2-table td{padding:7px 10px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.cell-abn{background:var(--red-soft);color:#9B2C20;font-weight:700;border-radius:6px;position:relative;cursor:help;animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(211,58,44,.25)}50%{box-shadow:0 0 0 4px rgba(211,58,44,.12)}}
+.bubble{position:absolute;right:0;top:calc(100% + 7px);width:216px;background:#fff;border:1px solid var(--line-2);
+  border-radius:9px;box-shadow:0 10px 28px rgba(20,22,26,.16);padding:9px 12px;font-size:12px;line-height:1.6;z-index:20}
+.bubble::before{content:"";position:absolute;top:-6px;right:18px;width:11px;height:11px;background:#fff;border-left:1px solid var(--line-2);border-top:1px solid var(--line-2);transform:rotate(45deg)}
+.bubble b{color:var(--red)}
+.p2-insights{flex:.8;min-width:0}
+.p2-insights .cap{font-size:11px;color:var(--muted);letter-spacing:.08em;font-weight:700;margin-bottom:7px}
+.insight{font-size:12.2px;line-height:1.6;color:var(--ink-2);padding:7px 10px;border-left:3px solid var(--line-2);background:#FAFBFC;border-radius:0 7px 7px 0;margin-bottom:7px;opacity:0;transform:translateY(-4px);transition:.3s}
+.insight.show{opacity:1;transform:none}
+.insight.warn{border-left-color:var(--amber);background:var(--amber-soft)}
+.insight.good{border-left-color:var(--green);background:var(--green-soft)}
+.p2-divider{height:1px;background:var(--line);margin:18px 0 14px}
+.form-demo{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.form-demo label{font-size:13px;color:var(--ink-2);font-weight:600}
+.form-demo input{font-family:var(--sans);font-size:13.5px;padding:8px 12px;border:1.5px solid var(--line-2);border-radius:8px;outline:none;width:230px;transition:.15s}
+.form-demo input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.form-hint{width:100%;display:none;align-items:center;gap:9px;background:var(--accent-soft);border:1px solid var(--accent-line);
+  border-radius:9px;padding:9px 13px;font-size:12.8px;margin-top:10px}
+.form-hint.show{display:flex}
+.form-hint .fix{color:var(--accent);font-weight:700;cursor:pointer;text-decoration:underline}
+.form-hint .no{color:var(--muted);cursor:pointer}
+
+/* ================= P3 智能路由层 ================= */
+.p3-log{background:#FAFBFC;border:1px solid var(--line);border-radius:9px;padding:10px 13px;min-height:56px;font-size:12px;line-height:1.75}
+.p3-log .tlog .dot{background:var(--amber)}
+.p3-log .tlog.done .dot{background:var(--green)}
+.pbar{height:4px;background:var(--line);border-radius:4px;margin-top:9px;overflow:hidden;display:none}
+.pbar.show{display:block}
+.pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),#7AA2FF);border-radius:4px;transition:width .4s ease}
+.board{margin-top:13px;display:none;border:1.5px dashed var(--accent-line);border-radius:11px;background:#F8FAFF;padding:14px}
+.board.show{display:block;animation:tin .3s ease}
+.board .b-tag{font-size:10.5px;color:var(--accent);font-weight:700;letter-spacing:.08em;margin-bottom:10px}
+.board .b-tag span{background:var(--accent-soft);border:1px solid var(--accent-line);border-radius:20px;padding:2px 9px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:9px;padding:10px 13px}
+.kpi .k-l{font-size:11px;color:var(--muted)}
+.kpi .k-v{font-size:21px;font-weight:760;margin-top:3px;letter-spacing:-.02em}
+.kpi .k-d{font-size:11px;margin-top:3px}
+.kpi .up{color:var(--red)}.kpi .down{color:var(--green)}
+.b-chart{display:flex;align-items:flex-end;gap:10px;height:118px;margin-bottom:12px;padding:0 6px}
+.b-chart .col{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end}
+.b-chart .bar{width:70%;border-radius:5px 5px 0 0;background:linear-gradient(180deg,#4A71FF,var(--accent));min-height:4px;transition:height .6s cubic-bezier(.2,.8,.2,1)}
+.b-chart .bar.alt{background:linear-gradient(180deg,#FFB44D,#E88B0C)}
+.b-chart .lb{font-size:10px;color:var(--muted)}
+.b-table{width:100%;border-collapse:collapse;font-size:12.3px}
+.b-table th{text-align:left;font-size:10.5px;color:var(--muted);padding:5px 9px;border-bottom:1.5px solid var(--line-2);background:#fff}
+.b-table td{padding:6px 9px;border-bottom:1px solid var(--line);background:#fff}
+
+/* ================= P4 智能运维层 ================= */
+.p4-row{display:flex;gap:14px}
+.p4-left{flex:1.05}
+.p4-right{flex:.95}
+.comp-box{border:1.5px solid var(--line-2);border-radius:11px;padding:15px;background:#fff;transition:.3s;position:relative;overflow:hidden}
+.comp-box .c-name{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}
+.comp-box .c-state{font-size:11.5px;color:var(--muted);margin-top:7px;display:flex;gap:7px;align-items:center}
+.comp-box .c-body{margin-top:10px;display:flex;gap:9px}
+.comp-box .mini{flex:1;height:34px;border-radius:7px;background:#F0F1F4;display:flex;align-items:center;justify-content:center;font-size:10.5px;color:var(--muted)}
+.comp-box .mini.on{background:var(--green-soft);color:#0A7A54;font-weight:700}
+.comp-box.err{border-color:var(--red);background:var(--red-soft)}
+.comp-box.err .c-name{color:var(--red)}
+.comp-box.heal{border-color:var(--amber);background:var(--amber-soft)}
+.comp-box.ok-again{border-color:var(--green)}
+.status-pill{font-size:11px;font-weight:700;border-radius:20px;padding:2px 9px;background:#F0F1F4;color:#5A6472}
+.status-pill.err{background:var(--red-soft);color:#9B2C20}
+.status-pill.ok{background:var(--green-soft);color:#0A7A54}
+.status-pill.heal{background:var(--amber-soft);color:#8A5A00}
+.fps-box{margin-top:14px;border:1.5px solid var(--line-2);border-radius:11px;padding:15px}
+.fps-box .f-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.fps-box .f-head b{font-size:13px}
+.fps-meter{display:flex;align-items:center;gap:10px}
+.fps-bar{flex:1;height:8px;border-radius:6px;background:var(--line);overflow:hidden}
+.fps-bar i{display:block;height:100%;border-radius:6px;transition:width .5s,background .5s;width:60%}
+.fps-num{font-family:var(--mono);font-size:19px;font-weight:760;min-width:52px;text-align:right}
+.fps-tip{display:none;align-items:center;gap:9px;background:var(--amber-soft);border:1px solid #F0DCB4;border-radius:9px;
+  padding:9px 13px;font-size:12.5px;margin-top:11px}
+.fps-tip.show{display:flex}
+.ops-log{margin-top:14px}
+.ops-log .cap{font-size:11px;color:var(--muted);letter-spacing:.08em;font-weight:700;margin-bottom:7px}
+.op{font-size:12.2px;line-height:1.7;padding:6px 10px;border-radius:7px;background:#FAFBFC;border:1px solid var(--line);margin-bottom:6px;display:flex;gap:8px;align-items:baseline;opacity:0;transform:translateY(-4px);transition:.3s}
+.op.show{opacity:1;transform:none}
+.op .act{font-weight:700}
+.op.ok{background:var(--green-soft);border-color:#BFE7D8}
+.op.err{background:var(--red-soft);border-color:#F3C9C3}
+.op.heal{background:var(--amber-soft);border-color:#F0DCB4}
+
+footer{max-width:1240px;margin:26px auto 0;padding:0 18px;font-size:12px;color:var(--muted);line-height:1.8}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">前端智能化改造 · 演示台</div>
+  <nav>
+    <a href="#p1">01 交互层</a>
+    <a href="#p2">02 数据层</a>
+    <a href="#p3">03 路由层</a>
+    <a href="#p4">04 运维层</a>
+  </nav>
+  <div class="badge">纯前端模拟 · 未接真实模型</div>
+</div>
+
+<div class="hero">
+  <h1>一句话，操作整个界面 <span class="hl">（四类智能化交互演示）</span></h1>
+  <p>下方四个演示对应方案里的四条路径：<b>智能交互层</b>（自然语言操作）、<b>智能数据层</b>（数据主动预警）、<b>智能路由层</b>（动态生成页面）、<b>智能运维层</b>（自我修复）。所有"AI"行为均由前端规则模拟。</p>
+</div>
+
+<div class="grid">
+
+<!-- ============ P1 智能交互层 ============ -->
+<section class="panel" id="p1">
+  <div class="panel-head">
+    <span class="num">01</span><h2>智能交互层</h2><span class="sub">意图 → 受控 Tool Call</span>
+    <span class="demo-tag">路径一 · Demo</span>
+  </div>
+  <div class="cmd">
+    <input id="cmdInput" placeholder='说你想做什么，例如："筛选出北京地区已付款的订单"' autocomplete="off">
+    <button class="btn primary" id="cmdBtn">执行</button>
+  </div>
+  <div class="chips">
+    <span class="chip" data-cmd="筛选出北京地区已付款的订单">筛选北京·已付款</span>
+    <span class="chip" data-cmd="按金额从高到低排序">按金额降序</span>
+    <span class="chip" data-cmd="只看高优先级的订单">只看高优先级</span>
+    <span class="chip" data-cmd="导出当前数据为 Excel">导出 Excel（高危）</span>
+  </div>
+  <div class="trace" id="trace1"></div>
+  <div class="confirmbar" id="confirmBar">
+    <span>🛡 <span class="w">高危动作确认</span>：AI 想要执行「导出全部订单为 Excel」</span>
+    <button class="btn sm primary" id="cfmYes">允许</button>
+    <button class="btn sm" id="cfmNo">取消</button>
+  </div>
+  <table class="p1-table">
+    <thead><tr><th>订单号</th><th>地区</th><th>状态</th><th>优先级</th><th style="text-align:right">金额</th></tr></thead>
+    <tbody id="p1Body"></tbody>
+  </table>
+</section>
+
+<!-- ============ P2 智能数据层 ============ -->
+<section class="panel" id="p2">
+  <div class="panel-head">
+    <span class="num">02</span><h2>智能数据层</h2><span class="sub">数据自己会说话</span>
+    <span class="demo-tag">路径二 · Demo</span>
+  </div>
+  <div class="p2-top">
+    <div style="flex:1.2;min-width:0">
+      <table class="p2-table">
+        <thead><tr><th>门店</th><th style="text-align:right">今日交易额</th><th style="text-align:right">同比</th></tr></thead>
+        <tbody id="p2Body"></tbody>
+      </table>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn sm" id="p2Inject">注入一条异常数据</button>
+        <button class="btn sm" id="p2Reset">重置</button>
+      </div>
+    </div>
+    <div class="p2-insights">
+      <div class="cap">AI 实时洞察</div>
+      <div id="p2List"></div>
+    </div>
+  </div>
+  <div class="p2-divider"></div>
+  <div style="font-size:13px;font-weight:700;margin-bottom:8px">智能表单：输入即校验</div>
+  <div class="form-demo">
+    <label>客户邮箱</label>
+    <input id="emailInput" placeholder="请输入邮箱地址" autocomplete="off">
+    <button class="btn sm" id="emailCheck">校验</button>
+    <span class="mono" id="emailState" style="font-size:12px;color:var(--muted)"></span>
+  </div>
+  <div class="form-hint" id="formHint">
+    <span>💡 检测到格式问题，是否修正为 <span class="fix" id="fixVal"></span>？</span>
+    <button class="btn sm primary" id="fixYes">自动修正</button>
+    <button class="btn sm" id="fixNo">保持原样</button>
+  </div>
+</section>
+
+<!-- ============ P3 智能路由层 ============ -->
+<section class="panel" id="p3">
+  <div class="panel-head">
+    <span class="num">03</span><h2>智能路由层</h2><span class="sub">页面动态生成</span>
+    <span class="demo-tag">路径三 · Demo</span>
+  </div>
+  <div class="cmd">
+    <input id="p3Input" placeholder='描述你想要的页面，例如："给我一个销售数据看板"' autocomplete="off">
+    <button class="btn primary" id="p3Btn">生成页面</button>
+  </div>
+  <div class="chips">
+    <span class="chip" data-gen="销售数据看板">销售数据看板</span>
+    <span class="chip" data-gen="订单监控大屏">订单监控大屏</span>
+  </div>
+  <div class="p3-log" id="p3Log"></div>
+  <div class="pbar" id="p3Bar"><i></i></div>
+  <div class="board" id="p3Board"></div>
+</section>
+
+<!-- ============ P4 智能运维层 ============ -->
+<section class="panel" id="p4">
+  <div class="panel-head">
+    <span class="num">04</span><h2>智能运维层</h2><span class="sub">自我修复 + 性能守护</span>
+    <span class="demo-tag">路径四 · Demo</span>
+  </div>
+  <div class="p4-row">
+    <div class="p4-left">
+      <div class="comp-box" id="compBox">
+        <div class="c-name">订单列表组件 <span class="mono" style="color:var(--muted);font-size:11px">&lt;OrderTable&gt; v2.1</span>
+          <span class="status-pill ok" id="compPill">运行正常</span></div>
+        <div class="c-state" id="compState">最近一次渲染耗时 23ms</div>
+        <div class="c-body">
+          <div class="mini on">表头</div><div class="mini on">行数据</div><div class="mini on">分页</div><div class="mini on">排序</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn sm danger" id="injErr">注入渲染故障</button>
+        <button class="btn sm" id="compReset">恢复正常</button>
+      </div>
+      <div class="ops-log">
+        <div class="cap">运维日志（AI 自愈动作）</div>
+        <div id="p4Log"></div>
+      </div>
+    </div>
+    <div class="p4-right">
+      <div class="fps-box">
+        <div class="f-head"><b>性能守护</b><span style="font-size:11px;color:var(--muted)">采样周期 5s</span></div>
+        <div class="fps-meter">
+          <div class="fps-bar"><i id="fpsBar"></i></div>
+          <div class="fps-num" id="fpsNum">60</div>
+        </div>
+        <div class="fps-tip" id="fpsTip">
+          <span>⚠ 检测到 FPS &lt; 30：建议关闭装饰动画、开启虚拟滚动</span>
+          <button class="btn sm primary" id="fpsFix">一键优化</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn sm" id="fpsStress">模拟性能压力</button>
+        </div>
+      </div>
+      <div class="ops-log" style="margin-top:14px">
+        <div class="cap">健康指标</div>
+        <div style="font-size:12.5px;line-height:2;color:var(--ink-2)">
+          渲染错误自愈率 <b style="color:var(--green)">96%</b>（近 30 天）<br>
+          平均自愈耗时 <b>26ms</b> · 未修复已自动上报 <b style="color:var(--amber)">4 起</b><br>
+          内存占用 <span class="mono">142 MB</span> · 长任务 &gt;50ms <b>0</b>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <b>说明：</b>本页所有演示均为<b>前端规则模拟</b>，未调用任何真实模型 API；上方的"AI 解析"实际是正则规则引擎，用于还原方案里「意图 → 工具 → 执行 → 护栏 → 审计」的效果链路。真实落地时，红线逻辑（权限 / 事务 / 成本）都在网关与后端完成，前端只负责展示与交互。<br>
+  配套汇报 PPT 见同目录《前端智能化改造方案.html》。
+</footer>
+
+<div id="toasts"></div>
+
+<script>
+/* ================= 工具 ================= */
+function $(s){return document.querySelector(s)}
+function toast(msg,type){
+  var t=document.createElement('div');t.className='toast '+(type||'');
+  t.innerHTML=msg;document.getElementById('toasts').appendChild(t);
+  setTimeout(function(){t.style.opacity='0';t.style.transition='opacity .3s'},3600);
+  setTimeout(function(){t.remove()},4000);
+}
+function delay(ms){return new Promise(function(r){setTimeout(r,ms)})}
+
+/* ================= P1 智能交互层 ================= */
+var P1=(function(){
+  var orders=[
+    {id:'SO-10241',region:'北京',status:'paid',    prio:'high', amt:12800},
+    {id:'SO-10242',region:'上海',status:'paid',    prio:'mid',  amt: 3200},
+    {id:'SO-10243',region:'北京',status:'unpaid',  prio:'high', amt: 8600},
+    {id:'SO-10244',region:'深圳',status:'paid',    prio:'low',  amt:21500},
+    {id:'SO-10245',region:'上海',status:'refunded',prio:'mid',  amt: 4900},
+    {id:'SO-10246',region:'北京',status:'paid',    prio:'high', amt: 7600},
+    {id:'SO-10247',region:'广州',status:'paid',    prio:'mid',  amt: 5300},
+    {id:'SO-10248',region:'北京',status:'paid',    prio:'high', amt: 9900},
+  ];
+  var state={rows:orders.slice(),log:[],confirming:false};
+  var regionMap={'北京':'北京','上海':'上海','深圳':'深圳','广州':'广州'};
+
+  function tagStatus(s){return s==='paid'?'已付款':s==='unpaid'?'未付款':'已退款'}
+  function render(){
+    var tb=$('#p1Body');tb.innerHTML='';
+    state.rows.forEach(function(o){
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td class="mono">'+o.id+'</td><td>'+o.region+'</td>'+
+        '<td><span class="tag '+o.status+'">'+tagStatus(o.status)+'</span></td>'+
+        '<td><span class="tag '+o.prio+'">'+(o.prio==='high'?'高':o.prio==='mid'?'中':'低')+'</span></td>'+
+        '<td class="amt" style="text-align:right">¥'+o.amt.toLocaleString()+'</td>';
+      tb.appendChild(tr);
+    });
+  }
+  function logLine(html,cls){
+    var box=$('#trace1');
+    var d=document.createElement('div');
+    d.className='tlog '+(cls||'');d.innerHTML=html;
+    box.appendChild(d);
+    requestAnimationFrame(function(){d.classList.add('show')});
+    if(box.scrollHeight>box.clientHeight+2) box.scrollTop=box.scrollHeight;
+    state.log.push(d);
+    return d;
+  }
+  function clearLog(){
+    state.log.forEach(function(d){d.remove()});state.log=[];
+  }
+  function parse(text){
+    var plan={filters:{},sort:null,action:null,desc:[]};
+    Object.keys(regionMap).forEach(function(k){
+      if(text.indexOf(k)>-1){plan.filters.region=regionMap[k];plan.desc.push('按地区筛选「'+k+'」')}
+    });
+    if(/已付款|已支付|已结/.test(text)){plan.filters.status='paid';plan.desc.push('状态=已付款')}
+    if(/未付款|未支付/.test(text)){plan.filters.status='unpaid';plan.desc.push('状态=未付款')}
+    if(/高优先级|优先/.test(text)){plan.filters.prio='high';plan.desc.push('仅高优先级')}
+    if(/金额|按金额/.test(text)&&/(高到低|降序|从高)/.test(text)){plan.sort={f:'amt',d:'desc'};plan.desc.push('金额降序')}
+    if(/导出|excel|Excel/.test(text)){plan.action='export';plan.desc.push('导出 Excel')}
+    return plan;
+  }
+  function apply(plan){
+    state.rows=orders.slice();
+    if(plan.filters.region) state.rows=state.rows.filter(function(o){return o.region===plan.filters.region});
+    if(plan.filters.status) state.rows=state.rows.filter(function(o){return o.status===plan.filters.status});
+    if(plan.filters.prio)   state.rows=state.rows.filter(function(o){return o.prio===plan.filters.prio});
+    if(plan.sort) state.rows=state.rows.slice().sort(function(a,b){return b[plan.sort.f]-a[plan.sort.f]});
+    render();
+  }
+  async function run(text){
+    if(state.confirming){toast('请先处理上一条高危确认','warn');return}
+    clearLog();
+    var plan=parse(text);
+    $('#confirmBar').classList.remove('show');
+    if(plan.desc.length===0&&!plan.action){
+      logLine('<span class="dot"></span>🧠 意图理解：<b>模糊意图</b>，无法命中本地规则');
+      logLine('<span class="dot"></span>☁️ 尝试调用模型解析…（<i>演示环境跳过，真实场景由网关转发</i>）');
+      await delay(700);
+      logLine('<span class="dot done"></span>✅ 未命中：已展示候选工具列表，等待人工选择','done');
+      toast('<b>提示：</b>演示仅内置了筛选 / 排序 / 导出的规则，可点下方快捷指令试试','warn');
+      return;
+    }
+    logLine('<span class="dot"></span>🧠 意图理解：识别出 '+plan.desc.length+' 个诉求 —— '+plan.desc.join('、'));
+    await delay(420);
+    if(plan.filters.region||plan.filters.status||plan.filters.prio){
+      var tools=[];
+      if(plan.filters.region||plan.filters.status||plan.filters.prio)
+        tools.push('filterOrders '+JSON.stringify(plan.filters));
+      if(plan.sort) tools.push('sortOrders '+JSON.stringify(plan.sort));
+      logLine('<span class="dot"></span>🔧 匹配工具：'+tools.join(' → '));
+      await delay(420);
+      logLine('<span class="dot"></span>⚡ 命中 <b>L1 规则</b>，未调用模型（0 token，12ms）');
+      await delay(420);
+      apply(plan);
+      logLine('<span class="dot done"></span>✅ 执行完成：展示 '+state.rows.length+' 条订单','done');
+      toast('<b>已执行：</b>'+plan.desc.join('、')+'<br>共 '+state.rows.length+' 条结果');
+    }
+    if(plan.action==='export'){
+      if(plan.desc.length>1) await delay(300);
+      logLine('<span class="dot"></span>🔧 匹配工具：<b>exportData</b>（risk: high）');
+      await delay(400);
+      logLine('<span class="dot"></span>🛡 权限校验通过 → <b>高危动作，等待用户二次确认</b>');
+      $('#confirmBar').classList.add('show');
+      state.confirming=true;
+    }
+  }
+  function confirmExport(ok){
+    $('#confirmBar').classList.remove('show');state.confirming=false;
+    if(ok){
+      logLine('<span class="dot done"></span>✅ 用户确认 → 已导出 <b>orders_20260901.xlsx</b>（'+state.rows.length+' 条）','done');
+      toast('<b>导出完成：</b>orders_20260901.xlsx（演示）','ok');
+    }else{
+      logLine('<span class="dot done"></span>🚫 用户取消 → 高危动作已终止，并写入审计日志','done');
+      toast('已取消，该次尝试已记入审计','warn');
+    }
+  }
+  $('#cmdBtn').addEventListener('click',function(){var v=$('#cmdInput').value.trim();if(v)run(v)});
+  $('#cmdInput').addEventListener('keydown',function(e){if(e.key==='Enter'){var v=this.value.trim();if(v)run(v)}});
+  document.querySelectorAll('#p1 .chip').forEach(function(c){
+    c.addEventListener('click',function(){$('#cmdInput').value=c.dataset.cmd;run(c.dataset.cmd)});
+  });
+  $('#cfmYes').addEventListener('click',function(){confirmExport(true)});
+  $('#cfmNo').addEventListener('click',function(){confirmExport(false)});
+  render();
+  return {reset:function(){state.rows=orders.slice();clearLog();$('#confirmBar').classList.remove('show');render()}};
+})();
+
+/* ================= P2 智能数据层 ================= */
+var P2=(function(){
+  var base=[
+    {name:'北京·朝阳店',amt:3240, yoy:'+4%'},
+    {name:'上海·静安店',amt:2980, yoy:'-8%'},
+    {name:'深圳·南山店',amt:4120, yoy:'+11%'},
+    {name:'广州·天河店',amt:3860, yoy:'+2%'},
+    {name:'杭州·西湖店',amt:4500, yoy:'+16%'},
+  ];
+  var rows=base.map(function(x){return Object.assign({},x)});
+  var abnCell=null, bubbleEl=null;
+
+  function mean(){return rows.reduce(function(s,r){return s+r.amt},0)/rows.length}
+  function render(){
+    var tb=$('#p2Body');tb.innerHTML='';
+    rows.forEach(function(r,i){
+      var td=document.createElement('tr');
+      td.innerHTML='<td>'+r.name+'</td><td class="amt" style="text-align:right;position:relative" data-i="'+i+'">¥'+r.amt.toLocaleString()+'</td>'+
+        '<td style="text-align:right">'+r.yoy+'</td>';
+      tb.appendChild(td);
+    });
+    scan();
+  }
+  function scan(){
+    var m=mean();
+    document.querySelectorAll('#p2Body td[data-i]').forEach(function(td){
+      var r=rows[+td.dataset.i];
+      if(r.amt>m*2.2){
+        td.classList.add('cell-abn');
+        td.innerHTML='¥'+r.amt.toLocaleString()+
+          '<div class="bubble"><b>⚠ 异常值</b><br>交易额 ¥'+r.amt.toLocaleString()+' 是日均值（¥'+Math.round(m).toLocaleString()+'）的 <b>'+(r.amt/m).toFixed(1)+' 倍</b><br>建议：检查该门店当日订单或活动配置</div>';
+      }else{
+        td.classList.remove('cell-abn');
+        td.innerHTML='¥'+r.amt.toLocaleString();
+      }
+    });
+  }
+  function insight(html,cls){
+    var list=$('#p2List');
+    var d=document.createElement('div');
+    d.className='insight '+(cls||'');d.innerHTML=html;
+    list.insertBefore(d,list.firstChild);
+    requestAnimationFrame(function(){d.classList.add('show')});
+    while(list.children.length>4)list.removeChild(list.lastChild);
+  }
+  function inject(){
+    var i=Math.floor(Math.random()*rows.length);
+    rows[i].amt=Math.round(mean()*(2.8+Math.random()*3));
+    render();
+    toast('<b>⚠ 数据异常：</b>'+rows[i].name+' 交易额异常偏高','warn');
+    insight('<b>⚠ 预警：</b>'+rows[i].name+' 交易额为日均 <b>'+ (rows[i].amt/mean()).toFixed(1)+' 倍</b>，已自动高亮并解释','warn');
+  }
+  function reset(){
+    rows=base.map(function(x){return Object.assign({},x)});
+    render();
+    $('#p2List').innerHTML='';
+    insight('✅ 数据已重置，规则引擎持续监听中…','good');
+  }
+  $('#p2Inject').addEventListener('click',inject);
+  $('#p2Reset').addEventListener('click',reset);
+
+  /* 智能表单 */
+  function suggest(v){
+    var m=v.match(/([^@\s]+)@?([^@\s]*)/);
+    if(!m)return null;
+    var name=m[1].split(/[\._\-]/)[0].toLowerCase();
+    return name+'@qq.com';
+  }
+  $('#emailCheck').addEventListener('click',function(){
+    var v=$('#emailInput').value.trim();
+    var st=$('#emailState'),hint=$('#formHint');
+    hint.classList.remove('show');
+    if(!v){st.textContent='';toast('请输入邮箱','warn');return}
+    if(/^[\w.+-]+@[\w-]+\.[\w.]+$/.test(v)){
+      st.textContent='✓ 格式正确';st.style.color='var(--green)';
+      insight('✅ 表单校验：'+v+' 通过，无需提示','good');
+    }else{
+      var s=suggest(v);
+      st.textContent='✕ 格式有误';st.style.color='var(--red)';
+      if(s){$('#fixVal').textContent=s;hint.classList.add('show')}
+      insight('⚠ 表单提示：检测到邮箱格式问题，已给出修正建议','warn');
+    }
+  });
+  $('#fixYes').addEventListener('click',function(){
+    var v=$('#emailInput').value.trim();var s=suggest(v);
+    $('#emailInput').value=s;
+    $('#formHint').classList.remove('show');
+    $('#emailState').textContent='✓ 已自动修正';$('#emailState').style.color='var(--green)';
+    toast('<b>已修正：</b>'+s,'ok');
+    insight('✅ 智能补全：已自动修正为 '+s,'good');
+  });
+  $('#fixNo').addEventListener('click',function(){$('#formHint').classList.remove('show')});
+
+  setTimeout(function(){
+    insight('✅ 规则引擎已就绪：监听数据变化与用户输入');
+  },500);
+  setTimeout(function(){
+    toast('<b>自动演示：</b>数据层规则引擎运行中，点「注入一条异常数据」试试');
+  },1500);
+  return {reset:reset};
+})();
+
+/* ================= P3 智能路由层 ================= */
+var P3=(function(){
+  var logBox=$('#p3Log'),board=$('#p3Board'),bar=$('#p3Bar'),barI=$('#p3Bar i');
+  var genCount=0;
+  function clog(html,cls){
+    var d=document.createElement('div');
+    d.className='tlog '+(cls||'');d.innerHTML=html;
+    logBox.appendChild(d);
+    requestAnimationFrame(function(){d.classList.add('show')});
+    if(logBox.scrollHeight>logBox.clientHeight+2)logBox.scrollTop=logBox.scrollHeight;
+  }
+  function rand(a,b){return a+Math.floor(Math.random()*(b-a+1))}
+  async function generate(intent){
+    board.classList.remove('show');
+    logBox.innerHTML='';
+    bar.classList.add('show');barI.style.width='0';
+    genCount++;
+    clog('<span class="dot"></span>🧠 意图理解：「'+intent+'」 → 页面类型 <b>dashboard</b>');
+    barI.style.width='34%';
+    await delay(430);
+    clog('<span class="dot"></span>🏗 规划布局：选择组件 <b>[kpi ×3, chart, table]</b>，绑定数据源 sales_api');
+    barI.style.width='68%';
+    await delay(430);
+    clog('<span class="dot"></span>🔗 注册路由：<span class="mono">/smart/dashboard-'+(1000+genCount)+'</span>（白名单组件，越界编译期拦截）');
+    barI.style.width='100%';
+    await delay(430);
+    clog('<span class="dot done"></span>✅ 页面已生成：KPI 卡片 + 趋势图 + 明细表（配置驱动，非写死代码）','done');
+    await delay(250);
+    bar.classList.remove('show');barI.style.width='0';
+    renderBoard(genCount);
+  }
+  function renderBoard(n){
+    var alt=n%2===0;
+    var kpis=[
+      {l:'总销售额(GMV)',v:'¥'+(rand(120,180)*10).toLocaleString()+'万',d:alt?'↑ 12.4%':'↑ 8.1%',c:'up'},
+      {l:'订单数',v:rand(860,1260).toLocaleString(),d:alt?'↑ 6.8%':'↓ 2.3%',c:alt?'up':'down'},
+      {l:'活跃客户',v:rand(420,680).toLocaleString(),d:alt?'↑ 15.2%':'↑ 9.6%',c:'up'},
+    ];
+    var bars=[42,58,36,72,55,88,64].map(function(b){return b+(n%3)*4});
+    var rows=[
+      ['华东区', '¥'+(rand(60,90)*10)+'万','已完成'],
+      ['华北区', '¥'+(rand(40,70)*10)+'万','已完成'],
+      ['华南区', '¥'+(rand(30,55)*10)+'万','进行中'],
+    ];
+    var html='<div class="b-tag"><span>AI 生成页面 · 路由 /smart/dashboard-'+n+'</span></div>';
+    html+='<div class="kpis">'+kpis.map(function(k){
+      return '<div class="kpi"><div class="k-l">'+k.l+'</div><div class="k-v">'+k.v+'</div><div class="k-d '+k.c+'">'+k.d+' 较上周</div></div>';
+    }).join('')+'</div>';
+    html+='<div class="b-chart">'+bars.map(function(h,i){
+      return '<div class="col"><div class="bar'+(alt?'':' alt')+'" style="height:'+h+'%"></div><div class="lb">周'+(i+1)+'</div></div>';
+    }).join('')+'</div>';
+    html+='<table class="b-table"><thead><tr><th>区域</th><th>销售额</th><th>状态</th></tr></thead><tbody>'+
+      rows.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>'}).join('')+'</tbody></table>';
+    board.innerHTML=html;
+    board.classList.add('show');
+    toast('<b>看板已生成：</b>/smart/dashboard-'+n,'ok');
+  }
+  $('#p3Btn').addEventListener('click',function(){var v=$('#p3Input').value.trim();if(v)generate(v);else generate('销售数据看板')});
+  $('#p3Input').addEventListener('keydown',function(e){if(e.key==='Enter'){$('#p3Btn').click()}});
+  document.querySelectorAll('#p3 .chip').forEach(function(c){
+    c.addEventListener('click',function(){$('#p3Input').value=c.dataset.gen;generate(c.dataset.gen)});
+  });
+  return {};
+})();
+
+/* ================= P4 智能运维层 ================= */
+var P4=(function(){
+  var comp=$('#compBox'),pill=$('#compPill'),compState=$('#compState');
+  var logBox=$('#p4Log');
+  function olog(html,cls){
+    var d=document.createElement('div');
+    d.className='op '+(cls||'');d.innerHTML=html;
+    logBox.insertBefore(d,logBox.firstChild);
+    requestAnimationFrame(function(){d.classList.add('show')});
+    while(logBox.children.length>5)logBox.removeChild(logBox.lastChild);
+  }
+  function setComp(mode){
+    comp.classList.remove('err','heal','ok-again');
+    var minis=comp.querySelectorAll('.mini');
+    if(mode==='ok'){
+      pill.textContent='运行正常';pill.className='status-pill ok';
+      compState.textContent='最近一次渲染耗时 23ms';
+      minis.forEach(function(m){m.classList.add('on');m.textContent=m.textContent.replace(/✕|◌/g,'')});
+    }else if(mode==='err'){
+      pill.textContent='渲染失败';pill.className='status-pill err';
+      compState.textContent='Error: Render timeout after 5s at <OrderTable> line 42';
+      minis[1].classList.remove('on');minis[1].textContent='✕ 数据区';
+      minis[2].classList.remove('on');minis[2].textContent='✕ 分页';
+    }else if(mode==='heal'){
+      pill.textContent='自愈中…';pill.className='status-pill heal';
+      compState.textContent='策略命中：render_timeout → 重试渲染（第 1 次）';
+    }else if(mode==='again'){
+      pill.textContent='已自愈';pill.className='status-pill ok';
+      compState.textContent='已自动重试并恢复（耗时 28ms）';
+      minis[1].classList.add('on');minis[1].textContent='行数据';
+      minis[2].classList.add('on');minis[2].textContent='分页';
+    }
+  }
+  async function injectErr(){
+    setComp('err');
+    olog('<span class="act">🛑 捕获异常</span> 组件 OrderTable 渲染超时（5s）','err');
+    await delay(1100);
+    setComp('heal');
+    olog('<span class="act">🔍 模式识别</span> 命中已知错误模式 <b>render_timeout</b> → 策略：重试渲染','heal');
+    await delay(1100);
+    setComp('again');
+    comp.classList.add('ok-again');
+    olog('<span class="act">✅ 自愈成功</span> 重试后恢复，耗时 28ms，未影响其他组件','ok');
+    toast('<b>已自动修复：</b>渲染超时 → 重试成功（无需人工介入）','ok');
+  }
+  $('#injErr').addEventListener('click',injectErr);
+  $('#compReset').addEventListener('click',function(){setComp('ok');olog('<span class="act">ℹ️ 手动恢复</span> 组件回到正常状态','ok')});
+
+  /* FPS 守护 */
+  var fpsEl=$('#fpsNum'),fpsBar=$('#fpsBar'),fpsTip=$('#fpsTip');
+  var fps=60,target=60,pressure=false;
+  setInterval(function(){
+    if(pressure){target=randF(17,26)}else{target=randF(54,60)}
+    fps+=(target-fps)*0.18;
+    fpsEl.textContent=Math.round(fps);
+    var pct=fps/60*100;
+    fpsBar.style.width=pct+'%';
+    fpsBar.style.background=fps<30?'var(--red)':fps<45?'var(--amber)':'var(--green)';
+    if(fps<30&&!fpsTip.classList.contains('show')){
+      fpsTip.classList.add('show');
+      olog('<span class="act">📉 性能告警</span> FPS 降至 '+Math.round(fps)+'，低于阈值 30','heal');
+    }
+    if(fps>=40&&fpsTip.classList.contains('show'))fpsTip.classList.remove('show');
+  },300);
+  function randF(a,b){return a+Math.random()*(b-a)}
+  $('#fpsStress').addEventListener('click',function(){pressure=true;toast('已模拟性能压力：持续长任务占用主线程','warn')});
+  $('#fpsFix').addEventListener('click',function(){
+    pressure=false;
+    olog('<span class="act">⚡ 一键优化</span> 已应用：虚拟滚动 on · 装饰动效 off · 图表降采样','ok');
+    toast('<b>优化已应用：</b>FPS 回升至 60','ok');
+  });
+  setTimeout(function(){olog('<span class="act">👋 运维守护已启动</span> 采样 FPS / 捕获渲染异常（演示）','ok')},600);
+  return {};
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,2473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>前端智能化改造 · V2 人话版（思想 + 进阶示例 + 无模型兜底）</title>
+<style>
+/* ============================================================
+   设计令牌（深蓝 / 深空黑 / 暖金强调，Stripe × Linear 风格）
+   ============================================================ */
+:root{
+  --bg:#F4F6FB;
+  --bg-grad:linear-gradient(180deg,#FFFFFF 0%,#F8FAFE 100%);
+  --card:#FFFFFF;
+  --ink:#0E1116;
+  --ink2:#3D4452;
+  --muted:#767E8C;
+  --line:#E8EBF2;
+  --line2:#D7DBE4;
+
+  --primary:#2547D0;
+  --primary-2:#1B3AB8;
+  --pri-soft:#ECF0FE;
+  --pri-line:#C2CFFB;
+  --pri-ink:#1A2D7A;
+
+  --red:#D8463E;
+  --red-soft:#FCEDEB;
+  --red-line:#F3C9C3;
+  --red-ink:#962B25;
+
+  --green:#0A8A5E;
+  --green-soft:#E5F4ED;
+  --green-line:#BFE7D8;
+  --green-ink:#075A3D;
+
+  --amber:#B26B00;
+  --amber-soft:#FDF3E3;
+  --amber-line:#F0DCB4;
+  --amber-ink:#7A4900;
+
+  --ink-deep:#0A0C12;
+  --gold:#FFD166;
+
+  --shadow-sm:0 1px 2px rgba(15,18,28,.04);
+  --shadow:0 1px 2px rgba(15,18,28,.04),0 6px 20px rgba(15,18,28,.05);
+  --shadow-lg:0 6px 28px rgba(15,18,28,.08);
+
+  --r-sm:8px;
+  --r:12px;
+  --r-lg:16px;
+
+  --mono:"JetBrains Mono","SFMono-Regular",Consolas,"Cascadia Code",monospace;
+  --sans:system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);font-family:var(--sans);color:var(--ink);font-size:14.5px;line-height:1.65;-webkit-font-smoothing:antialiased}
+code,.mono{font-family:var(--mono)}
+.wrap{max-width:1280px;margin:0 auto;padding:0 28px 96px}
+
+/* ============================================================
+   顶部导航（sticky，背景毛玻璃，滚动高亮）
+   ============================================================ */
+.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.86);backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav-in{max-width:1280px;margin:0 auto;padding:12px 28px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.brand{font-size:14px;font-weight:780;letter-spacing:-.01em;color:var(--ink);padding-right:14px;margin-right:6px;
+  border-right:1px solid var(--line);display:flex;align-items:center;gap:8px;white-space:nowrap}
+.brand .bdot{width:8px;height:8px;border-radius:50%;background:var(--primary);box-shadow:0 0 0 3px var(--pri-soft)}
+.nav a{font-size:13px;color:var(--ink2);text-decoration:none;padding:7px 13px;border-radius:8px;font-weight:500;transition:.15s;white-space:nowrap}
+.nav a:hover{background:var(--bg);color:var(--ink)}
+.nav a.active{background:var(--pri-soft);color:var(--primary-2)}
+.nav .sp{flex:1}
+.pill{font-size:12px;padding:5px 11px;border-radius:20px;background:#fff;border:1px solid var(--line);
+  color:var(--muted);font-variant-numeric:tabular-nums;display:inline-flex;align-items:center;gap:5px}
+.pill b{color:var(--ink);font-weight:700}
+a.pill{text-decoration:none;cursor:pointer;transition:.15s}
+a.pill:hover{border-color:var(--pri-line);color:var(--pri-ink)}
+
+/* ============================================================
+   Hero（左：标题+卖点，右：四层架构卡片）
+   ============================================================ */
+.hero{
+  background:
+    radial-gradient(900px 320px at 82% -20%,rgba(37,71,208,.10),transparent 60%),
+    radial-gradient(700px 280px at 0% 0%,rgba(37,71,208,.05),transparent 60%),
+    var(--bg-grad);
+  border-bottom:1px solid var(--line);
+  padding:56px 0 52px;
+  margin-bottom:36px;
+}
+.hero-grid{max-width:1080px;margin:0 auto;padding:0 28px;display:block}
+.hero h1{font-size:34px;font-weight:800;letter-spacing:-.02em;line-height:1.2;color:var(--ink-deep)}
+.hero h1 em{font-style:normal;background:linear-gradient(180deg,transparent 60%,#FFE9A8 60%);padding:0 4px}
+.hero .lead{color:var(--ink2);margin-top:14px;font-size:15px;line-height:1.8;max-width:760px}
+.hero .lead b{color:var(--ink)}
+.hero-meta{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}
+.tag-pill{font-size:12.5px;padding:6px 12px;border-radius:20px;background:#fff;border:1px solid var(--line);
+  color:var(--ink2);font-weight:600;display:inline-flex;align-items:center;gap:7px;box-shadow:var(--shadow-sm)}
+.tag-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+.tag-pill.b{background:var(--pri-soft);border-color:var(--pri-line);color:var(--pri-ink)}
+.tag-pill.b .dot{background:var(--primary)}
+
+/* hero 右侧四层架构卡片 */
+.hero-arch{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:22px;box-shadow:var(--shadow)}
+.hero-arch h4{font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.08em;margin-bottom:16px;
+  text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.hero-arch h4::before{content:"";width:14px;height:2px;background:var(--primary);border-radius:2px}
+.hero-arch .arow{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:8px}
+.hero-arch .anode{border:1.5px solid var(--line2);border-radius:10px;padding:12px 13px;background:#fff;font-size:13px;font-weight:600;text-align:center;line-height:1.3}
+.hero-arch .anode small{display:block;font-weight:400;color:var(--muted);font-size:11px;margin-top:3px;line-height:1.4}
+.hero-arch .anode.b{border-color:var(--primary);background:var(--pri-soft);color:var(--primary-2)}
+.hero-arch .anode.b small{color:var(--primary)}
+.hero-arch .anode.s{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 4px 14px rgba(216,70,62,.22)}
+.hero-arch .anode.s small{color:#FFD9D5}
+.hero-arch .anode.g{border-style:dashed;background:#FAFBFC;color:var(--ink2)}
+.hero-arch .aarr{color:#B7BCC6;font-size:18px;text-align:center}
+.hero-arch .agroup{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.hero-arch .footer-line{font-size:11.5px;color:var(--muted);text-align:center;margin-top:10px;letter-spacing:.04em}
+
+/* ============================================================
+   Section 通用（编号 + 标题 + 描述）
+   ============================================================ */
+section{margin-bottom:60px;scroll-margin-top:72px}
+.shead{display:flex;align-items:flex-end;gap:14px;margin-bottom:6px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.shead h2{font-size:22px;font-weight:780;letter-spacing:-.01em;color:var(--ink)}
+.shead .num{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--primary);background:var(--pri-soft);
+  padding:4px 10px;border-radius:6px;letter-spacing:.04em}
+.shead .tag{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:var(--ink);color:#fff;letter-spacing:.04em}
+.shead .tag.a{background:var(--primary)}
+.shead .tag.o{background:#fff;color:var(--ink2);border:1px solid var(--line2)}
+.sdesc{color:var(--muted);margin:12px 0 20px;font-size:14px;line-height:1.75;max-width:920px}
+.sdesc b{color:var(--ink2)}
+
+/* ============================================================
+   面板 / 网格
+   ============================================================ */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;box-shadow:var(--shadow-sm)}
+.panel + .panel{margin-top:14px}
+.panel h3{font-size:14.5px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:9px;color:var(--ink)}
+.panel h3 .step{width:22px;height:22px;border-radius:7px;background:var(--primary);color:#fff;font-size:12px;
+  display:inline-flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+.panel h3 .step.g{background:var(--green)}.panel h3 .step.r{background:var(--red)}.panel h3 .step.m{background:var(--amber)}
+.hint{font-size:12px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media (max-width:1000px){.grid2,.grid3{grid-template-columns:1fr}}
+
+/* ============================================================
+   表单 / 按钮
+   ============================================================ */
+input[type=text],select{font-family:var(--sans);font-size:14px;padding:10px 14px;border:1px solid var(--line2);
+  border-radius:9px;background:#fff;color:var(--ink);outline:none;width:100%;transition:.15s}
+input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 4px var(--pri-soft)}
+.btn{font-family:var(--sans);font-size:13.5px;font-weight:600;color:var(--ink);background:#fff;
+  border:1px solid var(--line2);border-radius:9px;padding:9px 17px;cursor:pointer;transition:.15s}
+.btn:hover{border-color:var(--ink);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.btn:active{transform:translateY(0)}
+.btn.pri{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn.pri:hover{background:var(--primary-2);border-color:var(--primary-2);color:#fff}
+.btn.danger{background:#fff;border-color:#E9B4AE;color:var(--red)}
+.btn.danger:hover{background:var(--red-soft)}
+.btn.sm{padding:6px 12px;font-size:12.5px}
+.chip{font-size:13px;padding:6px 12px;border-radius:8px;background:#F2F3F6;border:1px solid var(--line);
+  color:var(--ink2);cursor:pointer;transition:.15s;font-weight:500}
+.chip:hover{border-color:var(--primary);color:var(--primary-2);background:var(--pri-soft)}
+.chip.a{background:var(--pri-soft);border-color:var(--pri-line);color:var(--pri-ink)}
+a.chip{text-decoration:none;display:inline-block}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sw{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--ink2);cursor:pointer;user-select:none}
+.sw input{width:15px;height:15px;accent-color:var(--primary)}
+
+/* ============================================================
+   五道闸轨迹
+   ============================================================ */
+.trace{display:flex;flex-direction:column;gap:7px}
+.tstep{display:flex;gap:11px;align-items:flex-start;padding:10px 13px;border-radius:9px;border:1px solid var(--line);
+  background:#FAFBFC;opacity:.42;transition:.25s}
+.tstep.on{opacity:1;background:#fff;border-color:var(--pri-line);box-shadow:var(--shadow-sm)}
+.tstep.ok{border-color:var(--green-line);background:var(--green-soft)}
+.tstep.bad{border-color:var(--red-line);background:var(--red-soft)}
+.tstep .ti{width:22px;height:22px;border-radius:7px;background:var(--line2);color:#fff;font-size:11.5px;
+  display:inline-flex;align-items:center;justify-content:center;flex:none;font-weight:700;margin-top:1px}
+.tstep.on .ti{background:var(--primary)}.tstep.ok .ti{background:var(--green)}.tstep.bad .ti{background:var(--red)}
+.tstep .tt{font-size:13px;font-weight:700}
+.tstep .td{font-size:12.5px;color:var(--ink2);line-height:1.7;word-break:break-all;margin-top:2px}
+.tstep .td .k{color:var(--muted)}
+
+/* ============================================================
+   表格
+   ============================================================ */
+.tblwrap{max-height:340px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:#fff}
+table.tbl{width:100%;border-collapse:collapse;font-size:13px}
+table.tbl th{position:sticky;top:0;background:#F7F8FB;text-align:left;font-weight:700;font-size:12px;
+  color:var(--muted);padding:10px 13px;border-bottom:1px solid var(--line2);white-space:nowrap;z-index:2;letter-spacing:.02em}
+table.tbl td{padding:9px 13px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.tbl tr:last-child td{border-bottom:none}
+table.tbl tbody tr:hover{background:#FAFBFC}
+tr.warn{background:var(--amber-soft)!important}
+.badge{font-size:11.5px;padding:3px 8px;border-radius:6px;font-weight:700;display:inline-block;letter-spacing:.02em}
+.b-paid{background:var(--green-soft);color:var(--green-ink)}
+.b-unpaid{background:var(--amber-soft);color:var(--amber-ink)}
+.b-refund{background:#F0F1F4;color:#5A616E}
+.mark{background:linear-gradient(transparent 60%,#FFE9A8 60%);font-weight:700}
+.insight{border-left:3px solid var(--amber);background:var(--amber-soft);padding:10px 13px;border-radius:0 8px 8px 0;
+  font-size:13px;margin-top:10px;display:none;line-height:1.7}
+.insight.show{display:block}
+
+/* ============================================================
+   日志
+   ============================================================ */
+.log{max-height:240px;overflow:auto;font-family:var(--mono);font-size:12px;background:#FBFCFD;
+  border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.log div{padding:4px 0;border-bottom:1px dashed #EDEFF2;color:var(--ink2);word-break:break-all;line-height:1.7}
+.log div:last-child{border-bottom:none}
+.log .t{color:#9AA1AC;margin-right:8px}
+.log .lv{font-weight:700;margin-right:6px;font-family:var(--sans);font-size:11.5px;letter-spacing:.04em}
+.log .lv.ok{color:var(--green)}.log .lv.warn{color:var(--amber)}.log .lv.err{color:var(--red)}.log .lv.info{color:var(--primary)}
+
+/* ============================================================
+   智能表单
+   ============================================================ */
+.frow{display:grid;grid-template-columns:84px 1fr;gap:12px;align-items:start;margin-bottom:14px}
+.flabel{font-size:13px;color:var(--muted);padding-top:11px;font-weight:600}
+.fmsg{font-size:12.5px;margin-top:6px;min-height:18px}
+.fmsg.err{color:var(--red)}.fmsg.ok{color:var(--green)}.fmsg.tip{color:var(--amber)}
+.sug{display:none;margin-top:8px}
+.sug.show{display:block}
+
+/* ============================================================
+   KPI
+   ============================================================ */
+.kpi{border:1px solid var(--line);border-radius:11px;padding:14px 16px;background:#fff;box-shadow:var(--shadow-sm)}
+.kpi .kv{font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.2;font-variant-numeric:tabular-nums}
+.kpi .kl{font-size:12.5px;color:var(--muted);margin-top:4px}
+.kpi .kd{font-size:12.5px;margin-top:6px;font-weight:700}
+.up{color:var(--red)}.down{color:var(--green)}
+
+/* ============================================================
+   高危确认
+   ============================================================ */
+.confirm{border:1.5px solid var(--red-line);background:var(--red-soft);border-radius:11px;padding:14px 17px;display:none;margin-top:14px}
+.confirm.show{display:block}
+.confirm h4{font-size:14px;color:var(--red);margin-bottom:7px;display:flex;align-items:center;gap:7px}
+.confirm pre{font-family:var(--mono);font-size:12px;background:rgba(255,255,255,.85);border-radius:7px;
+  padding:9px 12px;margin:9px 0;overflow:auto;color:var(--ink)}
+
+/* ============================================================
+   DSL & Stage
+   ============================================================ */
+.stage{min-height:200px;border:1.5px dashed var(--line2);border-radius:11px;padding:18px;background:#FCFCFD;
+  display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13.5px}
+.stage.filled{border-style:solid;background:#fff;display:block;color:var(--ink)}
+.dsl{font-family:var(--mono);font-size:12px;background:#0E1116;color:#D5DAE2;border-radius:10px;
+  padding:13px 15px;white-space:pre;overflow:auto;max-height:200px;line-height:1.7}
+.dsl .k{color:#8AB4F8}.dsl .s{color:#A8D78F}.dsl .n{color:#F28B82}.dsl .c{color:#9AA0A6;font-style:italic}
+
+/* ============================================================
+   性能/自愈
+   ============================================================ */
+.gauge{display:flex;align-items:baseline;gap:10px}
+.gauge .gv{font-size:36px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:var(--ink)}
+.gauge .gu{font-size:13px;color:var(--muted)}
+.deglog{font-size:12.5px;display:flex;flex-direction:column;gap:6px}
+.deglog div{padding:8px 12px;border-radius:8px;background:#FAFBFC;border:1px solid var(--line)}
+.deglog div.hit{border-color:var(--amber-line);background:var(--amber-soft)}
+
+/* ============================================================
+   通用
+   ============================================================ */
+.comp{border:1px solid var(--line);border-radius:10px;padding:13px 16px;background:#fff;font-size:13px;box-shadow:var(--shadow-sm)}
+.comp.broken{border-color:var(--red-line);background:var(--red-soft)}
+.comp.fallback{border-color:var(--green-line);background:var(--green-soft)}
+.empty{padding:28px;text-align:center;color:var(--muted);font-size:13px}
+.foot{margin-top:48px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;text-align:center;line-height:1.7}
+.foot b{color:var(--ink2)}
+.note{font-size:12.5px;color:var(--muted);margin-top:12px;line-height:1.75}
+.note b{color:var(--ink2)}
+
+/* ============================================================
+   核心思想区（深色 hero / 双栏架构卡 / 权重表 / 以前 vs 现在 / 三卡片 / 三建议 / 总结）
+   ============================================================ */
+.idea-hero{background:linear-gradient(135deg,#0E1116 0%,#1B2541 60%,#2547D0 140%);
+  border-radius:var(--r-lg);padding:36px 40px;color:#fff;box-shadow:var(--shadow-lg);
+  position:relative;overflow:hidden}
+.idea-hero::after{content:"";position:absolute;right:-80px;top:-80px;width:300px;height:300px;
+  background:radial-gradient(circle,rgba(255,209,102,.18) 0%,transparent 70%);pointer-events:none}
+.idea-hero .quote{font-size:24px;font-weight:780;line-height:1.55;letter-spacing:-.01em;max-width:920px;position:relative;z-index:1}
+.idea-hero .quote em{font-style:normal;color:var(--gold)}
+.idea-hero .sub{margin-top:18px;font-size:14.5px;color:#D5DAE2;line-height:1.85;max-width:980px;position:relative;z-index:1}
+.idea-hero .sub b{color:#fff}
+
+.idea-h{display:flex;align-items:center;gap:12px;margin:32px 0 14px}
+.idea-h .ih-l{font-family:var(--mono);font-size:11.5px;font-weight:700;color:var(--primary);background:var(--pri-soft);
+  padding:4px 10px;border-radius:5px;letter-spacing:.06em}
+.idea-h .ih-t{font-size:16px;font-weight:780;letter-spacing:-.01em;color:var(--ink)}
+.idea-h .ih-s{flex:1;height:1px;background:var(--line)}
+
+.arch-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:8px}
+@media (max-width:1000px){.arch-row{grid-template-columns:1fr}}
+.arch-card{border:1.5px solid var(--line);border-radius:var(--r);background:#fff;padding:22px 24px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column}
+.arch-card.after{border-color:var(--red-line);background:linear-gradient(180deg,#FFF7F6 0%,#FFFFFF 70%)}
+.arch-card .atit{font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:9px}
+.arch-card .atit .pn{font-family:var(--mono);background:var(--ink);color:#fff;padding:3px 8px;border-radius:5px;font-size:11px;letter-spacing:.06em}
+.arch-card.after .atit{color:var(--red-ink)}
+.arch-card.after .atit .pn{background:var(--red)}
+.arch-flow{display:flex;flex-direction:column;align-items:stretch;gap:0;flex:1}
+.arch-flow .node{border:1.5px solid var(--line2);border-radius:10px;padding:12px 14px;background:#fff;font-size:13.5px;font-weight:600;text-align:center;line-height:1.3}
+.arch-flow .node small{display:block;font-weight:400;color:var(--muted);font-size:11.5px;margin-top:3px;line-height:1.5}
+.arch-flow .node.blue{border-color:var(--primary);background:var(--pri-soft);color:var(--primary-2)}
+.arch-flow .node.blue small{color:var(--primary)}
+.arch-flow .node.red{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 6px 18px rgba(216,70,62,.22)}
+.arch-flow .node.red small{color:#FFD9D5}
+.arch-flow .node.ghost{border-style:dashed;background:#FAFBFC;color:var(--ink2)}
+.arch-flow .arrow{height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#B7BCC6;font-size:18px;line-height:1}
+.arch-flow .arrow small{font-size:10.5px;color:var(--muted);margin-top:2px;letter-spacing:.04em}
+.arch-flow .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;width:100%}
+.arch-flow .arrow-loop{height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--red);font-size:20px;line-height:1}
+.arch-flow .arrow-loop small{font-size:10.5px;color:var(--muted);margin-top:2px;letter-spacing:.04em}
+.arch-card .pain{background:#FCEDEB;border:1px solid #F3C9C3;border-radius:9px;padding:10px 13px;margin-top:14px;font-size:12.5px;color:var(--red-ink);line-height:1.7}
+.arch-card.after .pain{background:var(--pri-soft);border-color:var(--pri-line);color:var(--pri-ink)}
+.arch-card.after .pain b{color:var(--ink)}
+
+.idea-table{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:#fff;box-shadow:var(--shadow-sm)}
+.idea-table table{width:100%;border-collapse:collapse}
+.idea-table th{background:#F7F8FB;text-align:left;font-size:12px;font-weight:700;color:var(--muted);
+  padding:12px 16px;border-bottom:1px solid var(--line);letter-spacing:.04em}
+.idea-table td{padding:14px 16px;border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.6;vertical-align:top}
+.idea-table tr:last-child td{border-bottom:none}
+.idea-table .obj{font-weight:700;color:var(--ink);font-size:14px;display:block}
+.idea-table .obj small{font-weight:400;color:var(--muted);font-size:12px;margin-top:2px;display:block}
+.idea-table .wup{color:var(--red);font-weight:700}
+.idea-table .wdown{color:var(--green);font-weight:700}
+
+.vs-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:8px}
+@media (max-width:1000px){.vs-row{grid-template-columns:1fr}}
+.vs-card{border-radius:var(--r);padding:20px 22px;border:1.5px solid var(--line);background:#fff;box-shadow:var(--shadow-sm);position:relative}
+.vs-card.before{background:#FAFBFC}
+.vs-card.now{background:linear-gradient(180deg,#F4F7FF 0%,#FFFFFF 70%);border-color:var(--pri-line)}
+.vs-card h4{font-size:14.5px;font-weight:780;margin-bottom:12px;display:flex;align-items:center;gap:9px}
+.vs-card.before h4{color:var(--muted)}
+.vs-card.before h4::before{content:"BEFORE";font-family:var(--mono);font-size:10.5px;background:#E5E7EB;color:#5A616E;padding:3px 8px;border-radius:5px;letter-spacing:.06em}
+.vs-card.now h4{color:var(--primary-2)}
+.vs-card.now h4::before{content:"NOW";font-family:var(--mono);font-size:10.5px;background:var(--primary);color:#fff;padding:3px 8px;border-radius:5px;letter-spacing:.06em}
+.vs-card p{font-size:13.5px;color:var(--ink2);line-height:1.85}
+.vs-card p small{display:block;color:var(--muted);margin-top:10px;font-size:12.5px;line-height:1.7}
+.vs-card code{background:rgba(15,17,22,.06);padding:2px 7px;border-radius:5px;font-size:12.5px;font-family:var(--mono);color:var(--ink)}
+.vs-card.now code{background:rgba(37,71,208,.10);color:var(--primary-2)}
+
+.three-why{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:8px}
+@media (max-width:1000px){.three-why{grid-template-columns:1fr}}
+.why-card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:20px 22px;box-shadow:var(--shadow-sm);position:relative}
+.why-card .wicn{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;margin-bottom:13px}
+.why-card.s .wicn{background:var(--red-soft);color:var(--red)}
+.why-card.t .wicn{background:var(--amber-soft);color:var(--amber)}
+.why-card.c .wicn{background:var(--green-soft);color:var(--green)}
+.why-card h4{font-size:14.5px;font-weight:780;margin-bottom:8px;color:var(--ink)}
+.why-card p{font-size:13px;color:var(--ink2);line-height:1.75}
+.why-card p b{color:var(--ink)}
+
+.tips{margin-top:8px;display:flex;flex-direction:column;gap:12px}
+/* 注意：必须限定在 .tips 下，否则会误匹配表单提示 .fmsg.tip（导致文字挤进 38px 窄列疯狂折行） */
+.tips .tip{display:grid;grid-template-columns:38px 1fr;gap:14px;background:#fff;border:1px solid var(--line);
+  border-radius:var(--r);padding:16px 20px;box-shadow:var(--shadow-sm);align-items:start}
+.tips .tip .tn{width:30px;height:30px;border-radius:8px;background:var(--pri-soft);color:var(--primary-2);
+  font-family:var(--mono);font-weight:800;display:flex;align-items:center;justify-content:center;font-size:13px}
+.tips .tip .tb{font-size:13.5px;color:var(--ink2);line-height:1.85}
+.tips .tip .tb b{color:var(--ink)}
+.tips .tip code{background:#0E1116;color:#D5DAE2;padding:2px 7px;border-radius:5px;font-size:12px;font-family:var(--mono)}
+
+.idea-summary{background:linear-gradient(135deg,#0E1116 0%,#1B2541 100%);color:#fff;border-radius:var(--r-lg);
+  padding:30px 36px;margin-top:24px;box-shadow:var(--shadow-lg);position:relative;overflow:hidden}
+.idea-summary::before{content:"";position:absolute;left:-30px;bottom:-30px;width:220px;height:220px;
+  background:radial-gradient(circle,rgba(37,71,208,.30) 0%,transparent 70%);pointer-events:none}
+.idea-summary .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--gold);margin-bottom:12px;display:block;font-weight:700}
+.idea-summary .txt{font-size:18px;font-weight:680;line-height:1.75;max-width:1080px;letter-spacing:-.01em;position:relative;z-index:1}
+.idea-summary .txt b{color:var(--gold);font-weight:780}
+
+/* ============================================================
+   最终版新增：Toast / 权重条 / MCP 编排演示
+   ============================================================ */
+#toasts{position:fixed;right:20px;bottom:20px;display:flex;flex-direction:column;gap:9px;z-index:200}
+.toast{background:#fff;border:1px solid var(--line2);border-left:4px solid var(--primary);border-radius:10px;
+  padding:11px 15px;font-size:13px;line-height:1.6;box-shadow:var(--shadow-lg);max-width:360px;animation:tin .25s ease}
+.toast.ok{border-left-color:var(--green)}
+.toast.warn{border-left-color:var(--amber)}
+.toast.err{border-left-color:var(--red)}
+.toast b{font-weight:700}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.wbar{height:8px;border-radius:5px;background:#EDF0F5;overflow:hidden;margin-top:7px;min-width:130px}
+.wbar i{display:block;height:100%;border-radius:5px}
+.wbar.heavy i{width:86%;background:linear-gradient(90deg,#D8463E,#F2705F)}
+.wbar.light i{width:30%;background:linear-gradient(90deg,#0A8A5E,#3BB27A)}
+
+.orch{border:1px solid var(--line);border-radius:var(--r);background:#fff;box-shadow:var(--shadow-sm);padding:20px 22px;margin-top:16px}
+.orch-lanes{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.lane{border:1.5px solid var(--line2);border-radius:10px;padding:10px 12px;text-align:center;background:#FAFBFC;transition:.25s}
+.lane b{display:block;font-size:13px;margin-top:2px}
+.lane small{color:var(--muted);font-size:11px;line-height:1.45;display:block;margin-top:2px}
+.lane.core{border-color:var(--red);background:var(--red);color:#fff;box-shadow:0 4px 14px rgba(216,70,62,.22)}
+.lane.core small{color:#FFD9D5}
+.lane.hot{border-color:var(--primary);transform:translateY(-2px);box-shadow:0 0 0 3px var(--pri-soft)}
+.lane.core.hot{box-shadow:0 0 0 3px rgba(216,70,62,.28)}
+.orch-steps{min-height:80px}
+.ostep{display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:start;border:1px solid var(--line);
+  border-radius:9px;padding:10px 13px;margin-bottom:7px;background:#FAFBFC;opacity:0;transform:translateX(-8px);transition:.3s}
+.ostep.show{opacity:1;transform:none}
+.ostep.cur{border-color:var(--pri-line);background:#fff;box-shadow:var(--shadow-sm)}
+.ostep .os-lane{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.05em;padding:4px 2px;text-align:center;border-radius:5px;color:#fff;margin-top:2px;white-space:nowrap}
+.l-user{background:#5A616E}
+.l-fe{background:var(--primary)}
+.l-gw{background:var(--red)}
+.l-tools{background:var(--amber)}
+.ostep .os-t{font-size:13px;font-weight:700;line-height:1.5}
+.ostep .os-t code{background:#0E1116;color:#D5DAE2;padding:1px 6px;border-radius:4px;font-size:11px;font-family:var(--mono)}
+.ostep .os-d{font-size:12.5px;color:var(--ink2);line-height:1.7;margin-top:2px}
+.ostep .os-m{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;margin-top:3px}
+.orch-status{font-size:13px;color:var(--ink2);background:#FAFBFC;border:1px dashed var(--line2);border-radius:8px;padding:9px 13px;margin-top:8px}
+.orch-status b{color:var(--red)}
+/* 修复：路径三左右两栏等高拉伸，导致 DSL 盒子下方大片留白 */
+#p3 .grid2{align-items:start}
+/* 成本沙盘 */
+.sandbox{border:1px solid var(--line);border-radius:var(--r);background:#fff;box-shadow:var(--shadow-sm);padding:18px 20px;margin-top:16px}
+.sandbox .srow{display:grid;grid-template-columns:150px 1fr 150px;gap:14px;align-items:center;margin-bottom:10px}
+.sandbox .srow label{font-size:13px;color:var(--ink2);font-weight:600}
+.sandbox .srow output{font-family:var(--mono);font-size:12.5px;font-weight:700;text-align:right;color:var(--primary-2)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;background:#E5E9F2;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:50%;background:var(--primary);border:3px solid #fff;box-shadow:0 1px 4px rgba(15,18,28,.25);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--primary);border:3px solid #fff;cursor:pointer}
+@media (max-width:900px){.sandbox .srow{grid-template-columns:1fr;gap:4px}}
+/* 成熟度阶梯 */
+.ladder{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:8px}
+.ladder .rung{border:1.5px solid var(--line2);border-radius:10px;background:#fff;padding:13px 14px;position:relative}
+.ladder .rung .rl{font-family:var(--mono);font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.06em}
+.ladder .rung h5{font-size:13.5px;margin:4px 0 6px;color:var(--ink)}
+.ladder .rung p{font-size:12px;color:var(--ink2);line-height:1.65}
+.ladder .rung.hot{border-color:var(--pri-line);background:linear-gradient(180deg,#F4F7FF,#FFFFFF)}
+.ladder .rung .here{position:absolute;top:-9px;right:10px;font-size:10px;font-weight:700;background:var(--red);color:#fff;border-radius:20px;padding:2px 8px}
+@media (max-width:1000px){.ladder{grid-template-columns:1fr 1fr}}
+/* 回到顶部 */
+#toTop{position:fixed;right:20px;bottom:130px;z-index:150;width:38px;height:38px;border-radius:10px;border:1px solid var(--line2);
+  background:#fff;box-shadow:var(--shadow);cursor:pointer;font-size:16px;color:var(--ink2);opacity:0;pointer-events:none;transition:.2s}
+#toTop.show{opacity:1;pointer-events:auto}
+#toTop:hover{border-color:var(--primary);color:var(--primary-2)}
+/* 快捷模式横幅 */
+#degradeBanner{display:none;background:var(--amber-soft);border-bottom:1px solid var(--amber-line);color:var(--amber-ink);font-size:13px;padding:8px 28px;text-align:center}
+/* 折叠块（降低阅读密度） */
+details.fold{border:1px solid var(--line);border-radius:var(--r);background:#fff;box-shadow:var(--shadow-sm);margin-top:14px}
+details.fold summary{cursor:pointer;padding:13px 18px;font-size:13.5px;font-weight:700;color:var(--ink2);list-style:none;user-select:none}
+details.fold summary::before{content:"▸ ";color:var(--primary)}
+details.fold[open] summary::before{content:"▾ ";color:var(--primary)}
+details.fold summary:hover{color:var(--primary-2)}
+details.fold .fold-b{padding:0 18px 16px}
+/* 新学会的快捷指令（建议卡保存后出现在示例区第一位） */
+@keyframes chipPop{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+.chip-new{border:1px solid var(--green-line)!important;background:var(--green-soft)!important;color:var(--green-ink)!important;font-weight:600;animation:chipPop .4s ease}
+@media (max-width:900px){
+  .orch-lanes{grid-template-columns:1fr 1fr}
+  .ostep{grid-template-columns:60px 1fr}
+  .ostep .os-m{grid-column:2;white-space:normal}
+}
+</style>
+</head>
+<body>
+<div class="nav"><div class="nav-in">
+  <span class="brand"><span class="bdot"></span>前端智能化 · V2 人话版</span>
+  <a href="#idea" class="active">核心思想</a>
+  <a href="#plan">落地与验收</a>
+  <a href="#degrade">无模型兜底</a>
+  <a href="#p1">智能交互</a>
+  <a href="#p2">智能数据</a>
+  <a href="#p3">智能路由</a>
+  <a href="#p4">智能运维</a>
+  <a href="#audit">审计</a>
+  <span class="sp"></span>
+  <a class="pill" href="#audit" title="请求 = 网关模拟调用总次数：每次执行意图、生成页面、生成摘要都 +1（含被拦截的尝试）">请求 <b id="mReq">0</b></a>
+  <a class="pill" href="#audit" title="规则 = L1 本地规则直通（0 Token，~30ms）；模型 = L2 模拟大模型解析（150~240 Token/次）。策略：先规则、后模型。">规则 <b id="mL1">0</b> / 模型 <b id="mL2">0</b></a>
+  <a class="pill" href="#audit" title="Token = 累计模拟消耗：L2 解析每次 150~240 · 页面生成 210 · 数据摘要 260；规则直通恒为 0">Token <b id="mTok">0</b></a>
+</div></div>
+
+<div id="degradeBanner">🟠 <b>快捷模式（模拟模型故障）</b>：需要模型的功能已冻结；快捷指令与传统按钮全部照常 —— 这就是"拔掉 AI 也能用"。</div>
+
+<div class="hero">
+  <div class="hero-grid">
+    <div>
+      <h1>前端智能化改造 · <em>最终优化版</em></h1>
+      <p class="lead">一页讲清一件事：<b>接入层变薄，决策层上移</b>。上半页是思想主线（三层 → 四层、接入权重、边界与分层），下半页四条路径（<b>智能交互 / 智能数据 / 智能路由 / 智能运维</b>）在浏览器里真跑一遍。<b>不接任何真实模型</b>：意图解析、异常洞察、页面生成、自愈策略全部由本地规则模拟，但<strong>执行链路、工具调度、权限校验、审计留痕与真实方案完全一致</strong>。</p>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ============ 核心思想 ============ -->
+<section id="idea">
+  <div class="shead"><span class="tag a">核心思想</span><h2>接入层变薄 · 决策层上移</h2></div>
+  <p class="sdesc">这一节是整份 Demo 的<b>思想主线</b>：前端不是"不接后端"，而是把主要接入对象换成了 AI 执行层。下面的四条路径 Demo，全部是这条主线的落地证据。</p>
+
+  <!-- 顶部深色 hero 引言 -->
+  <div class="idea-hero">
+    <div class="quote">趋势不是"前端不接后端"，而是 <em>前端的接入层在变薄，智能决策层在上移</em></div>
+    <div class="sub">更准确地说：<b>前端正在越过传统的"业务后端"，直接对接"AI 能力层"<span style="white-space:nowrap">（模型 / MCP / Harness）</span></b>，而传统后端正在被挤压成纯粹的<b><span style="white-space:nowrap">数据与事务执行层</span></b>。</div>
+  </div>
+
+  <!-- 黑话翻译器 -->
+  <div class="panel" style="margin-top:14px">
+    <h3><span class="step">📖</span>黑话翻译器（先看这张表，后面全是人话）</h3>
+    <div class="grid2" style="gap:6px 22px;font-size:12.5px;line-height:1.85">
+      <div><b>MCP / AI 网关</b> → <b>AI 总调度台</b>：前端把用户的话交给它，它决定叫谁干活（后端？模型？页面自己？）</div>
+      <div><b>Tool / 工具调用</b> → 把页面操作登记成<b>"AI 会按的按钮"</b>——AI 只能按登记过的，不能发明新的</div>
+      <div><b>L1 / L2 / L3</b> → <b>快捷指令 / 小翻译 / 大顾问</b>（三级路由：越往后越聪明，也越慢越贵）</div>
+      <div><b>Token</b> → <b>AI 的话费</b>，按字数计费；快捷指令不走模型，0 话费</div>
+      <div><b>幻觉</b> → <b>AI 瞎编</b>：编出不存在的功能、乱填参数——五道闸就是防瞎编的五道关卡</div>
+      <div><b>Schema / 白名单</b> → <b>参数规则表</b>：AI 只能填表内选项，多填乱填当场拒绝</div>
+      <div><b>上下文锚定</b> → <b>前端给 AI 带路</b>：告诉它"我在哪个页面、点了哪个按钮、想干嘛"</div>
+      <div><b>DSL / 动态生成</b> → <b>页面配置单</b>：AI 只能点菜（选组件），不能进厨房（写代码）</div>
+    </div>
+  </div>
+
+  <!-- 01 架构演进 -->
+  <div class="idea-h"><span class="ih-l">01 · 架构演进</span><span class="ih-t">从「三层」到「四层」</span><span class="ih-s"></span></div>
+  <div class="arch-row">
+    <div class="arch-card">
+      <div class="atit"><span class="pn">BEFORE</span>传统三层 · 前端 ↔ 后端 ↔ 数据库</div>
+      <div class="arch-flow">
+        <div class="node">Vue 前端<small>只负责展示和交互</small></div>
+        <div class="arrow">↓<small>HTTP 接口</small></div>
+        <div class="node">业务后端<small>所有业务逻辑 · 权限 · 数据聚合</small></div>
+        <div class="arrow">↓<small>SQL</small></div>
+        <div class="node">数据库<small>持久化</small></div>
+      </div>
+      <div class="pain">痛点：任何 UI 意图变化（比如用户想"按相关性排序"），前端都得等着后端改接口。</div>
+    </div>
+    <div class="arch-card after">
+      <div class="atit"><span class="pn">AFTER</span>AI 时代四层 · 决策层上移</div>
+      <div class="arch-flow">
+        <div class="node blue">Vue / React 界面<small>用户自然语言 / 意图输入</small></div>
+        <div class="arrow">↕<small>MCP 协议 / SSE</small></div>
+        <div class="node red">AI 决策网关<small>MCP Server / Harness Agent · 意图理解 · 任务拆解 · 工具调度 · 对话记忆</small></div>
+        <div class="arrow">↓<small>按需调用</small></div>
+        <div class="row3">
+          <div class="node ghost">传统业务后端<small>CRUD / 事务 / 数据库</small></div>
+          <div class="node ghost">大语言模型<small>DeepSeek / GPT</small></div>
+          <div class="node ghost">第三方 API / 浏览器<small>地图 · 自动化 · 渲染</small></div>
+        </div>
+        <div class="arrow-loop">↺<small>动态生成 / 重渲染</small></div>
+        <div class="node blue">Vue / React 界面<small>渲染执行结果（同一界面）</small></div>
+      </div>
+      <div class="pain"><b>关键变化：</b>红色的「AI 决策网关」成为新的核心。<br>· 前端：直接连接网关，传递用户意图<br>· 传统后端：退化成网关可调用的众多「工具（Tools）」之一，不再负责决策<br>· 大模型：也变成网关可调用的工具之一（文本生成 / 总结等）</div>
+    </div>
+  </div>
+
+  <!-- 02 接入权重 -->
+  <div class="idea-h"><span class="ih-l">02 · 接入权重</span><span class="ih-t">前端到底在接什么？两样都接，权重完全不同</span><span class="ih-s"></span></div>
+  <div class="idea-table">
+    <table>
+      <thead><tr><th style="width:24%">接入对象</th><th style="width:22%">接入方式</th><th style="width:22%">权重（趋势）</th><th>负责什么</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="obj">AI 执行层<small>MCP / Harness</small></span></td>
+          <td>MCP 协议 / SSE / WebSocket</td>
+          <td><span class="wup">核心 · 越来越重 🥇</span><div class="wbar heavy"><i></i></div></td>
+          <td>意图理解 · 任务拆解 · 工具调度 · 对话记忆</td>
+        </tr>
+        <tr>
+          <td><span class="obj">传统业务后端<small>CRUD / BFF</small></span></td>
+          <td>HTTP / GraphQL / tRPC</td>
+          <td><span class="wdown">附属 · 越来越轻 🥈</span><div class="wbar light"><i></i></div></td>
+          <td>纯数据增删改查 · 支付 · 发送邮件等原子操作</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 以前 vs 现在 -->
+  <div class="vs-row">
+    <div class="vs-card before">
+      <h4>以前 · 一个意图 = 一个接口</h4>
+      <p>用户点"智能排序" → 前端调后端 <code>/api/sort</code> → 后端执行 SQL 排序 → 返回数据。
+        <small>不少新诉求需要新增或调整接口，前端通常要和后端一起排期才能落地。</small></p>
+    </div>
+    <div class="vs-card now">
+      <h4>现在 · 一个意图 = 一串工具调用</h4>
+      <p>用户说"优先展示高优先级且快截止的任务" → 前端把意图发给 MCP Server → Agent 拆任务 → 调后端 <code>/api/tasks</code> 拿原始数据 → 调模型写排序函数 → 调前端 render 工具重新渲染。
+        <small>整个过程前后端不直接对话，都听 MCP 这个"大脑"指挥。</small></p>
+      <div class="row" style="margin-top:10px"><a class="chip" href="#orch">▼ 看这段话现场跑起来</a></div>
+    </div>
+  </div>
+
+  <!-- 交互式编排演示 -->
+  <div class="orch" id="orch">
+    <div class="idea-h" style="margin-top:0"><span class="ih-l">现场播放</span><span class="ih-t">一个意图的完整旅程：前后端全程零直接对话</span><span class="ih-s"></span></div>
+    <div class="orch-lanes">
+      <div class="lane" data-lane="user">👤<b>用户</b><small>自然语言 / 传统按钮</small></div>
+      <div class="lane" data-lane="fe">🖥️<b>前端 · Vue</b><small>采集意图 · 等指令渲染</small></div>
+      <div class="lane core" data-lane="gw">🧠<b>MCP 网关 · Agent</b><small>意图分类 · 拆解 · 调度 · 记忆</small></div>
+      <div class="lane" data-lane="tools">🔧<b>工具层</b><small>传统后端 ｜ 大模型 ｜ 浏览器</small></div>
+    </div>
+    <div class="orch-steps" id="orchSteps"></div>
+    <div class="row" style="margin-top:6px">
+      <button class="btn pri sm" id="orchPlay">▶ 完整播放</button>
+      <button class="btn sm" id="orchStep">⏭ 单步</button>
+      <button class="btn sm" id="orchReset">↺ 重置</button>
+      <span class="hint">7 步编排 · 第 3、5 步过模型（≈120 + ≈180 token），其余 0 token</span>
+    </div>
+    <div class="orch-status" id="orchStatus">待播放 —— 点击「完整播放」，看"优先展示高优先级且快要截止的任务"这句话是怎么被编排出来的。</div>
+    <p class="note">「翻到下一页」这类高频、确定的操作不会过模型：网关按 L1 规则直接路由给后端（0 Token）——与下方<b>路径一</b>的 L1/L2 计数完全一致。</p>
+  </div>
+
+  <!-- 03 为什么不能抛开后端 -->
+  <div class="idea-h"><span class="ih-l">03 · 边界</span><span class="ih-t">为什么不能完全抛开后端？</span><span class="ih-s"></span></div>
+  <div class="three-why">
+    <div class="why-card s">
+      <div class="wicn">!</div>
+      <h4>数据安全与权限</h4>
+      <p>数据库账号、用户身份令牌、付费业务逻辑，<b>永远不能交给大模型处理</b>，必须留在自建后端或 Harness 执行引擎里。前端声明的上下文（含 user 段）只是 <b>hint</b>：服务端必须基于会话重新鉴权，永不信任前端自报的身份。</p>
+    </div>
+    <div class="why-card t">
+      <div class="wicn">⇄</div>
+      <h4>事务一致性</h4>
+      <p>"下单扣库存并发货"这种强一致性操作，<b>必须由后端事务保证</b>，大模型干不了这个细活。</p>
+    </div>
+    <div class="why-card c">
+      <div class="wicn">¥</div>
+      <h4>成本与延迟</h4>
+      <p>每次操作都过模型成本受不了。MCP / Harness 会把高频、确定的操作（"翻到下一页"）<b>直接路由给后端</b>，只有模糊意图才过模型。</p>
+    </div>
+  </div>
+
+  <!-- 03.5 成本沙盘 -->
+  <div class="sandbox" id="cost">
+    <div class="idea-h" style="margin-top:0"><span class="ih-l">把账算清</span><span class="ih-t">Token 经济沙盘：L1 直通率就是钱</span><span class="ih-s"></span></div>
+    <div class="srow"><label>日均意图量</label><input type="range" id="sbD" min="1000" max="200000" step="1000" value="50000"><output id="sbDv"></output></div>
+    <div class="srow"><label>L1 规则直通率</label><input type="range" id="sbH" min="0" max="95" step="5" value="70"><output id="sbHv"></output></div>
+    <div class="srow"><label>单次模型消耗</label><input type="range" id="sbT" min="100" max="4000" step="100" value="800"><output id="sbTv"></output></div>
+    <div class="srow"><label>模型单价</label><input type="range" id="sbP" min="1" max="24" step="1" value="4"><output id="sbPv"></output></div>
+    <div class="sout" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px">
+      <div class="kpi"><div class="kv" id="sbFull">—</div><div class="kl">全走模型 · 月 Token</div></div>
+      <div class="kpi"><div class="kv" id="sbReal">—</div><div class="kl">先 L1 后 L2 · 月 Token</div></div>
+      <div class="kpi"><div class="kv" id="sbSave">—</div><div class="kl">每月节省费用</div></div>
+      <div class="kpi"><div class="kv" id="sbSaveY">—</div><div class="kl">每年节省费用</div></div>
+    </div>
+    <p class="note">口径：月按 30 天；费用 = Token ÷ 1,000,000 × 单价。<b>把「L1 直通率」拉到 0% 看看——那就是"所有操作都过模型"的账单，也是"前端直接调大模型"方案的真实成本。</b>直通率每提高 10 个百分点，节省线性放大；右上角的「规则 / 模型」计数器，就是这个直通率的现场版。</p>
+  </div>
+
+  <!-- 降本与降级 -->
+  <div class="panel" style="margin-top:14px">
+    <h3><span class="step m">¥</span>降本四手段 &amp; 降级阶梯（生产必备）</h3>
+    <div class="grid2" style="gap:14px">
+      <div>
+        <div style="font-size:12.5px;font-weight:700;margin-bottom:7px">把成本再压下来的四个手段</div>
+        <div class="chips">
+          <span class="chip">意图缓存：同模板命中即复用解析结果（TTL + 参数槽位）</span>
+          <span class="chip">工具描述精简：只发当前场景相关的 5~8 个工具</span>
+          <span class="chip">流式优先：SSE 先回"我打算这么做"再执行</span>
+          <span class="chip">预算配额：按人 / 按会话设 Token 上限，超限降级 L1</span>
+        </div>
+        <p class="note" style="margin-top:8px">第二条与「上下文锚定」是一体两面：scene 锁定能力域后，候选工具从 137 个缩到 5~8 个——省 Token 的同时把选错率打下来。另外，<b>工具的 description 就是给模型看的接口文档</b>，它的质量直接决定调用成功率。</p>
+      </div>
+      <div>
+        <div style="font-size:12.5px;font-weight:700;margin-bottom:7px">降级阶梯：AI 不可用 ≠ 页面不可用</div>
+        <div style="font-size:12.5px;color:var(--ink2);line-height:1.95">
+          ① 模型超时 / 不可用 → 自动回落 L1 规则，提示"当前为快捷模式"<br>
+          ② 连续 2 次解析失败 → 弹出结构化筛选面板，让用户手动补齐<br>
+          ③ 工具执行失败 → 展示失败原因 + 建议的替代意图，不干报错<br>
+          ④ <b>传统按钮全程保留——AI 是可选的加速器，不是必经的关卡</b>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 Vue 新分层 -->
+  <div class="idea-h"><span class="ih-l">04 · 分层与起步</span><span class="ih-t">Vue 项目怎么落地：各层职责 + 三条上手建议</span><span class="ih-s"></span></div>
+  <p class="sdesc" style="margin-top:0">层级关系在 01 已经画过，这里不重复画图：先用一张表看清<b>每一层具体写什么代码</b>，再用三条建议上手。</p>
+  <div class="idea-table">
+    <table>
+      <thead><tr><th style="width:20%">层</th><th style="width:34%">职责（写什么）</th><th>关键点 / 禁忌</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="obj">Vue 3 前端<small>展示与交互层</small></span></td>
+          <td>意图输入框（自然语言） · 传统按钮（保留） · 响应式渲染（等待指令）</td>
+          <td>当好 <b>MCP 客户端</b>：把用户操作转成 tool call、渲染执行结果；<b>不碰 API Key、不做决策、不直接调大模型</b></td>
+        </tr>
+        <tr>
+          <td><span class="obj">MCP Server / Harness Agent<small>执行网关 · 前端现在主要接的东西</small></span></td>
+          <td>对话记忆 · 意图分类（点按钮 还是 模糊意图？） · 任务拆解与调度</td>
+          <td>唯一的"大脑"：决定调后端、调模型、还是直接操作浏览器；<b>权限与高危确认的闸门在这里</b></td>
+        </tr>
+        <tr>
+          <td><span class="obj">传统后端 + 大模型 API<small>工具层</small></span></td>
+          <td>后端：CRUD / 事务（把自己封装成 Tools，如 <span class="mono">create_order</span>）；模型：文本生成 / 总结</td>
+          <td>两者都是网关可调用的工具之一；<b>强一致性与敏感数据永远留在后端</b>，不经过模型</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="tips" style="margin-top:22px">
+    <div class="tip">
+      <div class="tn">01</div>
+      <div class="tb"><b>不要在 Vue 里直接调大模型 API</b>（这是新手最容易犯的错）——会把 API Key 暴露在前端，且无法管控成本。</div>
+    </div>
+    <div class="tip">
+      <div class="tn">02</div>
+      <div class="tb"><b>前端的新职责是"当好 MCP 的客户端"</b>：在 Vue 里启动一个轻量级 MCP 客户端，把用户操作转成 MCP 的 tool call，然后把执行结果渲染到页面上。</div>
+    </div>
+    <div class="tip">
+      <div class="tn">03</div>
+      <div class="tb"><b>后端的新职责是"把自己封装成 MCP 的 Tools"</b>：把原来的 <code>/api/createOrder</code> 封装成 <code>create_order</code> Tool，注册到 MCP Server 上，让 AI 大脑去调用它，而不是让前端直接调。</div>
+    </div>
+  </div>
+
+  <!-- 05 上下文锚定 -->
+  <div class="idea-h"><span class="ih-l">05 · 上下文锚定</span><span class="ih-t">前端给 MCP「带路」：声明场景与意图，而不是让它猜</span><span class="ih-s"></span></div>
+  <p class="sdesc">网关有了「大脑」还不够：后端 MCP Server 里有几十上百个工具（tools/list），只靠工具描述去匹配，AI 经常选错或犹豫。<b>前端明明知道用户在干嘛——在哪个页面、点了哪个按钮、想达成什么目的——却没告诉网关。</b>解法是<b>上下文锚定（Context Anchoring）</b>：前端每次调用主动声明「我在哪、我要干嘛」，后端从「盲人摸象」变成「定向执行」。本页其实已经在做最小版：路径一的规则解析 = 意图解析器、工具注册表 = 能力域、角色选择 = 上下文里的 user。</p>
+
+  <div class="grid2" style="align-items:start">
+    <div>
+      <details class="fold" style="margin-top:0">
+        <summary>看代码：上下文信封 MCPContext（点开）</summary>
+        <div class="fold-b">
+      <div class="dsl" style="max-height:none;margin-top:10px">// 前端每次调用 MCP 自动携带的「上下文信封」
+interface MCPContext {
+  scene:   { id:'order_detail', name:'订单详情页',
+             module:'order', route:'/orders/detail/123' }
+  intent:  { action:'update', target:'Order',
+             trigger:'button_click', buttonId:'btn_approve' }
+  payload: { orderId:'123', selectedIds:[],
+             formData:{} }          // 页面数据快照
+  user:    { role:'operator',
+             permissions:['order:read','order:update'] }
+}
+
+// 调用方式 1：声明式调用 __router__，后端按上下文定向执行
+mcp.callTool('__router__',
+  { userInput:'审批这个订单', _mcp_context:ctx })
+
+// 调用方式 2（更彻底）：前端只说人话
+mcp.execute({ goal:'审批这个订单', context })
+//   → 后端 AI 根据 goal + context 自动选工具执行</div>
+        </div>
+      </details>
+      <p class="note">上下文由前端<b>自动采集</b>：路由 → scene、点击的按钮 → intent.buttonId、全局 store → payload、登录态 → user。开发者只声明语义，不拼参数、不背工具名。<br><b>哪些留在前端、哪些必须上移？</b>采集、呈现、高危确认 UI、降级兜底留在前端；解析、权限裁决、配额计费、审计落库、Tool 执行必须上移网关与后端——<b>前端校验只管体验，网关校验才管安全</b>。</p>
+    </div>
+    <div>
+      <div class="idea-table">
+        <table>
+          <thead><tr><th style="width:38%">层级</th><th>职责</th></tr></thead>
+          <tbody>
+            <tr><td><span class="obj">应用层<small>页面 / 组件</small></span></td><td>声明 scene + intent + payload（点按钮时顺手带一句人话目标）</td></tr>
+            <tr><td><span class="obj">前端 MCP Client<small>MCPContextualClient</small></span></td><td>自动采集上下文并注入每次请求；前端从「调工具」升级为「声明场景和意图」</td></tr>
+            <tr><td><span class="obj">后端 MCP Router<small>能力域 → 行为 → 工具</small></span></td><td>按上下文逐级缩小范围：order → approve → approve_order，不再全量模糊匹配</td></tr>
+            <tr><td><span class="obj">MCP Tools<small>业务逻辑</small></span></td><td>只专注业务本身，不再纠结「我该被谁调用」</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- 上下文锚定 · 现场对比 -->
+  <div class="orch" id="anchor" style="margin-top:16px">
+    <div class="idea-h" style="margin-top:0"><span class="ih-l">现场对比</span><span class="ih-t">同一个按钮：带上下文 vs 不带上下文</span><span class="ih-s"></span></div>
+    <div class="grid2" style="align-items:start;gap:14px">
+      <div>
+        <div style="border:1.5px solid var(--line2);border-radius:10px;overflow:hidden">
+          <div style="background:#F7F8FB;padding:8px 13px;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line)">📄 订单详情页 · SO-20402 泰和能源 · ¥35,700 · 待审批</div>
+          <div style="padding:14px 16px">
+            <div style="font-size:12.5px;color:var(--ink2)">客户：泰和能源（KA · 上海）· 下单 2026-08-20</div>
+            <div class="row" style="margin-top:10px">
+              <button class="btn pri sm" id="btnAnchorApprove">✓ 审批通过</button>
+              <button class="btn sm" id="btnAnchorLogi">查物流</button>
+            </div>
+            <div class="row" style="margin-top:12px">
+              <label class="sw"><input type="checkbox" id="swAnchor" checked>调用时携带 _mcp_context（上下文锚定）</label>
+            </div>
+          </div>
+        </div>
+        <p class="note">勾选：前端自动采集「页面 / 按钮 / 数据快照 / 角色」随请求发送；取消：只发一句人话，让后端在 137 个工具里猜。角色跟随路径一的角色选择。</p>
+      </div>
+      <div>
+        <div class="dsl" id="anchorCtx" style="max-height:190px">// 请求信封将在这里显示</div>
+        <div class="log" id="anchorLog" style="margin-top:10px;max-height:150px">等待操作：点左侧按钮试试…</div>
+      </div>
+    </div>
+  </div>
+
+  <details class="fold" style="margin-top:22px">
+    <summary>进阶 · 三种更极致的抽象：语义函数调用 / 事件驱动 / 声明式（点开看）</summary>
+    <div class="fold-b">
+  <div class="idea-h" style="margin-top:8px"><span class="ih-l">进阶</span><span class="ih-t">再往前一步：三种更极致的抽象</span><span class="ih-s"></span></div>
+  <div class="three-why" style="margin-top:0">
+    <div class="why-card s">
+      <div class="wicn">🎯</div>
+      <h4>语义函数调用</h4>
+      <p>前端只描述目标与约束：<b>mcp.execute({ goal:'把最近 3 天未支付订单催一下', constraints:{ maxCalls:10, avoid:['VIP'] } })</b>——后端 Agent 自动：查询 → 过滤 VIP → 限 10 个 → 发短信。AI 原生应用首选。</p>
+    </div>
+    <div class="why-card t">
+      <div class="wicn">📡</div>
+      <h4>事件驱动 MCP</h4>
+      <p>前端不发请求，只广播事实：<b>mcp.emit('order.approved', { orderId })</b>——后端订阅事件自动完成：更新状态、通知仓库、记录审计、财务结算。前端完全不需要知道「调哪个工具」。</p>
+    </div>
+    <div class="why-card c">
+      <div class="wicn">🧩</div>
+      <h4>声明式 MCP</h4>
+      <p>在路由配置里声明能力与按钮绑定：<b>&lt;Button mcp-action="approve_order"&gt;</b>，页面加载自动 order.query、点击自动对应 action，上下文从路由 / state 自动提取。低代码平台首选。</p>
+    </div>
+  </div>
+
+  <div class="idea-table" style="margin-top:16px">
+    <table>
+      <thead><tr><th>方案</th><th style="width:15%">前端工作量</th><th style="width:13%">灵活性</th><th>适合场景</th></tr></thead>
+      <tbody>
+        <tr><td><span class="obj">上下文注入<small>手动 setContext</small></span></td><td>中</td><td>中</td><td>传统企业应用，改造成本最小</td></tr>
+        <tr><td><span class="obj">自动采集 + 智能路由<small>推荐基座</small></span></td><td><b>低</b></td><td>高</td><td>大部分业务系统</td></tr>
+        <tr><td><span class="obj">语义函数调用<small>goal + constraints</small></span></td><td>极低</td><td>极高</td><td>AI 原生应用</td></tr>
+        <tr><td><span class="obj">事件驱动 MCP<small>emit / subscribe</small></span></td><td>极低</td><td>高</td><td>异步流程 / 微服务</td></tr>
+        <tr><td><span class="obj">声明式配置<small>mcp-action / 路由级声明</small></span></td><td>极低</td><td>中</td><td>低代码 / 配置化平台</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">推荐组合：<b>自动采集 + 智能路由做基座，声明式 mcp-action 做开发体验</b>——前端只在按钮上声明语义，其余全自动。</p>
+
+  <div class="idea-summary" style="margin-top:16px;padding:22px 30px">
+    <span class="lbl">// 终极形态</span>
+    <div class="txt" style="font-size:16px">最优雅的抽象，是让开发者<b>感觉不到 MCP 的存在</b>——前端只写 <span class="mono">api.getOrder('123')</span>，底层自动：采集上下文 → 路由能力域 → 执行工具。抽象的最高境界：<b>消失</b>。</div>
+  </div>
+
+    </div>
+  </details>
+
+  <!-- 06 成熟度坐标 -->
+  <div class="idea-h"><span class="ih-l">06 · 成熟度坐标</span><span class="ih-t">前端智能化 L0 → L4：你在哪，下一步去哪</span><span class="ih-s"></span></div>
+  <div class="ladder">
+    <div class="rung">
+      <div class="rl">L0</div><h5>传统界面</h5>
+      <p>菜单 + 表单 + 按钮，逻辑写死，每个诉求都等排期——<b>人适应系统</b>。</p>
+    </div>
+    <div class="rung">
+      <div class="rl">L1</div><h5>规则辅助</h5>
+      <p>高频路径自动化：快捷指令、表单纠错，0 Token、确定性强（路径一勾选 L1 即此级）。</p>
+    </div>
+    <div class="rung">
+      <div class="rl">L2</div><h5>单点智能</h5>
+      <p>数据自己会说话：异常高亮、拐点标注、智能摘要（本页路径二）。</p>
+    </div>
+    <div class="rung hot">
+      <span class="here">本页主体 · L3</span>
+      <div class="rl">L3</div><h5>意图驱动</h5>
+      <p>自然语言 → 网关编排 + 上下文锚定 + 五道闸护栏——<b>系统适应人</b>。</p>
+    </div>
+    <div class="rung">
+      <div class="rl">L4</div><h5>自主编排</h5>
+      <p>语义函数调用 / 事件驱动 / 声明式，MCP 感知消失。<b>护栏没建好前不要跳到这级。</b></p>
+    </div>
+  </div>
+  <p class="note">大多数团队站在 L0–L1。务实路线：<b>L1 攒规则与信任 → L2 让数据说话 → L3 上网关与护栏 → L4 再谈消失</b>；跳级 = 在没有白名单、Schema、审计时把编排权交给模型。注意区分两套编号：路径一里的 L1/L2 是<b>路由层级</b>（规则直通 vs 过模型），本表 L0–L4 是<b>成熟度层级</b>——重名纯属巧合，汇报时务必分开说。</p>
+
+  <!-- 总结一句话 -->
+  <div class="idea-summary">
+    <span class="lbl">// 一句话总结</span>
+    <div class="txt"><b>前端依然要接后端</b>，但中间夹了一个"AI 执行层"<span style="white-space:nowrap">（MCP / Harness）</span>。<b>前端现在主要对接这个执行层</b>，由它来决定是调用后端、模型、还是直接操作浏览器。</div>
+  </div>
+
+  <div class="row" style="margin-top:14px">
+    <a class="chip" href="#p1">看「五道闸」如何拦截越权与幻觉 →</a>
+    <a class="chip" href="#p2">看「数据自己会说话」 →</a>
+    <a class="chip" href="#p3">看「动态生成只给配置」 →</a>
+    <a class="chip" href="#audit">看每一次意图的留痕 →</a>
+    <a class="chip" href="#anchor">看「上下文锚定」现场对比 →</a>
+    <a class="chip" href="#cost">把「成本」算出来 →</a>
+  </div>
+</section>
+
+<!-- ============ 落地路线 ============ -->
+<section id="plan">
+  <div class="shead"><span class="tag o">落地</span><h2>怎么落地 & 怎么算成功</h2></div>
+  <p class="sdesc">四条路径<b>不要同时上</b>：先做信心工程，再打主战场；护栏与网关<b>同期上线</b>，不允许"先跑起来再加锁"。路径三看起来最酷、也最容易翻车——明确放最后并设边界。</p>
+  <div class="grid2" style="gap:14px;align-items:start">
+    <div class="panel">
+      <h3><span class="step">P</span>推进节奏 · 12 周四阶段（每步都有可验收产出）</h3>
+      <div style="font-size:13px;line-height:1.95;color:var(--ink2)">
+        <b style="color:var(--green)">P0 · 第 1–2 周 · 信心工程</b>：先做路径二（智能数据层）+ 埋点基线——不改架构、零权限风险、一周见效，先拿组织信心。<br>
+        <b style="color:var(--primary)">P1 · 第 3–6 周 · 主战场</b>：MCP 网关 + 路径一；3 个高频页面接入、20+ Tool 注册、五道护栏齐备。<br>
+        <b style="color:var(--amber)">P2 · 第 5–9 周 · 并行兜底</b>：路径四（自愈 + 性能守护）+ 三级路由与预算配额。<br>
+        <b style="color:var(--muted)">P3 · 第 10–12 周 · 受控试点</b>：路径三只开内部 1 个场景；先沉淀 15~20 个组件模板库，生成结果可保存为正式路由，再谈放开。
+      </div>
+      <p class="note">依赖关系不能颠倒：网关（P1）是路径一 / 三的共同前置；模板库依赖 P1 阶段提前约束的组件规范。风险预案：意图成功率不达标 → 工具集收缩到 5 个以内先做深；成本超预算 → 降 L3 占比 / 提高缓存 TTL / 换小模型；用户不买账 → 入口改成"操作建议卡"被动推荐。</p>
+    </div>
+    <div class="panel">
+      <h3><span class="step g">8</span>验收口径 · 八个数（上线前先埋点，别事后补）</h3>
+      <div class="chips">
+        <span class="chip">意图成功率 ≥85%</span>
+        <span class="chip">平均操作步骤 ↓60%</span>
+        <span class="chip">P95 意图首字节 &lt;800ms</span>
+        <span class="chip">L1 命中率 ≥60%</span>
+        <span class="chip">意图功能采用率 ≥30%</span>
+        <span class="chip">Token ≤X 元/人/月（硬上限告警）</span>
+        <span class="chip">渲染类自愈率 ≥60%</span>
+        <span class="chip">越权 / Key 泄漏 = 0 起</span>
+      </div>
+      <p class="note">每条意图记录四段式日志并上报后端：<b>原始输入 → 解析计划（含是否过模型）→ 执行结果 → 用户是否撤销</b>。正向飞轮：使用 → 日志 → badcase 归因 → 沉淀为 L1 规则 → <b>更快、更准、更便宜</b> → 更多人用。「用户撤销」是最值钱的负样本。</p>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:14px">
+    <h3><span class="step">＋</span>前端智能化还能加什么（按性价比排队）</h3>
+    <div class="chips">
+      <span class="chip a">✅ 本页已演示：快捷指令 / 参数规则表 / 高危确认 / 审计留痕 / 异常高亮 / 表单纠错 / 拐点标注 / 智能摘要 / 受控生成页面 / 错误自愈 / FPS 降级 / 多轮追问 / 建议卡 / 手动兜底</span>
+    </div>
+    <div class="chips" style="margin-top:8px">
+      <span class="chip">🥇 下一批：意图缓存（同一句话不重复花钱解析）</span>
+      <span class="chip">🥇 流式优先（先回"我打算这么做"再执行，等待感减半）</span>
+      <span class="chip">🥇 小模型解析落地（L2 才是省钱主力）</span>
+      <span class="chip">🥇 意图评测集（改规则 / 换模型自动跑分回归）</span>
+    </div>
+    <div class="chips" style="margin-top:8px">
+      <span class="chip">🔹 之后：看板保存为正式路由</span>
+      <span class="chip">🔹 跨页任务编排（一句话跨三个页面干活）</span>
+      <span class="chip">🔹 使用习惯进上下文（越用越懂你）</span>
+      <span class="chip">🔹 语音输入 → 走同一条意图管道</span>
+      <span class="chip">🔹 CI 卡点：扫描禁 eval / 禁动态拼组件路径</span>
+      <span class="chip">🔹 新手引导：AI 讲解当前页面每个按钮干嘛的</span>
+    </div>
+    <p class="note">排序原则：先做<b>不碰架构、纯前端、一周见效</b>的（建信心），再做需要网关的（主战场），最后做依赖模板库的（受控试点）。每个新能力上线前先问一句：<b>它挂了，传统等价物在哪？</b>答不上来就不许上。</p>
+  </div>
+</section>
+
+<!-- ============ 无模型兜底 ============ -->
+<section id="degrade">
+  <div class="shead"><span class="tag" style="background:var(--red)">兜底</span><h2>没模型了怎么办？——拔掉 AI，页面照常跑</h2></div>
+  <p class="sdesc">验收标准只有一条：<b>把模型拔掉，系统必须还能正常用</b>。自然语言是加速带，不是唯一路径；智能化是<b>渐进增强</b>——先有一个完整能用的页面，AI 往上叠加加速，而不是等 AI 挂了再补救。下面的开关可以模拟"模型挂了"，然后去上方路径一实际试试。</p>
+  <div class="grid2" style="align-items:start;gap:14px">
+    <div class="panel">
+      <h3><span class="step r">⚡</span>退化四级阶梯（每一级都有明确动作）</h3>
+      <div style="font-size:13px;line-height:2.05;color:var(--ink2)">
+        <b>① 隐身降级</b>：模型超时 / 故障 → 静默回落快捷指令，只留一个小提示"快捷模式"<br>
+        <b>② 手动兜底</b>：连续 2 次没听懂 → 弹出结构化筛选面板，点两下完成任务<br>
+        <b>③ 功能冻结</b>：生成页面、数据摘要等重度功能 → 置灰并说明原因，<b>绝不假装能用</b><br>
+        <b>④ 传统保底</b>：按钮 / 筛选 / 导出全程保留——AI 上线前后，功能集完全一致
+      </div>
+      <div class="row" style="margin-top:14px">
+        <label class="sw"><input type="checkbox" id="swModelDown">🔴 模拟模型故障（全局开关）</label>
+        <span class="hint" id="degradeState">当前：模型正常</span>
+      </div>
+      <div class="orch-status" id="degradeHow">打开开关：路径一里超出快捷指令的说法会提示"听不懂"并自动打开手动筛选；页面生成 / 数据摘要置灰；页面顶部出现快捷模式横幅。关掉即恢复。</div>
+    </div>
+    <div class="panel">
+      <h3><span class="step g">✓</span>停机演练验收清单</h3>
+      <div style="font-size:13px;line-height:2.15;color:var(--ink2)">
+        ☑ 断模型演练：核心流程 <b>100% 可完成</b>（每个智能功能都有传统等价物）<br>
+        ☑ 快捷指令覆盖率 <b>≥60%</b>：多数高频操作不依赖模型<br>
+        ☑ 降级提示<b>说人话</b>："当前为快捷模式"，而不是一屏报错堆栈<br>
+        ☑ 恢复后<b>自动退出</b>降级，无需用户刷新页面<br>
+        ☑ 降级期间审计照记：哪句没解析、谁用了手动兜底，一样可回溯
+      </div>
+      <p class="note">对应回五道闸的铁律：模型只有<b>提议权</b>——它挂了，裁决和执行还在。这就是整套东西"放在前端也敢用"的最终理由：<b>最坏情况，只是回到昨天。</b></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 路径一 ============ -->
+<section id="p1">
+  <div class="shead"><span class="tag a">路径一</span><h2>智能交互层 · 让界面"听懂人话"</h2></div>
+  <p class="sdesc">一句自然语言 → 解析为受控的 tool call → 五道闸校验 → 执行 → 留痕。右侧每一步都对应落地方案里的护栏。这就是思想主线里「前端当好 MCP 客户端」的样子。换个角度看，五道闸就是<b>幻觉的纵深防御</b>：闸 2 拦「发明工具」、闸 3 拦「参数幻觉」、闸 4 拦「越权执行」、闸 5 拦「高危误操作」，审计兜底可回溯。一条铁律贯穿始终：<b>模型提议 · 网关裁决 · 后端落地</b>——提议权可以给 AI，执行权必须留在系统里。</p>
+
+  <div class="grid2">
+    <div class="panel">
+      <h3><span class="step">1</span>说出你的意图</h3>
+      <div class="row">
+        <input type="text" id="intentInput" placeholder="例如：筛选出北京地区已付款的订单" style="flex:1;min-width:240px">
+        <button class="btn pri" id="btnRun">执行 (Enter)</button>
+      </div>
+      <div class="chips" style="margin-top:10px" id="chips"></div>
+      <div class="row" style="margin-top:14px;gap:16px">
+        <label class="sw"><input type="checkbox" id="swL1" checked>快捷指令优先（术语叫 L1：命中就不过模型）</label>
+        <label class="sw">当前角色
+          <select id="selRole" style="width:auto;padding:5px 8px;font-size:12.5px">
+            <option value="viewer">viewer（只读）</option>
+            <option value="operator">operator（可导出）</option>
+            <option value="admin">admin（全权限）</option>
+          </select>
+        </label>
+      </div>
+      <div class="grid3" style="gap:10px;margin-top:12px">
+        <div style="border:1px solid var(--green-line);background:var(--green-soft);border-radius:9px;padding:10px 13px;font-size:12.5px;line-height:1.7">
+          <b>L1 · 规则 + 意图缓存（"快捷指令"）</b><br>高频确定操作走正则 + 缓存复用。目标占比 ~70% · <b>&lt;50ms · 0 Token</b>。本页开关勾选时即此级。
+        </div>
+        <div style="border:1px solid var(--amber-line);background:var(--amber-soft);border-radius:9px;padding:10px 13px;font-size:12.5px;line-height:1.7">
+          <b>L2 · 小模型结构化解析</b><br>半确定意图（多条件组合、模糊时间）交给小模型，只输出 tool + params。目标 ~25% · <b>200~600ms · 成本低</b>。本页"模型"模拟此级。
+        </div>
+        <div style="border:1px solid var(--red-line);background:var(--red-soft);border-radius:9px;padding:10px 13px;font-size:12.5px;line-height:1.7">
+          <b>L3 · 大模型规划</b><br>真正的模糊意图（跨页编排、生成看板、多步任务）才请大模型做规划。目标 ~5% · <b>1~3s · 成本高（设上限）</b>。
+        </div>
+      </div>
+      <p class="note"><b>L1 开关这样对比着用：</b>勾选时，"筛选北京已付款订单"这类高频说法命中规则库 → 30ms / 0 Token；关掉后同一句话改走 L2"模型"解析 → 结果相同，但慢约 600ms、花 150+ Token（看右上角 L1/L2/Token 计数，轨迹里也会提示"本可被 L1 命中"）。<b>切换角色后再执行"删除订单"，可以看到权限闸生效。</b></p>
+      <div class="confirm" id="confirmBox">
+        <h4>⚠️ 高危动作，需要你确认</h4>
+        <div style="font-size:12.5px" id="confirmText"></div>
+        <pre id="confirmPlan"></pre>
+        <div class="row">
+          <button class="btn danger" id="btnConfirmYes">确认执行</button>
+          <button class="btn" id="btnConfirmNo">取消</button>
+        </div>
+      </div>
+      <div class="confirm" id="fbPanel" style="border-color:var(--amber-line);background:var(--amber-soft)">
+        <h4 style="color:var(--amber)">🖐 AI 没听懂？点两下，手动筛</h4>
+        <div class="row">
+          <select id="fbRegion" style="width:auto"><option value="">全部地区</option><option>北京</option><option>上海</option><option>深圳</option><option>成都</option><option>杭州</option></select>
+          <select id="fbStatus" style="width:auto"><option value="">全部状态</option><option value="paid">已付款</option><option value="unpaid">待付款</option><option value="refund">已退款</option></select>
+          <select id="fbDays" style="width:auto"><option value="">不限时间</option><option value="7">最近 7 天</option><option value="14">最近 14 天</option><option value="30">最近 30 天</option></select>
+          <button class="btn pri sm" id="btnFbRun">按这些条件筛选</button>
+          <button class="btn sm" id="btnFbClose">关闭</button>
+        </div>
+        <p class="note" style="margin-top:8px">这面板只在"连续 2 次没听懂"或"快捷模式下遇到复杂说法"时自动弹出——AI 不装懂，你点两下照常完成任务。</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3><span class="step">2</span>AI 执行轨迹（五道闸）</h3>
+      <div class="trace" id="trace">
+        <div class="tstep"><span class="ti">1</span><div><div class="tt">意图解析</div><div class="td" id="t0">等待输入…</div></div></div>
+        <div class="tstep"><span class="ti">2</span><div><div class="tt">工具白名单</div><div class="td" id="t1">—</div></div></div>
+        <div class="tstep"><span class="ti">3</span><div><div class="tt">参数 Schema 校验</div><div class="td" id="t2">—</div></div></div>
+        <div class="tstep"><span class="ti">4</span><div><div class="tt">权限二次校验</div><div class="td" id="t3">—</div></div></div>
+        <div class="tstep"><span class="ti">5</span><div><div class="tt">执行 + 审计留痕</div><div class="td" id="t4">—</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3><span class="step g">✓</span>订单表格　<span class="hint" id="tblMeta"></span></h3>
+    <div class="tblwrap"><table class="tbl">
+      <thead><tr><th>订单号</th><th>客户</th><th>地区</th><th>渠道</th><th>金额</th><th>状态</th><th>下单日期</th></tr></thead>
+      <tbody id="orderBody"></tbody>
+    </table></div>
+    <div class="insight" id="tblInsight"></div>
+  </div>
+
+  <div class="idea-h" style="margin-top:30px"><span class="ih-l">进阶示例</span><span class="ih-t">记忆 · 建议 · 兜底：交互层还能这样长</span><span class="ih-s"></span></div>
+  <div class="grid3" style="align-items:start;gap:14px">
+    <div class="panel">
+      <h3><span class="step">🧠</span>多轮追问（带记忆）</h3>
+      <div class="row">
+        <input type="text" id="mtInput" placeholder="先说：看北京已付款的订单" style="min-width:0;flex:1">
+        <button class="btn pri sm" id="btnMtRun">执行</button>
+      </div>
+      <div class="chips" id="mtChips" style="margin-top:8px">
+        <span class="chip">看北京已付款的订单</span>
+        <span class="chip">金额只要大于1万的</span>
+        <span class="chip">时间再限定最近7天</span>
+      </div>
+      <div class="log" id="mtLog" style="margin-top:10px;max-height:150px">第二轮起只说增量（如"金额只要大于1万的"），系统会继承上一轮条件、合并执行。</div>
+      <p class="note">这就是"对话记忆"：用户不用每次从头说全条件。真实实现是网关保存会话状态，与 MCP 的 memory 一致。</p>
+    </div>
+    <div class="panel">
+      <h3><span class="step">💡</span>操作建议卡（AI 主动开口）</h3>
+      <button class="btn sm" id="btnSimAct">模拟：用户连续 3 次筛选「北京」</button>
+      <div class="confirm" id="sugCard" style="border-color:var(--pri-line);background:var(--pri-soft);margin-top:10px">
+        <h4 style="color:var(--primary-2)">💡 要不要存成常用视图？</h4>
+        <div style="font-size:12.5px">注意到你连续 3 次筛选「北京」，可以固化成一条快捷指令，下次一句话直达（0 Token）。</div>
+        <pre style="font-family:var(--mono);font-size:11.5px;background:rgba(255,255,255,.85);border-radius:7px;padding:8px 11px;margin:8px 0;white-space:pre-wrap">新增快捷指令：/只看北京|北京订单/ → filterOrders(北京)</pre>
+        <div class="row">
+          <button class="btn pri sm" id="btnSugSave">保存为快捷指令</button>
+          <button class="btn sm" id="btnSugSkip">忽略</button>
+        </div>
+      </div>
+      <p class="note">保存后，上方示例区会多一个"只看北京"入口——这就是「使用习惯 → 沉淀规则」的正向飞轮：规则越用越准、Token 越用越省。</p>
+    </div>
+    <div class="panel">
+      <h3><span class="step r">🖐</span>手动兜底（听不懂就别猜）</h3>
+      <div style="font-size:12.5px;color:var(--ink2);line-height:1.85">连续 2 次"没听懂"，或快捷模式下遇到复杂说法 → 自动弹出结构化筛选面板（在左上第一块面板里）。AI 不装懂，你点两下照常完成任务。</div>
+      <p class="note" style="margin-top:8px">试一试：输入两次"帮我把办公室的灯关了"；或打开「无模型兜底」节的故障开关后，随便输入一句复杂的话。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 路径二 ============ -->
+<section id="p2">
+  <div class="shead"><span class="tag a">路径二</span><h2>智能数据层 · 让数据"自己会说话"</h2></div>
+  <p class="sdesc">同一份数据，系统主动做五件事：<b>高亮异常并解释、校验输入并给解药、标注拐点并换图、注入数据验证规则、生成人话摘要</b>。规则引擎在本地跑（真实方案里重规则放 Web Worker，靠数据指纹 + 防抖触发）。</p>
+
+  <div class="grid2">
+    <div class="panel">
+      <h3><span class="step m">A</span>智能表格 · 异常自动高亮与解释</h3>
+      <div class="row" style="margin-bottom:10px">
+        <button class="btn sm" id="btnInjectAbn">⚠️ 注入一条异常数据</button>
+        <button class="btn sm" id="btnResetAbn">↺ 还原数据</button>
+        <span class="hint">注入后规则引擎应立刻高亮并解释；点表格行可看逐条洞察</span>
+      </div>
+      <div class="tblwrap" style="max-height:250px"><table class="tbl">
+        <thead><tr><th>订单号</th><th>地区</th><th>金额</th><th>状态</th><th>洞察</th></tr></thead>
+        <tbody id="smartBody"></tbody>
+      </table></div>
+      <div class="insight" id="smartInsight"></div>
+      <p class="note"><b>规则：</b>金额 &gt; 全量均值 2.5 倍 → 高亮；≥5 万且为整数 → 疑似批量/测试单；退款且高于均值 → 建议复核；欠款 &gt;7 天 → 建议催收。</p>
+    </div>
+
+    <div class="panel">
+      <h3><span class="step m">B</span>智能表单 · 校验即给解药</h3>
+      <div class="frow"><div class="flabel">邮箱</div><div>
+        <input type="text" id="fEmail" value="zhangsan@qq.con">
+        <div class="fmsg" id="mEmail"></div>
+        <div class="sug" id="sEmail"><button class="btn sm" id="btnFixEmail">采纳建议</button></div>
+      </div></div>
+      <div class="frow"><div class="flabel">手机号</div><div>
+        <input type="text" id="fPhone" value="1381234567">
+        <div class="fmsg" id="mPhone"></div>
+        <div class="sug" id="sPhone"><button class="btn sm" id="btnFixPhone">采纳建议</button></div>
+      </div></div>
+      <div class="frow"><div class="flabel">订单金额</div><div>
+        <input type="text" id="fAmount" value="1280000">
+        <div class="fmsg" id="mAmount"></div>
+        <div class="sug" id="sAmount"><button class="btn sm" id="btnFixAmount">采纳建议</button></div>
+      </div></div>
+      <p class="note">报错不止说"格式错误"，而是<strong>同时给出可一键采纳的修正值</strong>。试试改一个字符看实时反馈。</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3><span class="step m">C</span>智能图表 · 自动标注拐点、自动切换图表类型</h3>
+    <div class="row" style="margin-bottom:12px">
+      <button class="btn sm" id="btnSeriesFlat">切到「平稳期」数据</button>
+      <button class="btn sm" id="btnSeriesSpike">切到「突增期」数据</button>
+      <span class="hint" id="chartHint"></span>
+    </div>
+    <div id="chartBox"></div>
+  </div>
+
+  <div class="panel">
+    <h3><span class="step m">D</span>智能摘要 · 把整页数据说成人话　<span class="hint">真实方案：网关把统计结果交给模型总结；本页用本地模板模拟</span></h3>
+    <div class="row" style="margin-bottom:10px">
+      <button class="btn pri sm" id="btnBrief">生成数据摘要</button>
+      <span class="hint" id="briefMeta">统计口径 = 当前可见订单（注入 / 删除都会反映在下一次摘要里）</span>
+    </div>
+    <div class="log" id="briefBox" style="font-size:12.5px">点击「生成数据摘要」——输出一段可直接贴进日报的文字：整体盘面 / 最突出订单 / 风险提示 / 催收与退款复核。</div>
+  </div>
+</section>
+
+<!-- ============ 路径三 ============ -->
+<section id="p3">
+  <div class="shead"><span class="tag a">路径三</span><h2>智能路由层 · 让页面"动态生成"</h2></div>
+  <p class="sdesc">网关返回的是<strong>受约束的页面 DSL（配置）</strong>，不是代码；前端只在白名单注册表内取组件渲染。</p>
+
+  <div class="grid2">
+    <div class="panel">
+      <h3><span class="step">1</span>说出你想要的页面</h3>
+      <div class="row">
+        <input type="text" id="pageIntent" placeholder="例如：给我一个销售数据看板" style="flex:1;min-width:220px">
+        <button class="btn pri" id="btnGen">生成页面</button>
+      </div>
+      <div class="chips" style="margin-top:10px" id="pageChips"></div>
+      <h3 style="margin-top:16px"><span class="step">2</span>网关返回的页面 DSL</h3>
+      <div class="dsl" id="dslBox">// 尚未生成</div>
+      <div class="confirm" id="genErr">
+        <h4>⛔ 已拦截：组件不在白名单内</h4>
+        <div style="font-size:12.5px" id="genErrText"></div>
+      </div>
+      <p class="note">对照原方案的反模式 <span class="mono">import('@/components/' + type + '.vue')</span>：本 Demo 改为<strong>静态注册表 + keyof 约束</strong>，模型只能输出 key，越界当场拒绝。</p>
+    </div>
+
+    <div class="panel">
+      <h3><span class="step g">3</span>渲染结果</h3>
+      <div class="stage" id="pageStage">页面将在这里动态生成…</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 路径四 ============ -->
+<section id="p4">
+  <div class="shead"><span class="tag a">路径四</span><h2>智能运维层 · 让应用"自我修复"</h2></div>
+  <p class="sdesc">错误按策略自愈（重试 / 降级 / 上报），性能低于阈值自动降级。<strong>未知错误只上报、不猜；写操作绝不自动重试。</strong></p>
+
+  <div class="grid2">
+    <div class="panel">
+      <h3><span class="step r">A</span>错误自愈</h3>
+      <div class="row" style="margin-bottom:12px">
+        <button class="btn sm" id="btnErrRetry">注入「可重试」异常</button>
+        <button class="btn sm" id="btnErrDegrade">注入「需降级」崩溃</button>
+        <button class="btn sm" id="btnErrUnknown">注入「未知」异常</button>
+        <button class="btn sm" id="btnErrWrite">注入「写操作超时」</button>
+        <button class="btn sm" id="btnErrReset">恢复正常</button>
+      </div>
+      <div id="compBox"></div>
+      <h3 style="margin-top:16px"><span class="step r">B</span>自愈日志</h3>
+      <div class="log" id="healLog" style="max-height:170px"></div>
+    </div>
+
+    <div class="panel">
+      <h3><span class="step r">C</span>性能守护</h3>
+      <div class="row" style="justify-content:space-between;align-items:flex-end;margin-bottom:10px">
+        <div class="gauge"><span class="gv" id="fpsVal">60</span><span class="gu">FPS（实时采样）</span></div>
+        <div class="row">
+          <button class="btn sm" id="btnLag">注入卡顿 5 秒</button>
+          <label class="sw"><input type="checkbox" id="swAuto" checked>自动降级</label>
+        </div>
+      </div>
+      <div class="deglog" id="degLog"></div>
+      <p class="note">真实方案还会采样 <span class="mono">performance.memory</span>（仅 Chromium，需可选链兜底），并在页面不可见时停止采样。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 审计 ============ -->
+<section id="audit">
+  <div class="shead"><span class="tag o">汇总</span><h2>审计日志 · 每一次意图都留痕</h2></div>
+  <p class="sdesc">四段式：<strong>原始输入 → 解析计划（含是否过模型）→ 执行结果 → 用户是否撤销</strong>。被拦截的动作同样记录——这是"前端当好 MCP 客户端"的底线：每一次 tool call 都可回溯。</p>
+  <div class="panel">
+    <div class="row" style="margin-bottom:10px" id="auditFilters">
+      <span class="chip a" data-af="all">全部</span>
+      <span class="chip" data-af="ok">执行 / 信息</span>
+      <span class="chip" data-af="err">拦截</span>
+      <span class="chip" data-af="warn">高危 / 撤销</span>
+      <button class="btn sm" id="btnClearLog">清空日志</button>
+      <span class="hint" id="auditMeta"></span>
+    </div>
+    <div class="orch-status" id="auditStats" style="margin-bottom:10px"></div>
+    <div class="log" id="auditLog" style="max-height:300px"></div>
+  </div>
+</section>
+
+<p class="foot">
+  本页为 <strong>V2 人话版</strong>：思想主线（三层 → 四层 · 接入权重 · MCP 编排播放 · 上下文锚定）+ 四条路径可交互验证 + 进阶示例（记忆 / 建议卡 / 手动兜底）+ 无模型兜底演练。<br>
+  所有"AI 能力"均由本地规则模拟，无网络请求、无 API Key；执行链路、五道护栏与审计结构与落地方案一致，可直接替换为真实 MCP / Harness 网关调用。
+</p>
+</div>
+
+<button id="toTop" title="回到顶部">↑</button>
+<div id="toasts"></div>
+
+<script>
+/* =========================================================
+   0. 基础设施
+   ========================================================= */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.prototype.slice.call(document.querySelectorAll(s));
+const now = () => new Date().toTimeString().slice(0,8);
+const fmt = n => n.toLocaleString('zh-CN');
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+const METRICS = { req:0, l1:0, l2:0, tok:0 };
+function bump(k, v){ METRICS[k] += (v === undefined ? 1 : v); paintMetrics(); }
+function paintMetrics(){
+  $('#mReq').textContent = METRICS.req;
+  $('#mL1').textContent  = METRICS.l1;
+  $('#mL2').textContent  = METRICS.l2;
+  $('#mTok').textContent = METRICS.tok;
+  const st = $('#auditStats');
+  if (st) {
+    const total = METRICS.l1 + METRICS.l2;
+    const rate = total ? Math.round(METRICS.l1 / total * 100) : 0;
+    st.innerHTML = '📖 顶部计数器读法：请求 <b>' + METRICS.req + '</b> = 网关模拟调用总次数（含被拦截的尝试）· 规则 <b>' +
+      METRICS.l1 + '</b> / 模型 <b>' + METRICS.l2 + '</b> = 其中被 L1 规则直通与走 L2 模型解析的次数 · Token <b>' +
+      METRICS.tok + '</b> = 累计模拟消耗。本轮 L1 直通率 <b>' + rate + '%</b>，估算节省 <b>≈' + fmt(METRICS.l1 * 190) +
+      '</b> Token（若这些请求全走模型，按 190/次计）。';
+  }
+}
+
+const AUDIT = [];
+const LV = { ok:'[OK]', warn:'[WARN]', err:'[BLOCK]', info:'[INFO]' };
+function log(lv, msg, extra){
+  AUDIT.unshift({ t:now(), lv, msg, extra });
+  paintAudit();
+}
+let auditFilter = 'all';
+function paintAudit(){
+  const list = AUDIT.filter(function(l){
+    if (auditFilter === 'all') return true;
+    if (auditFilter === 'ok') return l.lv === 'ok' || l.lv === 'info';
+    return l.lv === auditFilter;
+  });
+  const box = $('#auditLog');
+  box.innerHTML = list.map(l =>
+    '<div><span class="t">' + l.t + '</span><span class="lv ' + l.lv + '">' + (LV[l.lv]||'[LOG]') + '</span>' +
+    esc(l.msg) + (l.extra ? '<br><span style="color:#9AA1AC">　　' + esc(l.extra) + '</span>' : '') + '</div>'
+  ).join('') || '<div style="color:#9AA1AC">暂无记录</div>';
+  const blocked = AUDIT.filter(l => l.lv === 'err').length;
+  const warn = AUDIT.filter(l => l.lv === 'warn').length;
+  $('#auditMeta').textContent = '共 ' + AUDIT.length + ' 条 · 拦截 ' + blocked + ' 条 · 高危/撤销 ' + warn + ' 条';
+}
+$('#auditFilters').onclick = function(e){
+  const c = e.target.closest('.chip'); if (!c) return;
+  auditFilter = c.dataset.af;
+  $$('#auditFilters .chip').forEach(function(x){ x.classList.toggle('a', x === c); });
+  paintAudit();
+};
+$('#btnClearLog').onclick = () => { AUDIT.length = 0; paintAudit(); };
+
+/* Toast 轻提示（右下角） */
+function toast(msg, type){
+  const t = document.createElement('div');
+  t.className = 'toast ' + (type || '');
+  t.innerHTML = msg;
+  $('#toasts').appendChild(t);
+  setTimeout(function(){ t.style.opacity = '0'; t.style.transition = 'opacity .3s'; }, 3600);
+  setTimeout(function(){ t.remove(); }, 4000);
+}
+
+/* =========================================================
+   1. Mock 数据
+   ========================================================= */
+const REGIONS  = ['北京','上海','深圳','成都','杭州'];
+const STATUS   = { paid:'已付款', unpaid:'待付款', refund:'已退款' };
+const TODAY    = '2026-09-01';
+
+const ORDERS = [
+  ['SO-20381','星海科技','北京','线上',12800,'paid','2026-08-30'],
+  ['SO-20382','云图网络','上海','分销',9600,'paid','2026-08-30'],
+  ['SO-20383','南方传媒','深圳','直销',18400,'paid','2026-08-29'],
+  ['SO-20384','川流物流','成都','线上',7300,'unpaid','2026-08-29'],
+  ['SO-20385','锦鲤零售','杭州','KA',25600,'paid','2026-08-28'],
+  ['SO-20386','北极星数据','北京','直销',63000,'paid','2026-08-28'],
+  ['SO-20387','蓝鲸软件','上海','线上',11200,'refund','2026-08-27'],
+  ['SO-20388','风信子教育','深圳','分销',8800,'paid','2026-08-27'],
+  ['SO-20389','长风医疗','杭州','直销',14700,'paid','2026-08-26'],
+  ['SO-20390','恒益制造','成都','KA',32400,'paid','2026-08-26'],
+  ['SO-20391','初芒文化','北京','线上',6900,'unpaid','2026-08-25'],
+  ['SO-20392','海纳供应链','上海','KA',75000,'paid','2026-08-25'],
+  ['SO-20393','锐驰汽车','深圳','直销',21300,'paid','2026-08-24'],
+  ['SO-20394','明远咨询','杭州','分销',10500,'paid','2026-08-24'],
+  ['SO-20395','西岭旅游','成都','线上',5400,'paid','2026-08-23'],
+  ['SO-20396','启明半导体','北京','直销',41800,'paid','2026-08-23'],
+  ['SO-20397','青柠食品','上海','分销',7700,'unpaid','2026-08-22'],
+  ['SO-20398','万象地产','深圳','KA',28900,'paid','2026-08-22'],
+  ['SO-20399','知微生物','杭州','线上',13600,'paid','2026-08-21'],
+  ['SO-20400','远洋船舶','成都','直销',16200,'refund','2026-08-21'],
+  ['SO-20401','飞鸟传媒','北京','线上',9200,'paid','2026-08-20'],
+  ['SO-20402','泰和能源','上海','KA',35700,'paid','2026-08-20'],
+  ['SO-20403','灵犀智能','深圳','分销',11800,'paid','2026-08-19'],
+  ['SO-20404','沃野农业','杭州','直销',6300,'unpaid','2026-08-18'],
+  ['SO-20405','格物仪器','成都','线上',19800,'paid','2026-08-18'],
+].map(function(a){
+  return { id:a[0], customer:a[1], region:a[2], channel:a[3], amount:a[4], status:a[5], date:a[6] };
+});
+const daysAgo = d => Math.round((new Date(TODAY) - new Date(d)) / 86400000);
+
+/* =========================================================
+   2. 路径一：智能交互层
+   ========================================================= */
+const ROLE_PERMS = {
+  viewer:   ['order:read'],
+  operator: ['order:read','order:export'],
+  admin:    ['order:read','order:export','order:delete'],
+};
+const state = { filter:{ region:null, status:null, days:null }, sort:null, hidden:new Set() };
+
+function visibleOrders(){
+  let list = ORDERS.filter(o => !state.hidden.has(o.id));
+  const f = state.filter;
+  if (f.region) list = list.filter(o => o.region === f.region);
+  if (f.status) list = list.filter(o => o.status === f.status);
+  if (f.days)   list = list.filter(o => daysAgo(o.date) <= f.days);
+  if (f.minAmount) list = list.filter(o => o.amount >= f.minAmount);
+  if (state.sort) {
+    const field = state.sort.field, sign = state.sort.order === 'asc' ? 1 : -1;
+    list = list.slice().sort(function(a,b){
+      const va = field === 'amount' ? a.amount : new Date(a.date).getTime();
+      const vb = field === 'amount' ? b.amount : new Date(b.date).getTime();
+      return (va - vb) * sign;
+    });
+  }
+  return list;
+}
+
+// 区间型参数：枚举无法覆盖连续值，用 {__range:[min,max]} 表达，对应 JSON Schema 的 minimum/maximum
+const RANGE = (min, max) => ({ __range:[min, max] });
+
+// 工具注册表：模型只能"选名字 + 填参数"，不能发明函数
+const TOOLS = {
+  filterOrders: {
+    label:'按条件筛选订单', risk:'low', perm:'order:read',
+    schema:{ region:[null].concat(REGIONS), status:[null,'paid','unpaid','refund'], days:RANGE(1, 90), minAmount:RANGE(0, 500000) },
+    run(p){ state.filter = { region:p.region || null, status:p.status || null, days:p.days || null }; renderOrders(); }
+  },
+  sortOrders: {
+    label:'排序订单', risk:'low', perm:'order:read',
+    schema:{ field:['amount','date'], order:['asc','desc'] },
+    run(p){ state.sort = { field:p.field, order:p.order }; renderOrders(); }
+  },
+  exportData: {
+    label:'导出当前结果', risk:'high', perm:'order:export',
+    schema:{ format:['csv','xlsx'] },
+    run(p){ return '已生成 ' + p.format.toUpperCase() + ' 文件，共 ' + visibleOrders().length + ' 行（Demo 不真实下载）'; }
+  },
+  deleteOrders: {
+    label:'批量删除订单', risk:'high', perm:'order:delete',
+    schema:{ status:['paid','unpaid','refund'] },
+    run(p){
+      const n = visibleOrders().filter(o => o.status === p.status).length;
+      visibleOrders().filter(o => o.status === p.status).forEach(o => state.hidden.add(o.id));
+      renderOrders(); renderSmart();
+      return '已删除「' + STATUS[p.status] + '」订单 ' + n + ' 条（Demo 仅隐藏行）';
+    }
+  },
+  resetView: {
+    label:'重置视图', risk:'low', perm:'order:read',
+    schema:{},
+    run(){ state.filter = { region:null, status:null, days:null }; state.sort = null;
+           state.hidden.clear(); renderOrders(); renderSmart(); }
+  },
+};
+
+// L1 规则库：高频确定意图，命中就不过模型（0 Token、~30ms）
+// 注意规则顺序：先匹配"动作类"动词（导出/删除/重置），再匹配"筛选类"条件，
+// 否则"删除所有待付款订单"会被"待付款"规则抢先匹配成一次筛选。
+const RULES = [
+  { re:/(导出|下载|另存为)/,      plan:{ tool:'exportData',    params:{ format:'csv' } } },
+  { re:/(删除|删掉|清掉|移除|删了|干掉)/, plan:m => ({ tool:'deleteOrders',
+                                    params:{ status:/退款|退货/.test(m.input) ? 'refund' : 'unpaid' } }) },
+  { re:/(重置|恢复|清空筛选)/,    plan:{ tool:'resetView',     params:{} } },
+  { re:/北京.*(已付|付款|支付)/,  plan:{ tool:'filterOrders',  params:{ region:'北京', status:'paid' } } },
+  { re:/(已付|付款|支付).*北京/,  plan:{ tool:'filterOrders',  params:{ region:'北京', status:'paid' } } },
+  { re:/(待付款|未付款|欠款)/,    plan:{ tool:'filterOrders',  params:{ status:'unpaid' } } },
+  { re:/(退款|退货)的?订单/,      plan:{ tool:'filterOrders',  params:{ status:'refund' } } },
+  { re:/(金额|销售额).*(从高到低|降序|最高)/, plan:{ tool:'sortOrders', params:{ field:'amount', order:'desc' } } },
+  { re:/(金额|销售额).*(从低到高|升序|最低)/, plan:{ tool:'sortOrders', params:{ field:'amount', order:'asc' } } },
+  { re:/最近\s*(\d+)\s*天/,       plan:m => ({ tool:'filterOrders', params:{ days:+m[1] } }) },
+  { re:/(本周|这周|近一周)/,      plan:{ tool:'filterOrders',  params:{ days:7 } } },
+];
+
+// L2"模型"：规则未命中时，用抽取器模拟结构化输出（有延迟与 Token）
+function llmParse(input){
+  const p = {};
+  const rg = REGIONS.filter(r => input.indexOf(r) >= 0)[0];
+  if (rg) p.region = rg;
+  if (/已付款|已支付|付过款/.test(input)) p.status = 'paid';
+  else if (/待付款|未付款|还没付/.test(input)) p.status = 'unpaid';
+  else if (/退款|退货/.test(input)) p.status = 'refund';
+  const md = input.match(/(\d+)\s*(天|日)/) ||
+             (/(两周|半个月)/.test(input) ? [null,'14'] : null) ||
+             (/(一个月|30天)/.test(input) ? [null,'30'] : null) ||
+             (/(本周|这周|近一周)/.test(input) ? [null,'7'] : null);
+  if (md) p.days = +md[1];
+  const amt = input.match(/(\d+(?:\.\d+)?)\s*万/);
+  if (amt && /(大于|以上|至少|不低于|超过)/.test(input)) p.minAmount = Math.round(parseFloat(amt[1]) * 10000);
+  if (/从高到低|降序|最高|最贵/.test(input)) { p.field = 'amount'; p.order = 'desc'; }
+  else if (/从低到高|升序|最低|最便宜/.test(input)) { p.field = 'amount'; p.order = 'asc'; }
+  else if (/最新|按时间|按日期/.test(input)) { p.field = 'date'; p.order = 'desc'; }
+
+  // 模拟模型"幻觉"：自信地返回一个没注册过的工具名，交给白名单闸拦截
+  if (/(灯|空调|笑话|天气|音乐|外卖)/.test(input)) {
+    return { tool:'controlSmartDevice', params:{ action:input } };
+  }
+  if (p.field) return { tool:'sortOrders', params:{ field:p.field, order:p.order } };
+  if (/导出|下载|另存/.test(input)) return { tool:'exportData', params:{ format:/xlsx|excel/.test(input) ? 'xlsx' : 'csv' } };
+  if (/删除|清掉|移除/.test(input)) return { tool:'deleteOrders', params:{ status:p.status || 'unpaid' } };
+  if (/重置|恢复|清空/.test(input)) return { tool:'resetView', params:{} };
+  if (p.region || p.status || p.days || p.minAmount) {
+    return { tool:'filterOrders', params:{ region:p.region || null, status:p.status || null, days:p.days || null, minAmount:p.minAmount || null } };
+  }
+  return null;
+}
+
+async function parseIntent(input){
+  if ($('#swL1').checked) {
+    for (let i = 0; i < RULES.length; i++) {
+      const m = input.match(RULES[i].re);
+      if (m) {
+        await sleep(30);
+        const plan = typeof RULES[i].plan === 'function' ? RULES[i].plan(m) : RULES[i].plan;
+        return Object.assign({}, plan, { via:'L1 规则', ms:30, tok:0 });
+      }
+    }
+  }
+  if (MODEL_DOWN) return { tool:null, via:'模型不可用', ms:0, tok:0 };
+  const ms = 420 + Math.floor(Math.random() * 480);
+  await sleep(Math.min(ms, 700));
+  const plan = llmParse(input);
+  const tok = 150 + Math.floor(Math.random() * 90);
+  return plan ? Object.assign({}, plan, { via:'L2 模型', ms:ms, tok:tok })
+              : { tool:null, via:'L2 模型', ms:ms, tok:tok };
+}
+
+function setTrace(i, cls, html){
+  const el = $$('#trace .tstep')[i];
+  el.className = 'tstep ' + (cls || '');
+  $('#t' + i).innerHTML = html;
+}
+function resetTrace(){
+  $$('#trace .tstep').forEach(el => { el.className = 'tstep'; });
+  setTrace(0, '', '等待输入…');
+  [1,2,3,4].forEach(i => setTrace(i, '', '—'));
+}
+
+let pendingPlan = null;
+let failStreak = 0;
+let MODEL_DOWN = false;
+
+async function runIntent(raw){
+  const input = (raw || '').trim();
+  if (!input) return;
+  resetTrace();
+  $('#confirmBox').classList.remove('show');
+  bump('req');
+  const role = $('#selRole').value;
+
+  // 闸 1 意图解析
+  const plan = await parseIntent(input);
+  if (plan.via === 'L1 规则') bump('l1'); else { bump('l2'); bump('tok', plan.tok); }
+  let l1Could = false;
+  if (plan.via !== 'L1 规则') {
+    for (let i = 0; i < RULES.length; i++) { if (input.match(RULES[i].re)) { l1Could = true; break; } }
+  }
+  setTrace(0, 'on', '解析方式 <b>' + plan.via + '</b> · 耗时 ' + plan.ms + 'ms · Token ' + plan.tok +
+    (l1Could ? '<br><span class="k">↮ 对比：这句话本可被 L1 规则命中（30ms / 0 Token），勾选「L1 规则优先」即可省下这笔开销</span>' : '') +
+    '<br><span class="k">原始输入：</span>' + esc(input));
+  await sleep(180);
+
+  if (!plan.tool) {
+    if (plan.via === '模型不可用') {
+      setTrace(0, 'bad', '快捷模式：模型不可用，这句话超出快捷指令范围');
+      setTrace(1, 'bad', '不硬猜 → 引导手动兜底（退化阶梯 ②）');
+      failStreak++;
+      openFbPanel();
+      log('warn', '模型不可用，意图无法解析', '已打开手动筛选面板 · 输入：“' + input + '”');
+      toast('<b>快捷模式：</b>这句话需要模型理解，已为你打开手动筛选', 'warn');
+      return;
+    }
+    setTrace(0, 'bad', '无法把这句话映射到任何已注册的工具');
+    setTrace(1, 'bad', '未产生 tool_call，终止执行');
+    failStreak++;
+    if (failStreak >= 2) openFbPanel();
+    log('err', '意图无法解析 → 已拒绝', '输入：“' + input + '” · 记为 badcase，可固化为规则后转入 L1');
+    toast('<b>已拒绝：</b>这句话映射不到任何已注册工具，已记为 badcase', 'err');
+    return;
+  }
+  failStreak = 0;
+
+  // 闸 2 工具白名单
+  const tool = TOOLS[plan.tool];
+  if (!tool) {
+    setTrace(1, 'bad', '工具 <b>' + esc(plan.tool) + '</b> 不在注册表内 → 拒绝');
+    failStreak++;
+    if (failStreak >= 2) openFbPanel();
+    log('err', '未知工具被拦截', 'tool=' + plan.tool + '（模型"发明"的工具不会被执行）');
+    toast('<b>已拦截：</b>工具 ' + esc(plan.tool) + ' 不在白名单内', 'err');
+    return;
+  }
+  setTrace(1, 'ok', '命中已注册工具 <b>' + plan.tool + '</b>（' + tool.label + '）');
+  await sleep(150);
+
+  // 闸 3 参数 Schema 校验
+  const errs = [];
+  Object.keys(plan.params || {}).forEach(function(k){
+    const v = plan.params[k], allow = tool.schema[k];
+    if (!allow) { errs.push('多余字段 ' + k); return; }
+    if (allow.__range) {
+      const n = +v;
+      if (!isFinite(n) || n < allow.__range[0] || n > allow.__range[1]) {
+        errs.push(k + '=' + v + ' 超出允许区间 [' + allow.__range[0] + ', ' + allow.__range[1] + ']');
+      }
+    } else if (allow.indexOf(v) < 0) {
+      errs.push(k + '=' + v + ' 不在允许取值内');
+    }
+  });
+  if (errs.length) {
+    setTrace(2, 'bad', esc(errs.join('；')) + '<br>已拒绝（等价于 additionalProperties:false）');
+    log('err', '参数校验未通过', plan.tool + ' · ' + errs.join('；'));
+    toast('<b>已拦截：</b>参数不在 Schema 允许范围内', 'err');
+    return;
+  }
+  const cleanParams = {};
+  Object.keys(plan.params || {}).forEach(function(k){
+    if (plan.params[k] !== null && plan.params[k] !== undefined) cleanParams[k] = plan.params[k];
+  });
+  setTrace(2, 'ok', '<span class="mono">' + esc(JSON.stringify(cleanParams)) + '</span><br>字段与取值均在 Schema 允许范围内');
+  await sleep(150);
+
+  // 闸 4 权限二次校验
+  if (ROLE_PERMS[role].indexOf(tool.perm) < 0) {
+    setTrace(3, 'bad', '当前角色 <b>' + role + '</b> 缺少权限 <b>' + tool.perm + '</b> → 拒绝执行');
+    setTrace(4, 'bad', '动作未落地');
+    log('err', '越权调用被拦截', 'role=' + role + ' · tool=' + plan.tool + ' · 需要 ' + tool.perm);
+    toast('<b>已拦截：</b>角色 ' + role + ' 无权限 ' + tool.perm, 'err');
+    return;
+  }
+  setTrace(3, 'ok', '角色 <b>' + role + '</b> 具备 <b>' + tool.perm + '</b>');
+  await sleep(120);
+
+  // 闸 5 高危确认 → 执行 → 审计
+  plan.params = cleanParams;
+  if (tool.risk === 'high') {
+    setTrace(4, '', '等待用户确认（高危动作不自动执行）…');
+    pendingPlan = plan;
+    $('#confirmText').innerHTML = '工具 <b>' + plan.tool + '</b> 被标记为 <b>risk: high</b>，会真实影响数据，请先核对：';
+    $('#confirmPlan').textContent = JSON.stringify(
+      { tool:plan.tool, params:cleanParams, rationale:'解析方式：' + plan.via }, null, 2);
+    $('#confirmBox').classList.add('show');
+    log('warn', '高危动作待确认', plan.tool + ' · ' + JSON.stringify(cleanParams));
+    toast('<b>高危动作：</b>' + plan.tool + ' 等待你的二次确认', 'warn');
+    return;
+  }
+  await execute(plan);
+}
+
+async function execute(plan){
+  const tool = TOOLS[plan.tool];
+  const out = tool.run(plan.params || {});
+  setTrace(4, 'ok', '已执行 <b>' + plan.tool + '</b>　<span class="k">结果：</span>' + esc(out || '视图已更新'));
+  log('ok', '执行 ' + plan.tool, plan.via + ' · ' + JSON.stringify(plan.params || {}) + ' · ' + (out || '视图已更新'));
+  toast('<b>已执行：</b>' + plan.tool + ' —— ' + esc(out || '视图已更新'), 'ok');
+}
+
+$('#btnConfirmYes').onclick = function(){
+  $('#confirmBox').classList.remove('show');
+  if (!pendingPlan) return;
+  const p = pendingPlan; pendingPlan = null;
+  execute(p);
+};
+$('#btnConfirmNo').onclick = function(){
+  $('#confirmBox').classList.remove('show');
+  setTrace(4, '', '用户已取消（<b>撤销</b>是最有价值的负样本，会回流为 L1 规则）');
+  if (pendingPlan) log('warn', '用户撤销高危动作', pendingPlan.tool + ' · 记为负样本，可固化确认话术或规则');
+  pendingPlan = null;
+  toast('已取消，本次尝试已记入审计（负样本回流 L1）', 'warn');
+};
+
+function renderOrders(){
+  let listAll = visibleOrders(), f = state.filter;
+  let list = listAll;
+  if (DEG_FLAGS.virtual) list = list.slice(0, 8);
+  $('#orderBody').innerHTML = list.map(o =>
+    '<tr><td class="mono">' + o.id + '</td><td>' + o.customer + '</td>' +
+    '<td>' + (f.region ? '<span class="mark">' + o.region + '</span>' : o.region) + '</td>' +
+    '<td>' + o.channel + '</td><td>¥' + fmt(o.amount) + '</td>' +
+    '<td><span class="badge b-' + o.status + '">' + STATUS[o.status] + '</span></td>' +
+    '<td>' + o.date + '</td></tr>'
+  ).join('') || '<tr><td colspan="7" class="empty">没有符合条件的订单</td></tr>';
+  if (DEG_FLAGS.virtual) {
+    $('#orderBody').innerHTML += '<tr><td colspan="7" style="color:#B26B00;white-space:normal">⚡ 已启用虚拟滚动，仅渲染前 8 行（性能守护降级生效）</td></tr>';
+  }
+
+  const conds = [];
+  if (f.region) conds.push(f.region);
+  if (f.status) conds.push(STATUS[f.status]);
+  if (f.days)   conds.push('最近 ' + f.days + ' 天');
+  if (f.minAmount) conds.push('金额 ≥ ¥' + fmt(f.minAmount));
+  if (state.sort) conds.push('按' + (state.sort.field === 'amount' ? '金额' : '日期') + (state.sort.order === 'desc' ? '降序' : '升序'));
+  $('#tblMeta').textContent = '共 ' + listAll.length + ' / ' + (ORDERS.length - state.hidden.size) + ' 条' +
+    (conds.length ? ' · 条件：' + conds.join(' + ') : ' · 无筛选');
+
+  const box = $('#tblInsight');
+  if (listAll.length) {
+    const sum = listAll.reduce((s,o) => s + o.amount, 0);
+    box.innerHTML = '💡 <strong>已按你的意图更新视图</strong>：命中 ' + listAll.length + ' 条，合计 ¥' + fmt(sum) +
+      '，平均 ¥' + fmt(Math.round(sum / listAll.length)) + '。全过程未新增任何后端接口，也未让模型接触数据。';
+    box.classList.add('show');
+  } else box.classList.remove('show');
+}
+
+const EXAMPLES = [
+  '筛选出北京地区已付款的订单',
+  '按金额从高到低排序',
+  '只看最近7天的订单',
+  '帮我看看深圳最近两周的订单',
+  '导出当前筛选结果',
+  '删除所有待付款订单',
+  '把银河系所有行星订单都给我',
+  '最近 365 天的订单（参数越界）',
+  '帮我把办公室的灯关了',
+];
+$('#chips').innerHTML = EXAMPLES.map(e => '<span class="chip">' + e + '</span>').join('');
+$('#chips').onclick = function(e){
+  if (e.target.classList.contains('chip')) { $('#intentInput').value = e.target.textContent; runIntent(e.target.textContent); }
+};
+$('#btnRun').onclick = () => runIntent($('#intentInput').value);
+$('#intentInput').addEventListener('keydown', e => { if (e.key === 'Enter') runIntent($('#intentInput').value); });
+
+/* —— 手动兜底（听不懂 / 模型不可用时的结构化面板） —— */
+function openFbPanel(){ $('#fbPanel').classList.add('show'); }
+$('#btnFbRun').onclick = function(){
+  const p = {};
+  if ($('#fbRegion').value) p.region = $('#fbRegion').value;
+  if ($('#fbStatus').value) p.status = $('#fbStatus').value;
+  if ($('#fbDays').value)   p.days = +$('#fbDays').value;
+  setTrace(0, 'ok', '手动兜底：不经过模型、也不经过快捷指令，用户直接点选');
+  setTrace(1, 'ok', 'filterOrders');
+  setTrace(2, 'ok', '<span class="mono">' + esc(JSON.stringify(p)) + '</span>');
+  setTrace(3, 'ok', '角色权限照常校验');
+  execute({ tool:'filterOrders', params:p, via:'手动兜底' });
+  failStreak = 0;
+  $('#fbPanel').classList.remove('show');
+};
+$('#btnFbClose').onclick = function(){ $('#fbPanel').classList.remove('show'); };
+
+/* —— 无模型退化总开关 —— */
+function setModelDown(on){
+  MODEL_DOWN = on;
+  $('#degradeBanner').style.display = on ? 'block' : 'none';
+  $('#degradeState').textContent = on ? '当前：模拟模型故障中（快捷模式）' : '当前：模型正常';
+  $('#degradeHow').innerHTML = on
+    ? '已进入<b>快捷模式</b>。去上方路径一试：① "筛选出北京地区已付款的订单" —— 快捷指令，照常可用；② "帮我把办公室的灯关了" —— 需要模型 → 提示听不懂并自动打开手动筛选。页面生成 / 数据摘要按钮已置灰（功能冻结，不假装能用）。'
+    : '模型已恢复：所有智能功能回归，置灰按钮重新可用，顶部横幅消失。';
+  ['#btnGen', '#btnBrief'].forEach(function(s){
+    const b = $(s); b.disabled = on; b.style.opacity = on ? .45 : ''; b.title = on ? '该功能依赖模型 —— 快捷模式下冻结' : '';
+  });
+  $('#swModelDown').checked = on;
+  toast(on ? '<b>已进入快捷模式：</b>模型功能冻结，页面功能不受影响' : '<b>模型已恢复</b>，智能功能回归', on ? 'warn' : 'ok');
+  log(on ? 'warn' : 'ok', on ? '模拟模型故障 → 进入快捷模式（退化阶梯 ①③④ 生效）' : '模型恢复 → 退出快捷模式');
+}
+$('#swModelDown').onchange = function(){ setModelDown(this.checked); };
+
+/* —— 示例 · 多轮追问（"在刚才的基础上…"） —— */
+let mtPrev = null;
+function mtLog(lv, html){
+  const box = $('#mtLog');
+  const d = document.createElement('div');
+  d.innerHTML = '<span class="t">' + now() + '</span><span class="lv ' + lv + '">' + (LV[lv] || '[LOG]') + '</span>' + html;
+  box.appendChild(d);
+  box.scrollTop = box.scrollHeight;
+}
+async function mtRun(raw){
+  const input = (raw || '').trim();
+  if (!input) return;
+  const merged = Object.assign({}, mtPrev || {});
+  const added = {};
+  const rg = REGIONS.filter(r => input.indexOf(r) >= 0)[0];
+  if (rg) { merged.region = rg; added.region = rg; }
+  if (/已付款|已支付|付过款/.test(input)) { merged.status = 'paid'; added.status = 'paid'; }
+  else if (/待付款|未付款|还没付/.test(input)) { merged.status = 'unpaid'; added.status = 'unpaid'; }
+  else if (/退款|退货/.test(input)) { merged.status = 'refund'; added.status = 'refund'; }
+  const dm = input.match(/最近\s*(\d+)\s*天/) ||
+             (/(本周|这周|近一周)/.test(input) ? [null, '7'] : null) ||
+             (/(两周|半个月)/.test(input) ? [null, '14'] : null);
+  if (dm) { merged.days = +dm[1]; added.days = +dm[1]; }
+  const am = input.match(/(\d+(?:\.\d+)?)\s*万/);
+  if (am && /(大于|以上|至少|不低于|超过)/.test(input)) {
+    merged.minAmount = Math.round(parseFloat(am[1]) * 10000);
+    added.minAmount = merged.minAmount;
+  }
+  if (!Object.keys(added).length) {
+    mtLog('warn', '这句话没听出新条件 —— 试试下方示例说法（第二轮起只说增量即可）');
+    return;
+  }
+  mtLog('info', '会话记忆：' + (mtPrev ? '继承上一轮 ' + esc(JSON.stringify(mtPrev)) : '首轮（无历史条件）') +
+    ' ＋ 本轮增量 ' + esc(JSON.stringify(added)));
+  await sleep(320);
+  TOOLS.filterOrders.run(merged);
+  mtPrev = merged;
+  bump('req'); bump('l2'); bump('tok', 90);
+  mtLog('ok', '合并执行 filterOrders(' + esc(JSON.stringify(merged)) + ') —— 表格已更新，还可以继续追问');
+  toast('<b>多轮记忆：</b>条件已合并执行', 'ok');
+  log('ok', '多轮追问 · 条件合并执行', JSON.stringify(merged));
+}
+$('#btnMtRun').onclick = () => mtRun($('#mtInput').value);
+$('#mtInput').addEventListener('keydown', e => { if (e.key === 'Enter') mtRun($('#mtInput').value); });
+$('#mtChips').onclick = function(e){
+  if (e.target.classList.contains('chip')) { $('#mtInput').value = e.target.textContent; mtRun(e.target.textContent); }
+};
+
+/* —— 示例 · 操作建议卡（AI 主动开口） —— */
+let sugSaved = false;
+$('#btnSimAct').onclick = function(){
+  if (sugSaved) {
+    toast('<b>已经学会了：</b>示例区第一颗绿色的"✨ 只看北京"就是它，点它试试', 'ok');
+    log('info', '再次模拟筛选北京', '建议已被采纳过，不再重复弹出');
+    return;
+  }
+  $('#sugCard').classList.add('show');
+  log('info', '行为识别：连续 3 次筛选「北京」', '触发建议卡（被动推荐，不打断操作）');
+};
+$('#btnSugSave').onclick = function(){
+  $('#sugCard').classList.remove('show');
+  if (sugSaved) { toast('已经保存过了 —— 示例区第一颗绿色入口就是它', 'info'); return; }
+  sugSaved = true;
+  RULES.unshift({ re:/北京订单|只看北京|北京的订单/, plan:{ tool:'filterOrders', params:{ region:'北京' } } });
+  const chip = document.createElement('span');
+  chip.className = 'chip chip-new';
+  chip.textContent = '✨ 只看北京（刚学会）';
+  const box = $('#chips');
+  box.prepend(chip);
+  chip.scrollIntoView({ behavior:'smooth', block:'center' });
+  log('ok', '建议已采纳：使用习惯固化为快捷指令', '/只看北京|北京订单/ → filterOrders(北京) · 已插入示例区第一位');
+  toast('<b>已学会：</b>已滚动到示例区 —— 绿色的"✨ 只看北京"点它试试（0 Token）', 'ok');
+};
+$('#btnSugSkip').onclick = function(){
+  $('#sugCard').classList.remove('show');
+  log('info', '建议被忽略', '记录偏好，后续降低同类建议的出现频率；点「模拟」可再次打开');
+  toast('已忽略。想再看一次建议卡，再点一下「模拟」即可');
+};
+
+/* =========================================================
+   3. 路径二：智能数据层
+   ========================================================= */
+const AVG = ORDERS.reduce(function(s,o){ return s + o.amount; }, 0) / ORDERS.length;
+
+function insightOf(o){
+  const r = [];
+  if (o.amount > AVG * 2.5) r.push('金额为全量均值 ¥' + fmt(Math.round(AVG)) + ' 的 ' + (o.amount / AVG).toFixed(1) + ' 倍');
+  if (o.amount >= 50000 && o.amount % 10000 === 0) r.push('整数大额，疑似批量/测试单');
+  if (o.status === 'refund' && o.amount > AVG) r.push('退款且金额高于均值，建议复核');
+  if (o.status === 'unpaid' && daysAgo(o.date) > 7) r.push('欠款超 7 天，建议催收');
+  return r;
+}
+function renderSmart(){
+  let list = ORDERS.filter(o => !state.hidden.has(o.id));
+  if (DEG_FLAGS.virtual) list = list.slice(0, 8);
+  $('#smartBody').innerHTML = list.map(function(o){
+    const ins = insightOf(o);
+    return '<tr class="' + (ins.length ? 'warn' : '') + '" data-id="' + o.id + '">' +
+      '<td class="mono">' + o.id + '</td><td>' + o.region + '</td><td>¥' + fmt(o.amount) + '</td>' +
+      '<td><span class="badge b-' + o.status + '">' + STATUS[o.status] + '</span></td>' +
+      '<td style="white-space:normal">' + (ins.length ? '⚠️ ' + ins.join('；') : '<span style="color:#9AA1AC">—</span>') +
+      '</td></tr>';
+  }).join('') || '<tr><td colspan="5" class="empty">暂无数据</td></tr>';
+  if (DEG_FLAGS.virtual) {
+    $('#smartBody').innerHTML += '<tr><td colspan="5" style="color:#B26B00;white-space:normal">⚡ 已启用虚拟滚动，仅渲染前 8 行（性能守护降级生效）</td></tr>';
+  }
+}
+$('#smartBody').onclick = function(e){
+  const tr = e.target.closest('tr'); if (!tr || !tr.dataset.id) return;
+  const o = ORDERS.filter(x => x.id === tr.dataset.id)[0]; if (!o) return;
+  const ins = insightOf(o), box = $('#smartInsight');
+  box.innerHTML = '🔍 <strong>' + o.id + '（' + o.customer + ' · ' + o.region + ' · ¥' + fmt(o.amount) + '）</strong><br>' +
+    (ins.length ? ins.map(s => '· ' + s).join('<br>') : '· 未触发任何规则，属于正常波动范围。');
+  box.classList.add('show');
+};
+
+// —— 智能表单：报错同时给解药 ——
+const DOMAIN_FIX = { 'qq.con':'qq.com','gmial.com':'gmail.com','163.con':'163.com','126.con':'126.com',
+                     'foxmai.com':'foxmail.com','outlok.com':'outlook.com' };
+function checkEmail(v){
+  const s = (v || '').trim();
+  if (!s) return { s:'tip', m:'请输入邮箱' };
+  if (/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(s)) {
+    const dom = s.split('@')[1].toLowerCase();
+    if (DOMAIN_FIX[dom]) return { s:'tip', m:'域名 ' + dom + ' 不常见', fix:s.replace(dom, DOMAIN_FIX[dom]) };
+    if (/@(qq|163|126|gmail|foxmail|outlook|sina)\./.test(s)) return { s:'ok', m:'✓ 格式正确' };
+    return { s:'ok', m:'✓ 格式正确（企业域名）' };
+  }
+  const m = s.match(/^([^\s@]+)@([^\s@]+)$/);
+  if (m) {
+    const dom = m[2].toLowerCase();
+    if (DOMAIN_FIX[dom]) return { s:'err', m:'域名疑似拼写错误', fix:m[1] + '@' + DOMAIN_FIX[dom] };
+    if (dom.indexOf('.') < 0) return { s:'err', m:'缺少顶级域名', fix:s + '.com' };
+  }
+  if (s.indexOf('@') < 0) return { s:'err', m:'缺少 @ 符号', fix:s + '@company.com' };
+  return { s:'err', m:'格式不正确', fix:s.split('@')[0] + '@qq.com' };
+}
+function checkPhone(v){
+  const s = (v || '').replace(/\s/g, '');
+  if (/^1[3-9]\d{9}$/.test(s)) return { s:'ok', m:'✓ 手机号有效' };
+  if (/^\d{10}$/.test(s)) return { s:'err', m:'只有 10 位，可能漏了一位', fix:'1' + s };
+  if (/^1\d{11}$/.test(s)) return { s:'err', m:'12 位，多了一位', fix:s.slice(0, 11) };
+  if (s.length === 11 && !/^1/.test(s)) return { s:'err', m:'应以 1 开头', fix:'1' + s.slice(1) };
+  if (/^\d+$/.test(s)) return { s:'err', m:'请输入 11 位手机号', fix:'13800138000' };
+  return { s:'err', m:'手机号只能包含数字', fix:s.replace(/\D/g, '').slice(0, 11) };
+}
+function checkAmount(v){
+  const s = (v || '').replace(/[,\s¥]/g, '');
+  if (!/^\d+(\.\d{1,2})?$/.test(s)) return { s:'err', m:'请输入数字（最多两位小数）', fix:s.replace(/[^\d.]/g, '') || '0' };
+  const n = +s;
+  if (n > 1000000) return { s:'tip', m:'超过 100 万，是否多输了一个 0？', fix:String(n / 10) };
+  if (n === 0) return { s:'err', m:'金额不能为 0', fix:'' };
+  return { s:'ok', m:'✓ ¥' + fmt(n) };
+}
+function bindField(inpSel, msgSel, sugSel, btnSel, checker){
+  const inp = $(inpSel), msg = $(msgSel), sug = $(sugSel), btn = $(btnSel);
+  let fix = null;
+  function run(){
+    const r = checker(inp.value);
+    msg.className = 'fmsg ' + r.s;
+    msg.textContent = r.m;
+    fix = r.fix;
+    sug.classList.toggle('show', !!(r.fix !== undefined && r.fix !== null && r.fix !== ''));
+    btn.textContent = r.fix ? '改为 ' + r.fix : '采纳建议';
+  }
+  inp.addEventListener('input', run);
+  btn.onclick = function(){
+    if (fix) { inp.value = fix; run(); log('info', '表单智能修正已采纳', inpSel + ' → ' + fix); }
+  };
+  run();
+}
+bindField('#fEmail',  '#mEmail',  '#sEmail',  '#btnFixEmail',  checkEmail);
+bindField('#fPhone',  '#mPhone',  '#sPhone',  '#btnFixPhone',  checkPhone);
+bindField('#fAmount', '#mAmount', '#sAmount', '#btnFixAmount', checkAmount);
+
+// —— 智能图表：手写 SVG，自动标注拐点 + 自动切换类型 ——
+const SERIES = {
+  flat:  { label:'平稳期', data:[182,176,190,183,179,188,195,186,192,187,193,199,191,196] },
+  spike: { label:'突增期', data:[182,176,190,183,179,188,205,214,268,351,612,548,430,389] },
+};
+let currentSeries = 'spike';
+function findTurningPoints(d){
+  const pts = [];
+  for (let i = 1; i < d.length; i++) {
+    const prev = d[i-1] || 1, chg = (d[i] - prev) / prev;
+    if (Math.abs(chg) >= 0.28) pts.push({ i:i, chg:chg });
+  }
+  return pts;
+}
+function drawChart(key){
+  currentSeries = key;
+  const data = SERIES[key].data;
+  const tp = findTurningPoints(data);
+  const type = tp.length ? 'bar' : 'line';
+  const W = 900, H = 240, PL = 46, PR = 16, PT = 22, PB = 26;
+  const max = Math.max.apply(null, data) * 1.18;
+  const x = i => PL + i * (W - PL - PR) / (data.length - 1);
+  const y = v => H - PB - (v / max) * (H - PT - PB);
+  const grid = [0, .25, .5, .75, 1].map(function(r){
+    const yy = PT + r * (H - PT - PB);
+    return '<line x1="' + PL + '" y1="' + yy + '" x2="' + (W - PR) + '" y2="' + yy + '" stroke="#EDEFF2"/>' +
+           '<text x="' + (PL - 8) + '" y="' + (yy + 4) + '" text-anchor="end" font-size="10" fill="#9AA1AC">' +
+           Math.round(max * (1 - r)) + '</text>';
+  }).join('');
+
+  let body = '';
+  if (type === 'line') {
+    const pts = data.map((v,i) => x(i) + ',' + y(v)).join(' ');
+    body = (DEG_FLAGS.chart ? '' :
+      '<path fill="url(#g1)" d="M' + x(0) + ',' + y(data[0]) + ' ' +
+        data.map((v,i) => 'L' + x(i) + ',' + y(v)).join(' ') +
+        ' L' + x(data.length - 1) + ',' + (H - PB) + ' L' + x(0) + ',' + (H - PB) + ' Z" opacity=".13"/>') +
+      '<polyline fill="none" stroke="#1B4DFF" stroke-width="2.4" points="' + pts + '"/>' +
+      data.map((v,i) => '<circle cx="' + x(i) + '" cy="' + y(v) + '" r="2.6" fill="#1B4DFF"/>').join('');
+  } else {
+    const bw = (W - PL - PR) / data.length * 0.62;
+    body = data.map(function(v,i){
+      const isTp = tp.some(t => t.i === i);
+      return '<rect x="' + (x(i) - bw/2) + '" y="' + y(v) + '" width="' + bw + '" height="' + (H - PB - y(v)) +
+             '" rx="3" fill="' + (isTp ? '#D33A2C' : '#1B4DFF') + '" opacity="' + (isTp ? 1 : .72) + '"/>';
+    }).join('');
+  }
+  const tpMark = tp.map(function(t){
+    return '<g><line x1="' + x(t.i) + '" y1="' + (y(data[t.i]) - 8) + '" x2="' + x(t.i) + '" y2="' + (PT + 8) +
+      '" stroke="#D33A2C" stroke-dasharray="3 3"/>' +
+      '<rect x="' + (x(t.i) - 34) + '" y="' + (PT - 8) + '" width="68" height="17" rx="4" fill="#FCEDEB" stroke="#F3C9C3"/>' +
+      '<text x="' + x(t.i) + '" y="' + (PT + 5) + '" text-anchor="middle" font-size="10.5" fill="#D33A2C" font-weight="700">' +
+      (t.chg > 0 ? '↑' : '↓') + ' ' + (Math.abs(t.chg) * 100).toFixed(0) + '%</text></g>';
+  }).join('');
+  const axis = data.map(function(v,i){
+    return i % 2 === 0 ? '<text x="' + x(i) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="10" fill="#9AA1AC">D' + (i+1) + '</text>' : '';
+  }).join('');
+
+  $('#chartBox').innerHTML =
+    '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto">' +
+    '<defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">' +
+    '<stop offset="0" stop-color="#1B4DFF"/><stop offset="1" stop-color="#1B4DFF" stop-opacity="0"/>' +
+    '</linearGradient></defs>' + grid + body + tpMark + axis + '</svg>';
+
+  $('#chartHint').innerHTML = tp.length
+    ? '检测到 <b>' + tp.length + '</b> 个拐点（变化率 ≥28%）→ 自动切换为<b>柱状图</b>并标注：<b>' +
+      tp.map(t => 'D' + (t.i+1) + ' ' + (t.chg > 0 ? '↑' : '↓') + (Math.abs(t.chg) * 100).toFixed(0) + '%').join('、') + '</b>'
+    : '数据平稳，无显著拐点 → 保持<b>折线图</b>看趋势';
+}
+$('#btnSeriesFlat').onclick  = () => drawChart('flat');
+$('#btnSeriesSpike').onclick = () => drawChart('spike');
+
+// —— 注入/还原异常数据（现场验证规则引擎的反应） ——
+const ORIG_AMOUNT = {};
+ORDERS.forEach(function(o){ ORIG_AMOUNT[o.id] = o.amount; });
+$('#btnInjectAbn').onclick = function(){
+  const pool = ORDERS.filter(o => !state.hidden.has(o.id) && o.amount < AVG * 2.5);
+  if (!pool.length) return;
+  const o = pool[Math.floor(Math.random() * pool.length)];
+  o.amount = Math.round(AVG * (2.8 + Math.random() * 2.5));
+  REGION_STAT = buildRegionStat();
+  renderOrders(); renderSmart();
+  log('warn', '注入异常数据', o.id + ' 金额调为 ¥' + fmt(o.amount) + '（初始均值 ¥' + fmt(Math.round(AVG)) + ' 的 ' + (o.amount / AVG).toFixed(1) + ' 倍）→ 规则应立刻高亮');
+  toast('<b>已注入：</b>' + o.id + ' 金额被拉高 —— 上方表格应已自动高亮并解释', 'warn');
+};
+$('#btnResetAbn').onclick = function(){
+  ORDERS.forEach(function(o){ o.amount = ORIG_AMOUNT[o.id]; });
+  REGION_STAT = buildRegionStat();
+  renderOrders(); renderSmart();
+  log('info', '数据已还原', '全部订单金额恢复初始值');
+  toast('数据已还原为初始金额', 'ok');
+};
+
+// —— 智能摘要：把统计结果说成人话（真实方案由网关调模型总结，本页本地模板模拟） ——
+function buildBrief(){
+  const list = ORDERS.filter(o => !state.hidden.has(o.id));
+  if (!list.length) return '当前视图没有可见订单，先「重置视图」或撤销删除。';
+  const sum = list.reduce((s,o) => s + o.amount, 0);
+  const avg = sum / list.length;
+  const top = list.slice().sort((a,b) => b.amount - a.amount)[0];
+  const abnormal = list.filter(o => insightOf(o).length);
+  const unpaid = list.filter(o => o.status === 'unpaid' && daysAgo(o.date) > 7);
+  const refunds = list.filter(o => o.status === 'refund' && o.amount > AVG);
+  const lines = [
+    '📊 <b>整体盘面：</b>当前 ' + list.length + ' 笔订单，总金额 ¥' + fmt(sum) + '，笔均 ¥' + fmt(Math.round(avg)) + '。',
+    '🔺 <b>最突出：</b>' + top.id + '（' + top.customer + ' · ' + top.region + '）金额 ¥' + fmt(top.amount) + '，是笔均的 ' + (top.amount / avg).toFixed(1) + ' 倍，建议确认是否为大客户集中采购。',
+    abnormal.length
+      ? '⚠️ <b>风险提示：</b>' + abnormal.length + ' 笔触发风控规则（异常高值 / 大额整数 / 退款复核 / 逾期欠款），明细见上方高亮行。'
+      : '✅ <b>风险提示：</b>未发现触发风控规则的订单。',
+    unpaid.length
+      ? '💸 <b>催收建议：</b>' + unpaid.map(o => o.id + '（逾期 ' + daysAgo(o.date) + ' 天）').join('、') + '，合计 ¥' + fmt(unpaid.reduce((s,o) => s + o.amount, 0)) + '。'
+      : null,
+    refunds.length
+      ? '🔄 <b>退款复核：</b>' + refunds.map(o => o.id).join('、') + ' 退款金额高于均值，建议核实原因后再入账。'
+      : null,
+  ].filter(Boolean);
+  return lines.join('<br>');
+}
+$('#btnBrief').onclick = async function(){
+  this.disabled = true;
+  bump('req'); bump('l2'); bump('tok', 260);
+  $('#briefMeta').textContent = '统计与总结中…（模拟 L2：600ms / ≈260 token）';
+  await sleep(600);
+  $('#briefBox').innerHTML = buildBrief();
+  $('#briefMeta').textContent = '已生成 · 模拟 L2 · ≈260 token · 数据变化后可再次生成';
+  log('ok', '生成数据摘要', '本地模板模拟 · 基于当前可见 ' + ORDERS.filter(o => !state.hidden.has(o.id)).length + ' 笔订单 · ≈260 token');
+  toast('<b>摘要已生成：</b>可直接贴进日报；注入/删除数据后再点一次，结论会跟着变', 'ok');
+  this.disabled = false;
+};
+
+/* =========================================================
+   4. 路径三：智能路由层（白名单注册表 + 页面 DSL）
+   ========================================================= */
+const WIDGETS = { kpi:'KPI 卡片', table:'数据表格', chart:'趋势图表', rank:'地区排行' };
+function buildRegionStat(){
+  return REGIONS.map(function(r){
+    const list = ORDERS.filter(o => o.region === r);
+    return { region:r, count:list.length, sum:list.reduce((s,o) => s + o.amount, 0) };
+  }).sort((a,b) => b.sum - a.sum);
+}
+let REGION_STAT = buildRegionStat();
+
+function genPageDSL(intent){
+  const wantRank  = /地区|区域|排行|分布|地图|各/.test(intent);
+  const wantTable = /明细|表格|清单|列表|订单/.test(intent);
+  const use = ['kpi','chart'];
+  if (wantRank) use.push('rank');
+  if (wantTable || (!wantRank && !wantTable)) use.push('table');
+  return {
+    layout: use.length > 3 ? 'dashboard-2col' : 'dashboard-1col',
+    title: /销售|营收|业绩|GMV/.test(intent) ? '销售数据看板' : '订单概览看板',
+    widgets: use.map(function(t){
+      if (t === 'chart') return { type:'chart', bind:'gmv_trend', chart:'line' };
+      if (t === 'rank')  return { type:'rank',  bind:'region_rank' };
+      if (t === 'table') return { type:'table', bind:'orders', limit:6 };
+      return { type:'kpi', bind:'gmv' };
+    }),
+  };
+}
+function renderPage(dsl){
+  const total = ORDERS.reduce((s,o) => s + o.amount, 0);
+  const paid = ORDERS.filter(o => o.status === 'paid').length;
+  const parts = dsl.widgets.map(function(w){
+    if (w.type === 'kpi') {
+      return '<div class="grid3" style="margin-bottom:14px">' +
+        '<div class="kpi"><div class="kv">¥' + fmt(total) + '</div><div class="kl">累计 GMV</div><div class="kd up">↑ 12.4% 环比</div></div>' +
+        '<div class="kpi"><div class="kv">' + ORDERS.length + '</div><div class="kl">订单总数</div><div class="kd down">↓ 3.1% 环比</div></div>' +
+        '<div class="kpi"><div class="kv">' + (paid / ORDERS.length * 100).toFixed(0) + '%</div><div class="kl">付款率</div><div class="kd up">↑ 5.6pp</div></div>' +
+        '</div>';
+    }
+    if (w.type === 'chart') return '<div class="panel" style="margin-bottom:14px"><h3>趋势图 · gmv_trend</h3><div id="miniChart"></div></div>';
+    if (w.type === 'rank') {
+      return '<div class="panel" style="margin-bottom:14px"><h3>地区排行 · region_rank</h3>' +
+        REGION_STAT.map(function(r){
+          return '<div class="row" style="margin-bottom:6px"><span style="width:42px">' + r.region + '</span>' +
+            '<span style="flex:1;height:9px;background:#EDF1FF;border-radius:5px;overflow:hidden">' +
+            '<span style="display:block;width:' + (r.sum / REGION_STAT[0].sum * 100).toFixed(0) + '%;height:100%;background:#1B4DFF"></span></span>' +
+            '<span class="mono" style="width:92px;text-align:right">¥' + fmt(r.sum) + '</span></div>';
+        }).join('') + '</div>';
+    }
+    if (w.type === 'table') {
+      return '<div class="panel"><h3>订单明细 · orders（前 ' + w.limit + ' 条）</h3>' +
+        '<table class="tbl"><thead><tr><th>订单号</th><th>地区</th><th>金额</th><th>状态</th></tr></thead><tbody>' +
+        ORDERS.slice(0, w.limit).map(function(o){
+          return '<tr><td class="mono">' + o.id + '</td><td>' + o.region + '</td><td>¥' + fmt(o.amount) +
+                 '</td><td><span class="badge b-' + o.status + '">' + STATUS[o.status] + '</span></td></tr>';
+        }).join('') + '</tbody></table></div>';
+    }
+    return '';
+  }).join('');
+  const st = $('#pageStage');
+  st.className = 'stage filled';
+  st.innerHTML = '<div style="font-size:13px;color:var(--muted);margin-bottom:10px">' + esc(dsl.title) +
+    ' · layout=' + dsl.layout + '</div>' + parts;
+  if ($('#miniChart')) drawMini();
+}
+function drawMini(){
+  const d = SERIES.spike.data, W = 560, H = 130, max = Math.max.apply(null, d) * 1.15;
+  const x = i => 26 + i * (W - 40) / (d.length - 1);
+  const y = v => H - 16 - (v / max) * (H - 30);
+  $('#miniChart').innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto">' +
+    '<polyline fill="none" stroke="#1B4DFF" stroke-width="2" points="' + d.map((v,i) => x(i) + ',' + y(v)).join(' ') + '"/>' +
+    d.map((v,i) => '<circle cx="' + x(i) + '" cy="' + y(v) + '" r="2.2" fill="#1B4DFF"/>').join('') +
+    '<text x="4" y="14" font-size="10" fill="#9AA1AC">GMV（近 14 天）</text></svg>';
+}
+const PAGE_EXAMPLES = [
+  '给我一个销售数据看板',
+  '我要看各地区的订单排行',
+  '来一张订单明细清单',
+  '给我一个 3D 地球看板（会被拒绝）',
+];
+$('#pageChips').innerHTML = PAGE_EXAMPLES.map(e => '<span class="chip a">' + e + '</span>').join('');
+$('#pageChips').onclick = function(e){
+  if (e.target.classList.contains('chip')) $('#pageIntent').value = e.target.textContent;
+};
+$('#btnGen').onclick = function(){
+  const intent = $('#pageIntent').value.trim();
+  if (!intent) return;
+  $('#genErr').classList.remove('show');
+  bump('req'); bump('l2'); bump('tok', 210);
+
+  if (/(3D|三维|地球|自定义脚本|script)/i.test(intent)) {
+    $('#dslBox').textContent = JSON.stringify(
+      { tool:'generate_page', params:{ intent:intent }, rejected:['3d-globe'] }, null, 2);
+    $('#genErrText').innerHTML = '模型想用 <span class="mono">3d-globe</span>，但注册表只有 <span class="mono">' +
+      Object.keys(WIDGETS).join(' / ') + '</span>。<br>前端只认 key、不拼路径，因此不存在"加载任意组件"的越权渲染。';
+    $('#genErr').classList.add('show');
+    $('#pageStage').className = 'stage';
+    $('#pageStage').textContent = '生成被拦截，页面保持原样';
+    log('err', '页面生成被拦截', '未注册组件 3d-globe · 意图：“' + intent + '”');
+    toast('<b>已拦截：</b>组件 3d-globe 不在白名单注册表内', 'err');
+    return;
+  }
+  const dsl = genPageDSL(intent);
+  const unknown = dsl.widgets.filter(w => !(w.type in WIDGETS)).map(w => w.type);
+  if (unknown.length) { log('err', '组件越界被拒绝', unknown.join(',')); return; }
+  $('#dslBox').textContent = JSON.stringify(dsl, null, 2);
+  renderPage(dsl);
+  log('ok', '动态生成页面', 'intent=“' + intent + '” · widgets=' + dsl.widgets.map(w => w.type).join('+') +
+    ' · 生成的是配置，不是代码');
+  toast('<b>页面已生成：</b>' + dsl.title + '（配置驱动，非代码）', 'ok');
+};
+
+/* =========================================================
+   5. 路径四：智能运维层
+   ========================================================= */
+const HEAL_LOG = [];
+function heal(lv, msg){
+  HEAL_LOG.unshift({ t:now(), lv:lv, msg:msg });
+  $('#healLog').innerHTML = HEAL_LOG.map(l =>
+    '<div><span class="t">' + l.t + '</span><span class="lv ' + l.lv + '">' + (LV[l.lv] || '[LOG]') +
+    '</span>' + esc(l.msg) + '</div>').join('') || '<div style="color:#9AA1AC">暂无异常</div>';
+}
+let compState = 'ok';
+function renderComp(){
+  const box = $('#compBox');
+  if (compState === 'ok') {
+    box.innerHTML = '<div class="comp"><div style="font-weight:700;margin-bottom:4px">OrderPanel 组件</div>' +
+      '<div style="color:var(--muted);font-size:12.5px">状态正常 · 渲染耗时 12ms · 依赖：订单接口 / 图表子组件</div></div>';
+  } else if (compState === 'fallback') {
+    box.innerHTML = '<div class="comp fallback"><div style="font-weight:700;margin-bottom:4px">OrderPanel · 已降级为精简版</div>' +
+      '<div style="font-size:12.5px">图表子组件不可用，已切换为纯文本摘要：共 ' + ORDERS.length +
+      ' 条订单，合计 ¥' + fmt(ORDERS.reduce((s,o) => s + o.amount, 0)) + '。<br>核心功能（查看 / 筛选 / 导出）不受影响。</div></div>';
+  } else {
+    box.innerHTML = '<div class="comp broken"><div style="font-weight:700;margin-bottom:4px">OrderPanel 组件 · 渲染失败</div>' +
+      '<div style="font-size:12.5px">未匹配到已知自愈策略，仅上报，不做任何自动处理。</div></div>';
+  }
+}
+// 模拟 Vue errorHandler：按错误特征匹配策略
+function analyzeError(err){
+  if (/ChunkLoadError|NetworkTimeout|render-timeout/.test(err.name)) return { strategy:'retry',   suggestion:'资源加载类错误，重试一次渲染' };
+  if (/TypeError|Cannot read/.test(err.name + err.message))          return { strategy:'degrade', suggestion:'子组件依赖缺失，降级为备用组件' };
+  if (/WriteTimeout|TxTimeout/.test(err.name))                       return { strategy:'report',  suggestion:'写操作超时，绝不自动重试（幂等风险），仅上报' };
+  return { strategy:'report', suggestion:'未知错误，不猜测、不自动改业务，生成报告给开发者' };
+}
+async function handleComponentError(err){
+  heal('err', '捕获异常：' + err.name + ' - ' + err.message);
+  const fix = await Promise.resolve(analyzeError(err));
+  await sleep(300);
+  if (fix.strategy === 'retry') {
+    compState = 'ok'; renderComp();
+    heal('ok', '自愈策略=retry · 已重试渲染并成功（' + fix.suggestion + '）');
+    toast('<b>已自愈：</b>重试渲染成功，无需人工介入', 'ok');
+  } else if (fix.strategy === 'degrade') {
+    compState = 'fallback'; renderComp();
+    heal('warn', '自愈策略=degrade · 已切换备用组件（' + fix.suggestion + '）');
+    toast('<b>已降级：</b>切换备用组件，核心功能不受影响', 'warn');
+  } else {
+    compState = 'broken'; renderComp();
+    heal('warn', '自愈策略=report · ' + fix.suggestion);
+  }
+}
+$('#btnErrRetry').onclick   = () => handleComponentError({ name:'ChunkLoadError', message:'Loading chunk 7 failed' });
+$('#btnErrDegrade').onclick = () => handleComponentError({ name:'TypeError', message:'Cannot read properties of undefined (reading "render")' });
+$('#btnErrUnknown').onclick = () => handleComponentError({ name:'UnknownError', message:'something went wrong in business logic' });
+$('#btnErrWrite').onclick   = () => handleComponentError({ name:'WriteTimeout', message:'POST /api/orders timeout after 8000ms' });
+$('#btnErrReset').onclick   = () => { compState = 'ok'; renderComp(); heal('ok', '组件已恢复正常'); };
+
+// —— 性能守护 ——
+const DEG_FLAGS = { anim:false, chart:false, virtual:false };
+const DEG_RULES = [
+  { th:30, id:'anim',    name:'关闭过渡动画与阴影特效' },
+  { th:22, id:'chart',   name:'图表降级为静态渲染（去掉渐变/动效）' },
+  { th:14, id:'virtual', name:'长表格启用虚拟滚动（仅渲染可视行）' },
+];
+let styleEl = null;
+function applyDeg(id, on){
+  DEG_FLAGS[id] = on;
+  if (id === 'anim') {
+    if (on && !styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.textContent = '*{transition:none!important;animation:none!important;box-shadow:none!important}';
+      document.head.appendChild(styleEl);
+    } else if (!on && styleEl) { styleEl.remove(); styleEl = null; }
+  }
+  if (id === 'chart') drawChart(currentSeries);
+  if (id === 'virtual') { renderOrders(); renderSmart(); }
+}
+function paintDeg(){
+  $('#degLog').innerHTML = DEG_RULES.map(function(r){
+    return '<div class="' + (DEG_FLAGS[r.id] ? 'hit' : '') + '">' +
+      '<b>' + (DEG_FLAGS[r.id] ? '⚡ 已生效' : '○ 待命') + '</b> · FPS &lt; ' + r.th + ' 时：' + r.name + '</div>';
+  }).join('') + '<div style="color:#9AA1AC;font-size:11.5px">采样窗口 500ms；连续 2 次低于阈值才触发，恢复后自动撤回。</div>';
+}
+let fpsFrames = 0, fpsLast = performance.now(), lowStreak = {};
+function fpsLoop(){
+  fpsFrames++;
+  const t = performance.now();
+  if (t - fpsLast >= 500) {
+    const fps = Math.round(fpsFrames / ((t - fpsLast) / 1000));
+    $('#fpsVal').textContent = fps;
+    $('#fpsVal').style.color = fps >= 50 ? '' : (fps >= 30 ? '#B26B00' : '#D33A2C');
+    fpsFrames = 0; fpsLast = t;
+    if ($('#swAuto').checked) {
+      DEG_RULES.forEach(function(r){
+        if (fps < r.th) {
+          lowStreak[r.id] = (lowStreak[r.id] || 0) + 1;
+          if (lowStreak[r.id] >= 2 && !DEG_FLAGS[r.id]) {
+            applyDeg(r.id, true);
+            heal('warn', 'FPS ' + fps + ' < ' + r.th + ' → 自动降级：' + r.name);
+            toast('<b>性能守护：</b>FPS ' + fps + '，已自动降级 —— ' + r.name, 'warn');
+            paintDeg();
+          }
+        } else if (fps > r.th + 8) {
+          lowStreak[r.id] = 0;
+          if (DEG_FLAGS[r.id]) {
+            applyDeg(r.id, false);
+            heal('ok', 'FPS 恢复至 ' + fps + ' → 撤回降级：' + r.name);
+            paintDeg();
+          }
+        }
+      });
+    }
+  }
+  requestAnimationFrame(fpsLoop);
+}
+let lagging = false;
+$('#btnLag').onclick = function(){
+  if (lagging) return;
+  lagging = true;
+  this.disabled = true;
+  heal('info', '已注入 5 秒主线程阻塞（模拟重渲染 / 大数据计算）');
+  const end = performance.now() + 5000;
+  (function burst(){
+    if (!lagging || performance.now() > end) {
+      lagging = false; $('#btnLag').disabled = false;
+      heal('info', '卡顿结束，等待性能守护判定…');
+      return;
+    }
+    const t0 = performance.now();
+    while (performance.now() - t0 < 55) { /* 阻塞主线程 */ }
+    setTimeout(burst, 10);
+  })();
+};
+
+/* =========================================================
+   6. MCP 编排演示（把思想主线里「现在（智能化）」那段话跑起来）
+   ========================================================= */
+const ORCH_LANE_LABEL = { user:'用户', fe:'前端', gw:'MCP 网关', tools:'工具层' };
+const ORCH_STEPS = [
+  { lane:'user', icon:'💬', title:'用户说出意图',
+    detail:'“优先展示高优先级且快要截止的任务” —— 没有任何按钮对应这句话；传统做法是等后端出一个新接口。',
+    meta:'自然语言 · 0 token' },
+  { lane:'fe', icon:'🖥️', title:'前端转发意图',
+    detail:'Vue 里的轻量 MCP 客户端把意图原文发给网关：前端只采集意图、等指令渲染，不做任何决策。',
+    meta:'MCP 长连接 · ~2ms · 0 token', tool:'intent.send' },
+  { lane:'gw', icon:'🧠', title:'Agent 意图分类 + 任务拆解',
+    detail:'Agent 用模型理解这句话、判定意图类型（模糊 → 需要编排），并拆解计划：fetch_tasks → rank_tasks → render。这一步本身就是过模型的，只是很轻。',
+    meta:'模型推理 · ~600ms · ≈120 token' },
+  { lane:'tools', icon:'🗄️', title:'Tool① get_tasks（调传统后端）',
+    detail:'调 /api/tasks 拿原始数据 —— 确定性操作直接路由，后端退化成网关可调用的「工具之一」，不再负责决策。',
+    meta:'HTTP · ~32ms · 0 token', tool:'backend:get_tasks' },
+  { lane:'tools', icon:'🤖', title:'Tool② write_ranker（调大模型）',
+    detail:'只有"怎样才算优先、快截止"这种模糊判断才过模型：生成排序函数。DeepSeek / GPT 在这里也只是工具之一。',
+    meta:'模型 · ~900ms · ≈180 token', tool:'llm:write_ranker' },
+  { lane:'gw', icon:'🔀', title:'Agent 汇总编排结果',
+    detail:'原始数据 + 排序函数就绪，组装成受控渲染指令（视图配置，不是代码）。',
+    meta:'网关本地 · ~5ms · 0 token' },
+  { lane:'fe', icon:'✨', title:'Tool③ render(view)（回前端渲染）',
+    detail:'前端按指令重渲染列表：只执行、不思考。全程前后端 0 次直接对话，MCP 是唯一大脑。',
+    meta:'浏览器 · ~6ms · 0 token', tool:'fe:render' },
+];
+const ORCH = { runId:0, idx:0 };
+function orchBuild(){
+  $('#orchSteps').innerHTML = ORCH_STEPS.map(function(s, i){
+    return '<div class="ostep" id="os' + i + '">' +
+      '<div class="os-lane l-' + s.lane + '">' + ORCH_LANE_LABEL[s.lane] + '</div>' +
+      '<div><div class="os-t">' + s.icon + ' ' + s.title +
+        (s.tool ? '　<code>' + esc(s.tool) + '</code>' : '') + '</div>' +
+      '<div class="os-d">' + s.detail + '</div></div>' +
+      '<div class="os-m">' + s.meta + '</div></div>';
+  }).join('');
+}
+function orchClearHot(){
+  $$('.orch .lane').forEach(function(l){ l.classList.remove('hot'); });
+}
+function orchReveal(i){
+  const s = ORCH_STEPS[i];
+  $$('#orchSteps .ostep').forEach(function(el, k){ el.classList.toggle('cur', k === i); });
+  $('#os' + i).classList.add('show');
+  orchClearHot();
+  const lane = document.querySelector('.orch .lane[data-lane="' + s.lane + '"]');
+  if (lane) lane.classList.add('hot');
+}
+function orchHideAll(){
+  $$('#orchSteps .ostep').forEach(function(el){ el.classList.remove('show','cur'); });
+}
+function orchResetSilent(){
+  ORCH.runId++; ORCH.idx = 0;
+  orchHideAll();
+  orchClearHot();
+}
+function orchFinish(){
+  orchClearHot();
+  $('#orchStatus').innerHTML = '✅ <b>7 步编排完成</b>：前端 ↔ 后端 <b>0 次</b>直接对话，仅 2 步过模型（分类拆解 ≈120 + 排序函数 ≈180 token）——这就是「决策层上移」。';
+  toast('<b>编排完成：</b>前后端全程零直接对话，MCP 网关是唯一大脑', 'ok');
+  log('info', 'MCP 编排示例播放完成', '7 步 · 前后端 0 次直接对话 · 仅 2 步过模型（≈300 token）');
+}
+async function orchPlay(){
+  orchResetSilent();
+  $('#orchStatus').innerHTML = '播放中 —— 注意红色「MCP 网关」是唯一的大脑，前端和后端互相不说话…';
+  const rid = ORCH.runId;
+  while (ORCH.idx < ORCH_STEPS.length) {
+    if (rid !== ORCH.runId) return;
+    orchReveal(ORCH.idx);
+    ORCH.idx++;
+    await sleep(950);
+  }
+  if (rid !== ORCH.runId) return;
+  orchFinish();
+}
+function orchAdvance(){
+  ORCH.runId++;                       // 取消可能进行中的自动播放
+  if (ORCH.idx >= ORCH_STEPS.length) {
+    ORCH.idx = 0;
+    orchHideAll();
+  }
+  orchReveal(ORCH.idx);
+  ORCH.idx++;
+  if (ORCH.idx === ORCH_STEPS.length) orchFinish();
+  else $('#orchStatus').innerHTML = '单步模式：第 ' + ORCH.idx + ' / ' + ORCH_STEPS.length + ' 步已展示，继续点「单步」。';
+}
+$('#orchPlay').onclick  = function(){ orchPlay(); };
+$('#orchStep').onclick  = function(){ orchAdvance(); };
+$('#orchReset').onclick = function(){
+  orchResetSilent();
+  $('#orchStatus').innerHTML = '已重置 —— 点击「完整播放」重新观看编排过程。';
+};
+orchBuild();
+// 首次滚动到可视区域时自动播放一次
+let orchAutoPlayed = false;
+if ('IntersectionObserver' in window) {
+  const orchObs = new IntersectionObserver(function(es){
+    es.forEach(function(en){
+      if (en.isIntersecting && !orchAutoPlayed) { orchAutoPlayed = true; setTimeout(orchPlay, 500); }
+    });
+  }, { threshold: .3 });
+  orchObs.observe($('#orch'));
+}
+
+/* =========================================================
+   6.5 上下文锚定演示（前端带路 vs 后端猜）
+   ========================================================= */
+const ANCHOR_CFG = {
+  approve:   { btn:'btn_approve', action:'update', target:'Order', say:'审批这个订单',
+               behavior:'approve', tool:'approve_order', args:'orderId="SO-20402"', wrong:'batch_approve_orders' },
+  logistics: { btn:'btn_track',   action:'query',  target:'Logistics', say:'查一下这个订单的物流',
+               behavior:'query',  tool:'track_logistics', args:'orderId="SO-20402"', wrong:'query_orders' },
+};
+function anchorLog(lv, html){
+  const logBox = $('#anchorLog');
+  const d = document.createElement('div');
+  d.innerHTML = '<span class="t">' + now() + '</span><span class="lv ' + lv + '">' + (LV[lv] || '[LOG]') + '</span>' + html;
+  logBox.appendChild(d);
+  logBox.scrollTop = logBox.scrollHeight;
+}
+async function anchorRun(kind){
+  const cfg = ANCHOR_CFG[kind];
+  const withCtx = $('#swAnchor').checked;
+  const role = $('#selRole').value;
+  const ctx = {
+    scene:   { id:'order_detail', name:'订单详情页', module:'order', route:'/orders/detail/SO-20402' },
+    intent:  { action:cfg.action, target:cfg.target, trigger:'button_click', buttonId:cfg.btn },
+    payload: { orderId:'SO-20402', customer:'泰和能源' },
+    user:    { role:role, permissions:ROLE_PERMS[role] },
+  };
+  const envelope = withCtx
+    ? { tool:'__router__', arguments:{ userInput:cfg.say, _mcp_context:ctx } }
+    : { tool:'__router__', arguments:{ userInput:cfg.say } };
+  $('#anchorCtx').textContent = JSON.stringify(envelope, null, 2);
+  $('#anchorLog').innerHTML = '';
+  anchorLog('info', '__router__ 收到：「' + cfg.say + '」' + (withCtx ? ' + <b>_mcp_context</b>' : '（<b>无上下文</b>）'));
+  await sleep(350);
+  if (withCtx) {
+    anchorLog('ok', 'scene=<b>order_detail</b> → 锁定能力域 <b>order</b>（0 次猜测）');
+    await sleep(420);
+    anchorLog('ok', 'intent=' + cfg.action + ' + buttonId=<span class="mono">' + cfg.btn + '</span> → 行为 <b>' + cfg.behavior + '</b> → 直达 <b>' + cfg.tool + '(' + cfg.args + ')</b>');
+    await sleep(420);
+    anchorLog('ok', '执行完成 · 工具域内定向执行 · ~80ms · 工具选择花销 0 token');
+    toast('<b>上下文锚定生效：</b>前端带路，后端不用猜 —— 直达 ' + cfg.tool, 'ok');
+  } else {
+    anchorLog('warn', '只有一句话，开始翻 <b>tools/list（137 个工具）</b>，靠描述模糊匹配…');
+    await sleep(900);
+    anchorLog('warn', '差点选成 <span class="mono">' + cfg.wrong + '</span>（描述太像了），重新打分…');
+    await sleep(900);
+    anchorLog('ok', '最终命中 ' + cfg.tool + ' · 全程 ~2.1s · 工具选择多花 ~400 token —— 每次点击都要重新猜一遍');
+    toast('<b>没有上下文：</b>后端只能靠猜 —— 慢 2 秒 + 多烧 400 token，还可能选错', 'warn');
+  }
+}
+$('#btnAnchorApprove').onclick = () => anchorRun('approve');
+$('#btnAnchorLogi').onclick = () => anchorRun('logistics');
+
+/* =========================================================
+   6.6 成本沙盘（Token 经济学：L1 直通率就是钱）
+   ========================================================= */
+function sbPaint(){
+  const D = +$('#sbD').value, H = +$('#sbH').value / 100, T = +$('#sbT').value, P = +$('#sbP').value;
+  $('#sbDv').textContent = fmt(D) + ' 次/天';
+  $('#sbHv').textContent = Math.round(H * 100) + '%';
+  $('#sbTv').textContent = fmt(T) + ' Token/次';
+  $('#sbPv').textContent = '¥' + P + ' / 百万Token';
+  const full = D * 30 * T;              // 全走模型：月 Token
+  const real = full * (1 - H);          // 先 L1 后 L2：月 Token
+  const costOf = t => t / 1e6 * P;      // 元
+  const tokCN = t => t >= 1e8 ? (t / 1e8).toFixed(1) + ' 亿' : fmt(Math.round(t / 1e4)) + ' 万';
+  $('#sbFull').textContent = tokCN(full);
+  $('#sbReal').textContent = tokCN(real);
+  $('#sbSave').textContent = '¥' + fmt(Math.round(costOf(full - real)));
+  $('#sbSaveY').textContent = '¥' + fmt(Math.round(costOf(full - real) * 12));
+}
+['sbD','sbH','sbT','sbP'].forEach(function(id){ $('#' + id).addEventListener('input', sbPaint); });
+sbPaint();
+
+/* =========================================================
+   7. 导航滚动高亮
+   ========================================================= */
+if ('IntersectionObserver' in window) {
+  const spyObs = new IntersectionObserver(function(es){
+    es.forEach(function(en){
+      if (en.isIntersecting) {
+        $$('.nav a').forEach(function(a){
+          a.classList.toggle('active', a.getAttribute('href') === '#' + en.target.id);
+        });
+      }
+    });
+  }, { rootMargin:'-40% 0px -55% 0px' });
+  ['idea','plan','degrade','p1','p2','p3','p4','audit'].forEach(function(id){
+    const el = document.getElementById(id);
+    if (el) spyObs.observe(el);
+  });
+}
+/* 回到顶部 */
+const toTopBtn = $('#toTop');
+window.addEventListener('scroll', function(){ toTopBtn.classList.toggle('show', window.scrollY > 800); }, { passive:true });
+toTopBtn.onclick = function(){ window.scrollTo({ top:0, behavior:'smooth' }); };
+
+/* =========================================================
+   8. 初始化
+   ========================================================= */
+renderOrders();
+renderSmart();
+drawChart('spike');
+paintMetrics();
+paintAudit();
+paintDeg();
+renderComp();
+requestAnimationFrame(fpsLoop);
+log('info', 'V2 人话版已就绪', '思想主线 + 进阶示例（记忆/建议卡/手动兜底）+ 无模型兜底演练 · 本地规则模拟 · 无网络请求');
+</script>
+</body>
+</html>
+
+
