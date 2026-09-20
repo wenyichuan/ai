@@ -1,0 +1,3100 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="离线工具百宝箱：近百个实用小工具，纯单文件、无需联网">
+<title>离线工具百宝箱</title>
+<style>
+:root{
+  --bg:#f4f6fb; --card:#ffffff; --text:#1f2430; --muted:#697180; --line:#e3e6ee;
+  --pri:#2563eb; --pri-soft:#e3ecfe; --hover:#eef3ff; --shadow:0 1px 3px rgba(20,30,60,.08);
+  --ok:#16a34a; --warn:#d97706; --err:#dc2626; --mono:ui-monospace,Consolas,"Courier New",monospace;
+}
+[data-theme="dark"]{
+  --bg:#12161f; --card:#1d2430; --text:#e6e9f0; --muted:#98a1b3; --line:#333d50;
+  --pri:#4f8bff; --pri-soft:#1d2f52; --hover:#232e42; --shadow:0 1px 3px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.65}
+a{color:var(--pri)}
+::selection{background:var(--pri);color:#fff}
+header{position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--card);box-shadow:var(--shadow)}
+.logo{font-size:17px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.logo b{font-weight:700}
+#menuBtn{display:none}
+#q{max-width:420px}
+#stat{margin-left:auto;color:var(--muted);font-size:12px;white-space:nowrap}
+#wrap{display:flex;align-items:flex-start}
+#cats{width:225px;flex-shrink:0;position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto;padding:10px 8px 40px 16px}
+.cat{margin-bottom:10px}
+.cath{display:flex;align-items:center;gap:6px;font-weight:600;margin:10px 0 3px;font-size:13.5px}
+.cnt{background:var(--pri-soft);color:var(--pri);border-radius:10px;padding:0 7px;font-size:11px;font-weight:600}
+.navt{display:block;padding:2.5px 10px;border-radius:6px;color:var(--text);text-decoration:none;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.navt:hover{background:var(--hover);color:var(--pri)}
+.navt.none{color:var(--muted)}
+main{flex:1;min-width:0;padding:6px 20px 20px}
+.hero{background:linear-gradient(120deg,var(--pri),#7c3aed);color:#fff;border-radius:14px;padding:22px 24px;margin:10px 0 6px}
+.hero h1{font-size:22px;margin-bottom:6px}
+.hero p{opacity:.92;font-size:13px}
+.hero .tips{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+.hero .tips span{background:rgba(255,255,255,.16);border-radius:20px;padding:3px 12px;font-size:12px}
+.catsec{margin:26px 0}
+.catbig{font-size:17px;margin-bottom:12px;border-left:4px solid var(--pri);padding-left:10px;display:flex;align-items:center;gap:8px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:12px}
+.tcard{display:flex;gap:10px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;text-decoration:none;color:var(--text);transition:transform .12s,box-shadow .12s,border-color .12s}
+.tcard:hover{border-color:var(--pri);transform:translateY(-2px);box-shadow:var(--shadow)}
+.ticon{font-size:21px;line-height:1.4}
+.tname{font-weight:600}
+.tdesc{font-size:12px;color:var(--muted);line-height:1.45;margin-top:2px}
+.theader{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:14px;display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px}
+.theader h2{font-size:18px}
+.theader .desc{color:var(--muted);font-size:13px;width:100%}
+.tbody{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.empty{padding:60px 20px;text-align:center;color:var(--muted)}
+input,select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;color:var(--text);font:inherit;width:100%}
+textarea{resize:vertical;font-family:var(--mono);font-size:13px;line-height:1.55}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--pri);outline-offset:-1px;border-color:var(--pri)}
+input[type=color]{padding:2px;height:42px;width:64px;cursor:pointer}
+input[type=range]{padding:0;accent-color:var(--pri)}
+input[type=checkbox],input[type=radio]{width:auto;accent-color:var(--pri)}
+label.chk{display:inline-flex;align-items:center;gap:6px;cursor:pointer;margin:4px 10px 4px 0}
+.btn{background:var(--pri);color:#fff;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;font:inherit;font-size:14px;transition:filter .1s}
+.btn:hover{filter:brightness(1.12)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.btn.ghost:hover{border-color:var(--pri);color:var(--pri);filter:none}
+.btn.danger{background:var(--err)}
+.btn.ok{background:var(--ok)}
+.btn.sm{padding:3px 10px;font-size:12px;border-radius:6px}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;align-items:center}
+.fld{display:flex;flex-direction:column;gap:4px;margin:8px 0;min-width:0}
+.fl{font-size:12px;color:var(--muted)}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.row>.fld{flex:1;min-width:130px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.out{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-height:42px;white-space:pre-wrap;word-break:break-all;font-family:var(--mono);font-size:13px}
+.out.hTall{max-height:340px;overflow:auto}
+.result{font-size:22px;font-weight:700;color:var(--pri);padding:6px 0;word-break:break-all;font-family:var(--mono)}
+.result small{font-size:13px;color:var(--muted);font-weight:400}
+.muted{color:var(--muted)}
+.mt{margin-top:12px}
+.kv{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line);flex-wrap:wrap}
+.kv>span:first-child{color:var(--muted);font-size:13px}
+.kvv{display:flex;gap:8px;align-items:center;min-width:0;flex:1;justify-content:flex-end}
+code{background:var(--bg);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12.5px;word-break:break-all}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:10px;margin-top:10px}
+.stat{background:var(--bg);border-radius:10px;padding:10px 6px;text-align:center}
+.stat b{font-size:20px;display:block;color:var(--pri);font-family:var(--mono)}
+.stat span{font-size:12px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
+th,td{border:1px solid var(--line);padding:5px 8px;text-align:left}
+th{background:var(--bg);font-weight:600}
+tbody tr:hover{background:var(--hover)}
+.tw{max-height:360px;overflow:auto}
+mark{background:#fde047;color:#1f2430;border-radius:3px;padding:0 2px}
+.swatch{border-radius:8px;cursor:pointer;border:1px solid var(--line);min-height:52px;display:flex;align-items:flex-end;justify-content:center;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.65);font-size:12px;font-family:var(--mono);padding:4px}
+.pbar{height:10px;background:var(--bg);border-radius:5px;overflow:hidden;border:1px solid var(--line)}
+.pbar>div{height:100%;background:var(--pri);transition:width .2s}
+kbd{background:var(--bg);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:1px 6px;font-family:var(--mono);font-size:12px}
+details{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:10px 0;background:var(--bg)}
+summary{cursor:pointer;font-weight:600;color:var(--pri)}
+.badge{display:inline-block;border-radius:12px;padding:1px 10px;font-size:12px;font-weight:600}
+.badge.ok{background:rgba(22,163,74,.15);color:var(--ok)}
+.badge.warn{background:rgba(217,119,6,.15);color:var(--warn)}
+.badge.err{background:rgba(220,38,38,.12);color:var(--err)}
+.badge.info{background:var(--pri-soft);color:var(--pri)}
+.drow{font-family:var(--mono);font-size:13px;padding:1px 8px;white-space:pre-wrap;word-break:break-all;border-radius:3px}
+.drow.add{background:rgba(22,163,74,.13);color:var(--ok)}
+.drow.del{background:rgba(220,38,38,.10);color:var(--err)}
+.drow.eq{color:var(--muted)}
+.calc{max-width:360px;margin:0 auto}
+.calc-screen{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;text-align:right;margin-bottom:10px;overflow:hidden}
+.calc-expr{min-height:22px;color:var(--muted);word-break:break-all;font-family:var(--mono);font-size:14px}
+.calc-res{font-size:28px;font-weight:700;font-family:var(--mono);min-height:38px;word-break:break-all}
+.calc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.calc-grid.sci{grid-template-columns:repeat(5,1fr)}
+.calc-grid button{padding:12px 0;font-size:16px;border:1px solid var(--line);background:var(--bg);border-radius:10px;cursor:pointer;color:var(--text);font-family:var(--mono)}
+.calc-grid button:hover{border-color:var(--pri);color:var(--pri)}
+.calc-grid button.op{color:var(--pri);font-weight:700}
+.calc-grid button.eq{background:var(--pri);color:#fff;border-color:var(--pri)}
+.calc-grid button.fn{font-size:13px}
+.clockcard{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center}
+.clockcard .t{font-size:26px;font-weight:700;font-family:var(--mono)}
+.clockcard .c{color:var(--muted);font-size:13px}
+footer{padding:34px 16px 44px;text-align:center;color:var(--muted);font-size:12.5px}
+.chip{display:inline-block;background:var(--pri-soft);color:var(--pri);border-radius:14px;padding:2px 12px;margin:3px;font-size:13px;font-family:var(--mono)}
+.big{font-size:24px}
+.center{text-align:center}
+.warnbox{background:rgba(217,119,6,.1);border:1px solid rgba(217,119,6,.4);color:var(--warn);border-radius:8px;padding:8px 12px;margin:8px 0;font-size:13px}
+.errbox{background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.4);color:var(--err);border-radius:8px;padding:8px 12px;margin:8px 0;font-size:13px}
+.okbox{background:rgba(22,163,74,.08);border:1px solid rgba(22,163,74,.4);color:var(--ok);border-radius:8px;padding:8px 12px;margin:8px 0;font-size:13px}
+.g2048{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:#bbada0;border-radius:10px;padding:8px;width:340px;max-width:100%;margin:0 auto;user-select:none}
+.g2048 .cell{aspect-ratio:1;border-radius:6px;background:rgba(238,228,218,.35);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:26px;color:#776e65;font-family:var(--mono)}
+.tt-display{font-family:var(--mono);font-size:17px;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;line-height:1.9;letter-spacing:.5px}
+.tt-display .done{color:var(--ok)}
+.tt-display .bad{background:rgba(220,38,38,.25);border-radius:2px}
+.tt-display .cur{border-bottom:2px solid var(--pri)}
+@media (max-width:860px){
+  #menuBtn{display:inline-block}
+  #wrap{display:block}
+  #cats{position:fixed;left:0;top:0;bottom:0;width:262px;background:var(--card);z-index:100;transform:translateX(-102%);transition:transform .2s;height:100vh;box-shadow:0 0 30px rgba(0,0,0,.3)}
+  body.nav-open #cats{transform:none}
+  .split,.cols2{grid-template-columns:1fr}
+  #stat{display:none}
+  main{padding:6px 12px 16px}
+}
+</style>
+</head>
+<body>
+<header>
+  <button class="btn ghost sm" id="menuBtn">☰</button>
+  <div class="logo" id="homeLink">🧰 <b>离线工具百宝箱</b></div>
+  <input id="q" type="search" placeholder="搜索工具…（快捷键 /）" autocomplete="off">
+  <span id="stat"></span>
+  <button class="btn ghost sm" id="themeBtn" title="切换深色 / 浅色主题">🌓</button>
+</header>
+<div id="wrap">
+  <nav id="cats"></nav>
+  <main>
+    <section id="home"></section>
+    <section id="view" hidden></section>
+  </main>
+</div>
+<footer id="foot"></footer>
+<script>
+'use strict';
+/* ================= 基础工具函数 ================= */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const reEsc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+function fmtSmart(x){if(!isFinite(x))return '—';if(x===0)return '0';const a=Math.abs(x);
+  if(a>=1e15||a<1e-9)return x.toExponential(6);
+  let s=parseFloat(x.toPrecision(10)).toString();return s;}
+function download(name,data,mime){const blob=data instanceof Blob?data:new Blob([data],{type:mime||'text/plain;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;
+  document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},200);}
+async function copyText(t){try{await navigator.clipboard.writeText(t);return true;}
+  catch(e){try{const ta=document.createElement('textarea');ta.value=t;ta.style.cssText='position:fixed;opacity:0';document.body.appendChild(ta);ta.select();const ok=document.execCommand('copy');ta.remove();return ok;}catch(e2){return false;}}}
+const COPY={};
+function setCopy(k,v){COPY[k]=v;}
+function cpBtn(k,label){return `<button class="btn ghost sm" data-cp="${k}">${label||'复制'}</button>`;}
+document.addEventListener('click',async e=>{
+  const b=e.target.closest('[data-cp]');if(!b)return;
+  const ok=await copyText(COPY[b.dataset.cp]??'');
+  const old=b.textContent;b.textContent=ok?'✓ 已复制':'✗ 失败';setTimeout(()=>b.textContent=old,1200);
+});
+/* 表单速构 */
+const inp=(id,ph,type,v)=>`<input id="${id}" type="${type||'text'}" placeholder="${esc(ph||'')}" value="${esc(v==null?'':v)}" autocomplete="off" spellcheck="false">`;
+const tArea=(id,ph,rows,v)=>`<textarea id="${id}" rows="${rows||7}" placeholder="${esc(ph||'')}" spellcheck="false">${esc(v==null?'':v)}</textarea>`;
+const sel=(id,opts,v)=>`<select id="${id}">${opts.map(o=>{const[val,lab]=Array.isArray(o)?o:[o,o];
+  return `<option value="${esc(val)}"${String(val)===String(v)?' selected':''}>${esc(lab)}</option>`;}).join('')}</select>`;
+const lbl=(t,inner)=>`<label class="fld"><span class="fl">${t}</span>${inner}</label>`;
+const btn=(id,t,cls)=>`<button id="${id}" class="btn ${cls||''}">${t}</button>`;
+const out=(id,cls)=>`<div class="out ${cls||''}" id="${id}"></div>`;
+const chk=(id,t,on)=>`<label class="chk"><input type="checkbox" id="${id}"${on===false?'':' checked'}> ${t}</label>`;
+/* 生命周期清理 */
+let CLEANUPS=[];
+function onClean(fn){CLEANUPS.push(fn);}
+function runCleanups(){CLEANUPS.forEach(f=>{try{f();}catch(e){}});CLEANUPS=[];}
+function tick(fn,ms){const t=setInterval(fn,ms);onClean(()=>clearInterval(t));return t;}
+function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
+/* ================= 分类与注册 ================= */
+const CATS=[
+  {id:'text', icon:'📝', name:'文本处理'},
+  {id:'code', icon:'🔐', name:'编码加密'},
+  {id:'unit', icon:'📏', name:'单位换算'},
+  {id:'math', icon:'🧮', name:'计算工具'},
+  {id:'gen',  icon:'🎲', name:'随机生成'},
+  {id:'color',icon:'🎨', name:'颜色工具'},
+  {id:'dev',  icon:'💻', name:'开发工具'},
+  {id:'date', icon:'📅', name:'日期时间'},
+  {id:'img',  icon:'🖼️', name:'图片媒体'},
+  {id:'life', icon:'🏠', name:'生活助手'},
+  {id:'fun',  icon:'🎮', name:'休闲游戏'}
+];
+const TOOLS=[];
+function tool(id,cat,icon,name,desc,render){TOOLS.push({id,cat,icon,name,desc,render});}
+/* ================= 路由与首页 ================= */
+function route(){
+  runCleanups();
+  const m=location.hash.match(/^#\/t\/([\w-]+)$/);
+  const t=m&&TOOLS.find(x=>x.id===m[1]);
+  const home=$('#home'),view=$('#view');
+  if(t){
+    home.hidden=true;view.hidden=false;
+    view.innerHTML=`<div class="theader"><button class="btn ghost sm" id="backBtn">← 返回</button>
+      <h2>${t.icon} ${esc(t.name)}</h2><div class="desc">${esc(t.desc)}</div></div>
+      <div class="tbody" id="tbody"></div>`;
+    $('#backBtn').onclick=()=>{location.hash='';};
+    try{t.render($('#tbody'));}catch(e){$('#tbody').innerHTML=`<div class="errbox">工具加载出错：${esc(e.message)}</div>`;console.error(e);}
+    document.title=t.name+' · 离线工具百宝箱';
+  }else{
+    view.hidden=true;home.hidden=false;renderHome($('#q').value);
+    document.title='离线工具百宝箱 · 共 '+TOOLS.length+' 个工具';
+  }
+  document.body.classList.remove('nav-open');
+  window.scrollTo({top:0});
+}
+function renderHome(q){
+  q=(q||'').trim().toLowerCase();
+  let navHtml='',bodyHtml='',shown=0;
+  for(const c of CATS){
+    const all=TOOLS.filter(t=>t.cat===c.id);
+    const list=all.filter(t=>!q||t.name.toLowerCase().includes(q)||t.desc.toLowerCase().includes(q));
+    if(q&&!list.length)continue;
+    shown+=list.length;
+    navHtml+=`<div class="cat"><div class="cath">${c.icon} ${c.name}<span class="cnt">${list.length}</span></div>`+
+      (list.length?list.map(t=>`<a class="navt" href="#/t/${t.id}" title="${esc(t.desc)}">${t.icon} ${esc(t.name)}</a>`).join(''):`<div class="navt none">无匹配</div>`)+`</div>`;
+    bodyHtml+=`<section class="catsec" id="cat-${c.id}"><h3 class="catbig">${c.icon} ${c.name}<span class="cnt">${list.length}</span></h3>
+      <div class="cards">${list.map(t=>`<a class="tcard" href="#/t/${t.id}"><div class="ticon">${t.icon}</div>
+      <div><div class="tname">${esc(t.name)}</div><div class="tdesc">${esc(t.desc)}</div></div></a>`).join('')}</div></section>`;
+  }
+  $('#cats').innerHTML=navHtml;
+  $('#home').innerHTML=(q?'':`<div class="hero"><h1>🧰 离线工具百宝箱</h1>
+    <p>共 ${TOOLS.length} 个实用小工具，全部在浏览器本地运行 —— 无需联网、不收集任何数据。把本文件保存到电脑或手机，随时随地打开即用。</p>
+    <div class="tips"><span>✈️ 完全离线</span><span>🔒 数据不出浏览器</span><span>📂 单个 HTML 文件</span><span>⌨️ 按 <b>/</b> 快速搜索</span><span>🌓 深色模式</span></div></div>`)+
+    (bodyHtml||`<div class="empty">没有找到匹配「${esc(q)}」的工具 😢</div>`);
+}
+/* ================= 主题 / 搜索 / 启动 ================= */
+function setTheme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem('tbx-theme',t);}catch(e){}}
+try{setTheme(localStorage.getItem('tbx-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));}catch(e){setTheme('light');}
+$('#themeBtn').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
+$('#homeLink').onclick=()=>{location.hash='';};
+$('#menuBtn').onclick=()=>document.body.classList.toggle('nav-open');
+$('#q').addEventListener('input',e=>{if(location.hash)location.hash='';renderHome(e.target.value);});
+document.addEventListener('keydown',e=>{
+  if(e.key==='/'&&!/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)){e.preventDefault();$('#q').focus();}
+});
+
+/* ================= 文本处理 ================= */
+tool('word-count','text','🔢','字数统计','统计字符、单词、中文字、行数、字节数等',root=>{
+  root.innerHTML=`${tArea('wcIn','在此粘贴或输入文本…',10)}
+  <div class="stat-grid" id="wcOut"></div>`;
+  const upd=()=>{const t=$('#wcIn').value;
+    const cn=(t.match(/[\u4e00-\u9fff]/g)||[]).length;
+    const en=(t.match(/[a-zA-Z]+/g)||[]).length;
+    const num=(t.match(/\d+/g)||[]).length;
+    const words=(t.match(/[\u4e00-\u9fff]|[a-zA-Z0-9_']+/g)||[]).length;
+    const lines=t?t.split(/\r\n|\r|\n/).length:0;
+    const paras=t.split(/\n+/).filter(x=>x.trim()).length;
+    const sent=(t.match(/[.!?。！？；;]+/g)||[]).length;
+    $('#wcOut').innerHTML=[
+      ['字符数(含空格)',t.length],['字符数(去空格)',t.replace(/\s/g,'').length],
+      ['中文字符',cn],['英文单词',en],['数字组',num],
+      ['字数(中字+英文词)',words],['行数',lines],['段落数',paras],
+      ['句子数(约)',sent],['UTF-8 字节',new TextEncoder().encode(t).length]
+    ].map(([k,v])=>`<div class="stat"><b>${v}</b><span>${k}</span></div>`).join('');
+  };
+  $('#wcIn').addEventListener('input',upd);upd();
+});
+
+tool('case','text','ABC','大小写 / 命名格式','UPPER、lower、camelCase、snake_case 等互转',root=>{
+  const parts=s=>s.replace(/([a-z0-9])([A-Z])/g,'$1 $2').replace(/([A-Z]+)([A-Z][a-z])/g,'$1 $2')
+    .replace(/[_\-\s.]+/g,' ').trim().toLowerCase().split(/\s+/).filter(Boolean);
+  root.innerHTML=`${tArea('caseIn','输入文本，支持 hello world / helloWorld / hello_world 等格式',6)}
+    <div class="btns">${btn('caseGo','转 换')}</div>${out('caseOut')}`;
+  const run=()=>{const s=$('#caseIn').value;const p=parts(s);const cap=w=>w?w[0].toUpperCase()+w.slice(1):w;
+    const rows=[
+      ['全大写 UPPER CASE',s.toUpperCase()],
+      ['全小写 lower case',s.toLowerCase()],
+      ['首字母大写 Title',s.toLowerCase().replace(/(^|[\s(])([a-z])/g,(m,a,b)=>a+b.toUpperCase())],
+      ['小驼峰 camelCase',p.map((w,i)=>i?cap(w):w).join('')],
+      ['大驼峰 PascalCase',p.map(cap).join('')],
+      ['下划线 snake_case',p.join('_')],
+      ['常量 CONSTANT_CASE',p.join('_').toUpperCase()],
+      ['中划线 kebab-case',p.join('-')],
+      ['点号 dot.case',p.join('.')]
+    ];
+    $('#caseOut').innerHTML=rows.map(([k,v],i)=>{setCopy('case'+i,v);
+      return `<div class="kv"><span>${k}</span><div class="kvv"><code>${esc(v||'—')}</code>${cpBtn('case'+i)}</div></div>`;}).join('');
+  };
+  $('#caseGo').onclick=run;$('#caseIn').addEventListener('input',debounce(run,300));run();
+});
+
+tool('dedupe','text','🗃️','文本去重 / 排序','按行去重、排序、反转、删空行、加行号',root=>{
+  root.innerHTML=`${tArea('ddIn','每行一条数据，粘贴到此处…',9)}
+    <div class="btns">${btn('ddDup','去重')}${btn('ddSort','排序 A→Z')}${btn('ddSortR','排序 Z→A')}
+    ${btn('ddRev','反转顺序')}${btn('ddTrim','去首尾空格')}${btn('ddBlank','删除空行')}${btn('ddNum','添加行号')}</div>
+    <div class="muted" id="ddMsg"></div>${tArea('ddOut','处理结果（可直接修改后复制）',9)}`;
+  const get=()=>$('#ddIn').value.split(/\r?\n/);
+  const put=(l,msg)=>{$('#ddOut').value=l.join('\n');$('#ddMsg').textContent=msg||'';};
+  $('#ddDup').onclick=()=>{const l=get();put([...new Set(l)],`已去重：${l.length} 行 → ${new Set(l).size} 行`);};
+  $('#ddSort').onclick=()=>put(get().sort((a,b)=>a.localeCompare(b,'zh')));
+  $('#ddSortR').onclick=()=>put(get().sort((a,b)=>b.localeCompare(a,'zh')));
+  $('#ddRev').onclick=()=>put(get().reverse());
+  $('#ddTrim').onclick=()=>put(get().map(l=>l.trim()));
+  $('#ddBlank').onclick=()=>put(get().filter(l=>l.trim()!==''));
+  $('#ddNum').onclick=()=>{let n=0;put(get().map(l=>l.trim()?`${++n}. ${l}`:l));};
+});
+
+tool('replace','text','🔁','查找替换','支持普通文本与正则表达式批量替换',root=>{
+  root.innerHTML=`${tArea('frIn','原始文本',7)}
+    <div class="row">${lbl('查找内容',inp('frFind','要查找的文本 / 正则'))}
+    ${lbl('替换为',inp('frRep','替换成的内容，可用 $1 引用分组'))}</div>
+    <div class="btns">${chk('frRe','正则模式',false)}${chk('frIg','忽略大小写')}${chk('frG','全部替换')}${btn('frGo','执行替换')}</div>
+    <div id="frMsg"></div>${tArea('frOut','',7)}`;
+  $('#frGo').onclick=()=>{
+    const s=$('#frIn').value,f=$('#frFind').value;
+    if(!f){$('#frMsg').innerHTML='<div class="warnbox">请输入查找内容</div>';return;}
+    try{
+      const flags=($('#frG').checked?'g':'')+($('#frIg').checked?'i':'');
+      const re=new RegExp($('#frRe').checked?f:reEsc(f),flags);
+      const n=(s.match(re)||[]).length;
+      $('#frOut').value=s.replace(re,$('#frRep').value);
+      $('#frMsg').innerHTML=`<div class="okbox">共找到 ${n} 处${n?'，已替换':''}</div>`;
+    }catch(e){$('#frMsg').innerHTML=`<div class="errbox">正则错误：${esc(e.message)}</div>`;}
+  };
+});
+
+tool('reverse','text','🔄','文本反转','按字符、单词或行反转文本',root=>{
+  root.innerHTML=`${tArea('rvIn','输入文本…',6)}
+    <div class="btns">${btn('rvC','字符反转')}${btn('rvW','单词反转')}${btn('rvL','行序反转')}</div>${out('rvOut')}`;
+  const map=[['rvC',s=>[...s].reverse().join('')],['rvW',s=>s.split(/(\s+)/).reverse().join('')],['rvL',s=>s.split(/\r?\n/).reverse().join('\n')]];
+  map.forEach(([id,f])=>$('#'+id).onclick=()=>{$('#rvOut').textContent=f($('#rvIn').value);});
+});
+
+tool('whitespace','text','🧹','空白清理','去除多余空格、空行、全角空格等',root=>{
+  root.innerHTML=`${tArea('wsIn','输入文本…',8)}
+    <div class="btns">
+      ${chk('wsTrim','去每行首尾空白')}<label class="chk"><input type="checkbox" id="wsMulti"> 压缩连续空格</label>
+      <label class="chk"><input type="checkbox" id="wsBlank"> 删除空行</label>
+      <label class="chk"><input type="checkbox" id="wsAll"> 删除全部空白</label>
+      <label class="chk"><input type="checkbox" id="wsFw"> 全角空格→半角</label>
+      ${btn('wsGo','执行清理')}
+    </div>${tArea('wsOut','',8)}`;
+  $('#wsGo').onclick=()=>{
+    let l=$('#wsIn').value.split(/\r?\n/);
+    if($('#wsFw').checked)l=l.map(x=>x.replace(/\u3000/g,' '));
+    if($('#wsTrim').checked)l=l.map(x=>x.trim());
+    if($('#wsMulti').checked)l=l.map(x=>x.replace(/ {2,}/g,' '));
+    if($('#wsBlank').checked)l=l.filter(x=>x.trim()!=='');
+    let r=l.join('\n');
+    if($('#wsAll').checked)r=r.replace(/\s+/g,'');
+    $('#wsOut').value=r;
+  };
+});
+
+tool('line-affix','text','📎','行前后缀','为每行批量添加前缀、后缀或行号',root=>{
+  root.innerHTML=`${tArea('laIn','每行一条…',8)}
+    <div class="row">${lbl('前缀',inp('laPre','','text','"'))}${lbl('后缀',inp('laSuf','','text','",'))}
+    <label class="fld"><span class="fl">行号</span>${sel('laNum',[['no','不加行号'],['num','加行号 1. '],['pad','对齐行号 01. ']])}</label></div>
+    <div class="btns">${btn('laGo','应用到所有行')}</div>${tArea('laOut','',8)}`;
+  $('#laGo').onclick=()=>{
+    const pre=$('#laPre').value,suf=$('#laSuf').value,mode=$('#laNum').value;
+    let n=0;
+    $('#laOut').value=$('#laIn').value.split(/\r?\n/).map(l=>{
+      let x=l;
+      if(mode!=='no'&&x.trim())n++;
+      const no=mode==='num'?n+'. ':mode==='pad'?String(n).padStart(2,'0')+'. ':'';
+      return no+pre+x+suf;}).join('\n');
+  };
+});
+
+tool('diff','text','🆚','文本对比','逐行比较两段文本差异（左右增删高亮）',root=>{
+  root.innerHTML=`<div class="split">${tArea('dfA','原始文本 A',10)}${tArea('dfB','修改后文本 B',10)}</div>
+    <div class="btns">${btn('dfGo','比较差异')}<span class="muted">最多各支持 500 行</span></div><div id="dfOut"></div>`;
+  $('#dfGo').onclick=()=>{
+    const a=$('#dfA').value.split(/\r?\n/),b=$('#dfB').value.split(/\r?\n/);
+    if(a.length>500||b.length>500){$('#dfOut').innerHTML='<div class="warnbox">文本超过 500 行，请缩短后重试</div>';return;}
+    const n=a.length,m=b.length;
+    const dp=Array.from({length:n+1},()=>new Uint16Array(m+1));
+    for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)
+      dp[i][j]=a[i]===b[j]?dp[i+1][j+1]+1:Math.max(dp[i+1][j],dp[i][j+1]);
+    const ops=[];let i=0,j=0;
+    while(i<n&&j<m){
+      if(a[i]===b[j]){ops.push(['=',a[i]]);i++;j++;}
+      else if(dp[i+1][j]>=dp[i][j+1]){ops.push(['-',a[i]]);i++;}
+      else{ops.push(['+',b[j]]);j++;}
+    }
+    while(i<n)ops.push(['-',a[i++]]);while(j<m)ops.push(['+',b[j++]]);
+    const add=ops.filter(o=>o[0]==='+').length,del=ops.filter(o=>o[0]==='-').length;
+    $('#dfOut').innerHTML=`<div class="btns"><span class="badge ok">新增 ${add} 行</span><span class="badge err">删除 ${del} 行</span>
+      <span class="badge info">相同 ${ops.length-add-del} 行</span></div>
+      <div class="out hTall">${ops.map(([t,l])=>`<div class="drow ${t==='='?'eq':t}">${t==='='?'  ':t==='+'?'+ ':'- '}${esc(l)||' '}</div>`).join('')}</div>`;
+  };
+});
+
+tool('markdown','text','📑','Markdown 预览','实时预览 Markdown 渲染效果（基础语法）',root=>{
+  root.innerHTML=`<div class="split">${tArea('mdIn','# Hello Markdown\n\n支持 **加粗**、*斜体*、\`行内代码\`、[链接](https://example.com)\n\n- 列表项一\n- 列表项二\n\n> 引用文字\n\n\`\`\`\n代码块\n\`\`\`\n\n---\n\n1. 有序列表\n2. 第二项',12)}
+    <div class="out md-prev" id="mdOut" style="font-family:inherit;min-height:300px"></div></div>`;
+  function md2html(src){
+    src=src.replace(/\r\n?/g,'\n');
+    const codes=[];
+    src=src.replace(/```[^\n]*\n?([\s\S]*?)```/g,(m,c)=>{codes.push(c);return '\u0000C'+(codes.length-1)+'\u0000';});
+    let h=esc(src);
+    h=h.replace(/^###### (.*)$/gm,'<h6>$1</h6>').replace(/^##### (.*)$/gm,'<h5>$1</h5>')
+       .replace(/^#### (.*)$/gm,'<h4>$1</h4>').replace(/^### (.*)$/gm,'<h3>$1</h3>')
+       .replace(/^## (.*)$/gm,'<h2>$1</h2>').replace(/^# (.*)$/gm,'<h1>$1</h1>')
+       .replace(/^(?:---|\*\*\*|___)\s*$/gm,'<hr>')
+       .replace(/^&gt; (.*)$/gm,'<blockquote style="border-left:3px solid var(--pri);padding-left:10px;color:var(--muted)">$1</blockquote>');
+    h=h.replace(/`([^`\n]+)`/g,'<code>$1</code>')
+       .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+       .replace(/\*([^*\n]+)\*/g,'<em>$1</em>')
+       .replace(/~~([^~]+)~~/g,'<del>$1</del>')
+       .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+    const lines=h.split('\n');const res=[];let ul=false,ol=false;
+    for(const ln of lines){
+      const um=ln.match(/^\s*[-*+] (.*)$/),om=ln.match(/^\s*\d+[.)] (.*)$/);
+      if(um){if(!ul){res.push('<ul>');ul=true;}res.push(`<li>${um[1]}</li>`);continue;}
+      if(om){if(!ol){res.push('<ol>');ol=true;}res.push(`<li>${om[1]}</li>`);continue;}
+      if(ul){res.push('</ul>');ul=false;}if(ol){res.push('</ol>');ol=false;}
+      res.push(ln);
+    }
+    if(ul)res.push('</ul>');if(ol)res.push('</ol>');
+    h=res.join('\n');
+    h=h.split(/\n{2,}/).map(b=>{
+      b=b.trim();if(!b)return '';
+      return /^<(h\d|ul|ol|blockquote|hr|pre)/.test(b)?b:'<p>'+b.replace(/\n/g,'<br>')+'</p>';
+    }).join('\n');
+    h=h.replace(/\u0000C(\d+)\u0000/g,(m,i)=>`<pre style="background:var(--bg);padding:10px;border-radius:8px;overflow:auto"><code>${esc(codes[+i])}</code></pre>`);
+    return h;
+  }
+  const upd=()=>{$('#mdOut').innerHTML=md2html($('#mdIn').value)||'<span class="muted">（预览区域）</span>';};
+  $('#mdIn').addEventListener('input',debounce(upd,200));upd();
+});
+
+tool('pwd-strength','text','🛡️','密码强度检测','评估密码熵值、破解耗时并给出改进建议',root=>{
+  root.innerHTML=`${lbl('输入要检测的密码（不会保存或上传）',inp('psIn','','password'))}
+    <div id="psOut" class="mt"></div>`;
+  const COMMON=['123456','password','12345678','qwerty','abc123','111111','123123','admin','letmein','888888','666666','iloveyou','password1','qwertyuiop','000000','123456789'];
+  function analyze(p){
+    if(!p)return null;
+    let pool=0;
+    if(/[a-z]/.test(p))pool+=26;if(/[A-Z]/.test(p))pool+=26;
+    if(/\d/.test(p))pool+=10;if(/[^a-zA-Z0-9]/.test(p))pool+=33;
+    let entropy=p.length*Math.log2(pool||1);
+    const low=p.toLowerCase();const warns=[];
+    if(COMMON.some(c=>low.includes(c))){entropy=Math.min(entropy,10);warns.push('包含常见弱密码片段');}
+    if(/^(.)\1+$/.test(p))warns.push('全部是重复字符');
+    if(/(?:0123|1234|2345|3456|4567|5678|6789|abcd|bcde|qwer|asdf)/i.test(p))warns.push('包含键盘 / 连续序列');
+    if(p.length<8)warns.push('长度不足 8 位');
+    if(!/[A-Z]/.test(p)||!/[a-z]/.test(p))warns.push('建议混合大小写字母');
+    if(!/\d/.test(p))warns.push('建议加入数字');
+    if(!/[^a-zA-Z0-9]/.test(p))warns.push('建议加入符号');
+    const guesses=Math.pow(2,entropy),speed=1e10;
+    const secs=guesses/speed;
+    let time;
+    if(secs<1)time='瞬间破解';else if(secs<60)time=secs.toFixed(0)+' 秒';
+    else if(secs<3600)time=(secs/60).toFixed(0)+' 分钟';else if(secs<86400)time=(secs/3600).toFixed(1)+' 小时';
+    else if(secs<31536000)time=(secs/86400).toFixed(0)+' 天';
+    else{const y=secs/31536000;time=y>1e8?Math.round(y/1e8)+' 亿年':y>1e4?Math.round(y/1e4)+' 万年':y.toFixed(0)+' 年';}
+    const score=entropy<28?0:entropy<40?1:entropy<55?2:entropy<70?3:4;
+    const labels=['非常弱','弱','一般','强','非常强'];
+    return {entropy,score,label:labels[score],time,warns};
+  }
+  const upd=()=>{
+    const r=analyze($('#psIn').value);
+    if(!r){$('#psOut').innerHTML='<div class="muted">开始输入后实时评估…</div>';return;}
+    const colors=['#dc2626','#f97316','#d97706','#16a34a','#059669'];
+    $('#psOut').innerHTML=`
+      <div style="display:flex;gap:4px;margin:8px 0">${[0,1,2,3,4].map(i=>`<div style="flex:1;height:8px;border-radius:4px;background:${i<=r.score?colors[r.score]:'var(--line)'}"></div>`).join('')}</div>
+      <div class="kv"><span>强度评级</span><span class="badge" style="background:${colors[r.score]}22;color:${colors[r.score]}">${r.label}</span></div>
+      <div class="kv"><span>熵值</span><code>${r.entropy.toFixed(1)} bits</code></div>
+      <div class="kv"><span>暴力破解耗时（约 100 亿次/秒）</span><code>${r.time}</code></div>
+      ${r.warns.length?`<div class="warnbox">建议：${r.warns.join('；')}</div>`:'<div class="okbox">✓ 未发现明显弱点</div>'}`;
+  };
+  $('#psIn').addEventListener('input',upd);upd();
+});
+
+/* ================= 编码加密 ================= */
+function b64encode(s,urlsafe){const b=new TextEncoder().encode(s);let bin='';
+  for(let i=0;i<b.length;i+=0x8000)bin+=String.fromCharCode(...b.subarray(i,i+0x8000));
+  let r=btoa(bin);
+  if(urlsafe)r=r.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  return r;}
+function b64decode(s){const bin=atob(s.replace(/\s+/g,'').replace(/-/g,'+').replace(/_/g,'/'));
+  const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+  return new TextDecoder().decode(u);}
+
+tool('b64','code','🅱️','Base64 编解码','文本与 Base64 互转，支持中文与 URL 安全模式',root=>{
+  root.innerHTML=`<div class="split">${tArea('b64In','输入文本…',8)}${tArea('b64Out','输出结果…',8)}</div>
+    <div class="btns">${btn('b64E','编码 →')}<label class="chk"><input type="checkbox" id="b64U"> URL 安全(-_)</label>
+    <span style="flex:1"></span>${btn('b64D','← 解码')}<label class="chk"><input type="checkbox" id="b64Swap"> 反向（右侧为输入）</label></div>
+    <div id="b64Msg"></div>`;
+  const swap=()=>{const a=$('#b64In'),b=$('#b64Out');[a.value,b.value]=[b.value,a.value];};
+  $('#b64E').onclick=()=>{try{$('#b64Out').value=b64encode($('#b64In').value,$('#b64U').checked);$('#b64Msg').innerHTML='';}
+    catch(e){$('#b64Msg').innerHTML=`<div class="errbox">${esc(e.message)}</div>`;}};
+  $('#b64D').onclick=()=>{try{const d=b64decode($('#b64In').value);$('#b64Out').value=d;$('#b64Msg').innerHTML='';}
+    catch(e){$('#b64Msg').innerHTML='<div class="errbox">解码失败：不是有效的 Base64</div>';}};
+});
+
+tool('url-code','code','🔗','URL 编解码','encodeURIComponent / decodeURIComponent 转换',root=>{
+  root.innerHTML=`<div class="split">${tArea('ucIn','输入文本或 URL…',8)}${tArea('ucOut','',8)}</div>
+    <div class="btns">${btn('ucE','编码')}${btn('ucP','编码(+代空格)')}${btn('ucD','解码')}</div><div id="ucMsg"></div>`;
+  const v=()=>$('#ucIn').value;
+  $('#ucE').onclick=()=>{try{$('#ucOut').value=encodeURIComponent(v());$('#ucMsg').innerHTML='';}catch(e){$('#ucMsg').innerHTML=`<div class="errbox">${esc(e.message)}</div>`;}};
+  $('#ucP').onclick=()=>{$('#ucOut').value=encodeURI(v()).replace(/%20/g,'+');};
+  $('#ucD').onclick=()=>{try{$('#ucOut').value=decodeURIComponent(v().replace(/\+/g,'%20'));$('#ucMsg').innerHTML='';}
+    catch(e){$('#ucMsg').innerHTML='<div class="errbox">解码失败：包含无效的百分号编码</div>';}};
+});
+
+tool('html-entity','code','🧬','HTML 实体编解码','&lt; &amp; &#x4e2d; 等实体与文本互转',root=>{
+  root.innerHTML=`<div class="split">${tArea('heIn','输入文本…',8)}${tArea('heOut','',8)}</div>
+    <div class="btns">${btn('heE','编码')}${chk('heAll','非 ASCII 也编码',false)}${btn('heD','解码')}</div>`;
+  $('#heE').onclick=()=>{
+    const s=$('#heIn').value;
+    $('#heOut').value=$('#heAll').checked
+      ?[...s].map(c=>c.charCodeAt(0)>127?`&#x${c.charCodeAt(0).toString(16)};`:esc(c)).join('')
+      :esc(s);
+  };
+  $('#heD').onclick=()=>{const t=document.createElement('textarea');t.innerHTML=$('#heIn').value;$('#heOut').value=t.value;};
+});
+
+tool('base32','code','🅰️','Base32 编解码','RFC 4648 标准 Base32 转换',root=>{
+  root.innerHTML=`<div class="split">${tArea('b32In','输入文本…',7)}${tArea('b32Out','',7)}</div>
+    <div class="btns">${btn('b32E','编码 →')}${btn('b32D','← 解码')}</div><div id="b32Msg"></div>`;
+  const A='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  $('#b32E').onclick=()=>{const b=new TextEncoder().encode($('#b32In').value);
+    let bits=0,val=0,o='';for(const x of b){val=(val<<8)|x;bits+=8;while(bits>=5){o+=A[(val>>>(bits-5))&31];bits-=5;}}
+    if(bits)o+=A[(val<<(5-bits))&31];while(o.length%8)o+='=';
+    $('#b32Out').value=o;};
+  $('#b32D').onclick=()=>{try{const s=$('#b32In').value.replace(/[=\s]/g,'').toUpperCase();
+    let bits=0,val=0;const o=[];
+    for(const c of s){const i=A.indexOf(c);if(i<0)throw new Error('包含非法字符 '+c);
+      val=(val<<5)|i;bits+=5;if(bits>=8){o.push((val>>>(bits-8))&255);bits-=8;}}
+    $('#b32Out').value=new TextDecoder().decode(new Uint8Array(o));$('#b32Msg').innerHTML='';}
+    catch(e){$('#b32Msg').innerHTML=`<div class="errbox">${esc(e.message)}</div>`;}};
+});
+
+tool('caesar','code','🔓','凯撒密码 / ROT13','字母位移加密解密，位移量可调',root=>{
+  root.innerHTML=`${tArea('csIn','输入文本…',6)}
+    <div class="row"><label class="fld"><span class="fl">位移量（13 即 ROT13）：<b id="csV">13</b></span>
+    <input type="range" id="csS" min="1" max="25" value="13"></label></div>
+    ${out('csOut')}`;
+  const shift=(s,k)=>s.replace(/[a-z]/gi,c=>{
+    const base=c<='Z'?65:97;return String.fromCharCode((c.charCodeAt(0)-base+k)%26+base);});
+  const upd=()=>{$('#csV').textContent=$('#csS').value;$('#csOut').textContent=shift($('#csIn').value,+$('#csS').value);};
+  $('#csIn').addEventListener('input',upd);$('#csS').addEventListener('input',upd);upd();
+});
+
+tool('morse','code','📢','摩尔斯电码','英文/数字与摩尔斯电码（· −）互转',root=>{
+  const M={a:'.-',b:'-...',c:'-.-.',d:'-..',e:'.',f:'..-.',g:'--.',h:'....',i:'..',j:'.---',k:'-.-',
+    l:'.-..',m:'--',n:'-.',o:'---',p:'.--.',q:'--.-',r:'.-.',s:'...',t:'-',u:'..-',v:'...-',w:'.--',
+    x:'-..-',y:'-.--',z:'--..','0':'-----','1':'.----','2':'..---','3':'...--','4':'....-','5':'.....',
+    '6':'-....','7':'--...','8':'---..','9':'----.','.':'.-.-.-',',':'--..--','?':'..--..','!':'-.-.--',
+    '/':'-..-.','(':'-.--.',')':'-.--.-','=':'-...-','+':'.-.-.','@':'.--.-.',':':'---...',';':'-.-.-.'};
+  const R={};Object.keys(M).forEach(k=>R[M[k]]=k);
+  root.innerHTML=`<div class="split">${tArea('moIn','输入文本或电码…',7)}${tArea('moOut','',7)}</div>
+    <div class="btns">${btn('moE','文本 → 电码')}${btn('moD','电码 → 文本')}</div>
+    <div class="muted">字母间用空格，单词间用 “ / ” 分隔，例：... --- ... / --- ...-</div>`;
+  $('#moE').onclick=()=>{$('#moOut').value=$('#moIn').value.toLowerCase().split(/\s+/)
+    .map(w=>[...w].map(c=>M[c]??'').filter(Boolean).join(' ')).filter(Boolean).join(' / ');};
+  $('#moD').onclick=()=>{$('#moOut').value=$('#moIn').value.trim().split(/\s*\/\s*/)
+    .map(w=>w.trim().split(/\s+/).map(c=>R[c]??'').join('')).join(' ');};
+});
+
+tool('xor','code','⊗','异或加密','XOR 对称加密，密钥任意字符串',root=>{
+  root.innerHTML=`<div class="row">${lbl('密钥',inp('xrK','如 my-secret','text','key'))}
+    <label class="fld"><span class="fl">输出格式</span>${sel('xrF',[['hex','十六进制'],['b64','Base64']])}</label></div>
+    ${tArea('xrIn','明文或密文…',6)}
+    <div class="btns">${btn('xrE','加密')}${btn('xrD','解密')}</div>${tArea('xrOut','',6)}`;
+  const xor=(s,k)=>{const a=new TextEncoder().encode(s),kb=new TextEncoder().encode(k);
+    const o=new Uint8Array(a.length);for(let i=0;i<a.length;i++)o[i]=a[i]^kb[i%kb.length];return o;};
+  $('#xrE').onclick=()=>{const k=$('#xrK').value;if(!k)return alert('请输入密钥');
+    const o=xor($('#xrIn').value,k);
+    $('#xrOut').value=$('#xrF').value==='hex'
+      ?[...o].map(x=>x.toString(16).padStart(2,'0')).join('')
+      :b64encode(String.fromCharCode(...o));};
+  $('#xrD').onclick=()=>{try{const k=$('#xrK').value;if(!k)return alert('请输入密钥');
+    let bin=$('#xrIn').value.trim();
+    let u;
+    if($('#xrF').value==='hex'){if(/[^0-9a-fA-F\s]/.test(bin))throw new Error('密文包含非十六进制字符');
+      const h=bin.replace(/\s+/g,'');u=new Uint8Array(h.length/2);
+      for(let i=0;i<u.length;i++)u[i]=parseInt(h.substr(i*2,2),16);}
+    else{const b=atob(bin.replace(/-/g,'+').replace(/_/g,'/'));u=new Uint8Array(b.length);
+      for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);}
+    const x=new Uint8Array(u.length);for(let i=0;i<u.length;i++)x[i]=u[i]^new TextEncoder().encode(k)[i%k.length];
+    $('#xrOut').value=new TextDecoder().decode(x);}
+    catch(e){$('#xrOut').value='';alert('解密失败：'+e.message);}};
+});
+
+tool('text-radix','code','🔢','文本 ↔ 进制','文本与十六进制 / 二进制 / 十进制字节互转',root=>{
+  root.innerHTML=`<div class="row"><label class="fld"><span class="fl">进制</span>${sel('trB',[['16','十六进制'],['2','二进制'],['10','十进制']],'16')}</label>
+    <label class="fld"><span class="fl">分隔符</span>${sel('trS',[['sp','空格'],['none','无']], 'sp')}</label></div>
+    ${tArea('trIn','输入文本或字节串…',6)}
+    <div class="btns">${btn('trE','文本 → 字节')}${btn('trD','字节 → 文本')}</div>${out('trOut')}`;
+  $('#trE').onclick=()=>{const b=new TextEncoder().encode($('#trIn').value);
+    const base=$('#trB').value,arr=[...b].map(x=>x.toString(+base).padStart(base==='2'?8:2,'0'));
+    $('#trOut').textContent=$('#trS').value==='sp'?arr.join(' '):arr.join('');};
+  $('#trD').onclick=()=>{try{const base=+$('#trB').value;
+    let s=$('#trIn').value.trim();
+    if($('#trS').value==='none'){const w=base===2?8:2;const a=[];for(let i=0;i<s.length;i+=w)a.push(parseInt(s.substr(i,w),base));
+      $('#trOut').textContent=new TextDecoder().decode(new Uint8Array(a));}
+    else $('#trOut').textContent=new TextDecoder().decode(new Uint8Array(s.split(/\s+/).filter(Boolean).map(x=>parseInt(x,base))));
+    }catch(e){$('#trOut').textContent='转换失败：'+e.message;}};
+});
+
+/* ---- 纯 JS 摘要算法 ---- */
+function md5(str){
+  const rotl=(x,n)=>((x<<n)|(x>>>(32-n)))>>>0;
+  const bytes=new TextEncoder().encode(str);
+  const ml=bytes.length,bitLen=ml*8;
+  const pl=(((ml+8)>>6)<<6)+64;
+  const buf=new Uint8Array(pl);buf.set(bytes);buf[ml]=0x80;
+  const dv=new DataView(buf.buffer);
+  dv.setUint32(pl-8,bitLen>>>0,true);dv.setUint32(pl-4,Math.floor(bitLen/2**32),true);
+  const K=new Uint32Array(64);for(let i=0;i<64;i++)K[i]=Math.floor(Math.abs(Math.sin(i+1))*2**32);
+  const S=[7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,5,9,14,20,5,9,14,20,5,9,14,20,5,9,14,20,
+    4,11,16,23,4,11,16,23,4,11,16,23,4,11,16,23,6,10,15,21,6,10,15,21,6,10,15,21,6,10,15,21];
+  let a0=0x67452301,b0=0xefcdab89,c0=0x98badcfe,d0=0x10325476;
+  const M=new Uint32Array(16);
+  for(let i=0;i<pl;i+=64){
+    for(let j=0;j<16;j++)M[j]=dv.getUint32(i+j*4,true);
+    let A=a0,B=b0,C=c0,D=d0;
+    for(let j=0;j<64;j++){
+      let F,g;
+      if(j<16){F=(B&C)|(~B&D);g=j;}
+      else if(j<32){F=(D&B)|(~D&C);g=(5*j+1)%16;}
+      else if(j<48){F=B^C^D;g=(3*j+5)%16;}
+      else{F=C^(B|~D);g=(7*j)%16;}
+      F=(F+A+K[j]+M[g])>>>0;
+      A=D;D=C;C=B;
+      B=(B+rotl(F,S[j]))>>>0;
+    }
+    a0=(a0+A)>>>0;b0=(b0+B)>>>0;c0=(c0+C)>>>0;d0=(d0+D)>>>0;
+  }
+  const le=x=>{let s='';const dv2=new DataView(new ArrayBuffer(4));dv2.setUint32(0,x,true);
+    for(let i=0;i<4;i++)s+=dv2.getUint8(i).toString(16).padStart(2,'0');return s;};
+  return le(a0)+le(b0)+le(c0)+le(d0);
+}
+function sha1(bytes){
+  const rotl=(x,n)=>((x<<n)|(x>>>(32-n)))>>>0;
+  const ml=bytes.length,bitLen=ml*8;
+  const pl=(((ml+8)>>6)<<6)+64;
+  const buf=new Uint8Array(pl);buf.set(bytes);buf[ml]=0x80;
+  const dv=new DataView(buf.buffer);
+  dv.setUint32(pl-4,bitLen>>>0);dv.setUint32(pl-8,Math.floor(bitLen/2**32));
+  let h0=0x67452301,h1=0xEFCDAB89,h2=0x98BADCFE,h3=0x10325476,h4=0xC3D2E1F0;
+  const w=new Uint32Array(80);
+  for(let i=0;i<pl;i+=64){
+    for(let j=0;j<16;j++)w[j]=dv.getUint32(i+j*4);
+    for(let j=16;j<80;j++)w[j]=rotl(w[j-3]^w[j-8]^w[j-14]^w[j-16],1);
+    let a=h0,b=h1,c=h2,d=h3,e=h4;
+    for(let j=0;j<80;j++){
+      let f,k;
+      if(j<20){f=(b&c)|(~b&d);k=0x5A827999;}
+      else if(j<40){f=b^c^d;k=0x6ED9EBA1;}
+      else if(j<60){f=(b&c)|(b&d)|(c&d);k=0x8F1BBCDC;}
+      else{f=b^c^d;k=0xCA62C1D6;}
+      const t=(rotl(a,5)+f+e+k+w[j])>>>0;
+      e=d;d=c;c=rotl(b,30);b=a;a=t;
+    }
+    h0=(h0+a)>>>0;h1=(h1+b)>>>0;h2=(h2+c)>>>0;h3=(h3+d)>>>0;h4=(h4+e)>>>0;
+  }
+  return [h0,h1,h2,h3,h4].map(x=>x.toString(16).padStart(8,'0')).join('');
+}
+async function subtleHash(algo,str){
+  const d=await crypto.subtle.digest(algo,new TextEncoder().encode(str));
+  return [...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+tool('md5','code','🆔','MD5 摘要','计算文本的 MD5 值（32 位 / 16 位）',root=>{
+  root.innerHTML=`${tArea('m5In','输入文本…',6)}
+    <div class="btns">${btn('m5Go','计算 MD5')}<span class="muted">纯本地算法，支持中文</span></div>
+    <div class="kv"><span>MD5（32 位小写）</span><div class="kvv"><code id="m5F"></code>${cpBtn('m5F')}</div></div>
+    <div class="kv"><span>MD5（32 位大写）</span><div class="kvv"><code id="m5U"></code>${cpBtn('m5U')}</div></div>
+    <div class="kv"><span>MD5（16 位）</span><div class="kvv"><code id="m5S"></code>${cpBtn('m5S')}</div></div>`;
+  const upd=()=>{const h=md5($('#m5In').value);
+    setCopy('m5F',h);setCopy('m5U',h.toUpperCase());setCopy('m5S',h.slice(8,24));
+    $('#m5F').textContent=h;$('#m5U').textContent=h.toUpperCase();$('#m5S').textContent=h.slice(8,24);};
+  $('#m5Go').onclick=upd;$('#m5In').addEventListener('input',debounce(upd,300));upd();
+});
+
+tool('hash','code','#️⃣','SHA 哈希计算','SHA-1 / SHA-256 / SHA-384 / SHA-512，支持文件',root=>{
+  const hasSubtle=!!(window.crypto&&crypto.subtle);
+  root.innerHTML=`<ul class="muted" style="margin:0 0 10px 18px">
+      <li>SHA-1 与 MD5 为纯 JS 本地实现；SHA-2 系列使用浏览器内置 WebCrypto。</li>
+      ${hasSubtle?'':'<li>⚠️ 当前环境不支持 WebCrypto（crypto.subtle），SHA-256/384/512 不可用。</li>'}</ul>
+    ${tArea('hIn','输入文本…',6)}
+    <div class="kv"><span>MD5</span><div class="kvv"><code id="hMd5"></code>${cpBtn('hMd5')}</div></div>
+    <div class="kv"><span>SHA-1</span><div class="kvv"><code id="hS1"></code>${cpBtn('hS1')}</div></div>
+    <div class="kv"><span>SHA-256</span><div class="kvv"><code id="hS2"></code>${cpBtn('hS2')}</div></div>
+    <div class="kv"><span>SHA-384</span><div class="kvv"><code id="hS3"></code>${cpBtn('hS3')}</div></div>
+    <div class="kv"><span>SHA-512</span><div class="kvv"><code id="hS5"></code>${cpBtn('hS5')}</div></div>
+    <div class="mt">${lbl('文件哈希（本地读取，不上传）','<input type="file" id="hFile">')}</div>
+    ${out('hFOut')}`;
+  const upd=async()=>{
+    const s=$('#hIn').value;
+    const md=md5(s),s1=sha1(new TextEncoder().encode(s));
+    setCopy('hMd5',md);$('#hMd5').textContent=md;
+    setCopy('hS1',s1);$('#hS1').textContent=s1;
+    for(const [id,algo] of [['hS2','SHA-256'],['hS3','SHA-384'],['hS5','SHA-512']]){
+      if(!document.getElementById(id))return;
+      if(!hasSubtle){$('#'+id).textContent='（不可用）';continue;}
+      try{const h=await subtleHash(algo,s);if(!document.getElementById(id))return;setCopy(id,h);$('#'+id).textContent=h;}
+      catch(e){if(document.getElementById(id))$('#'+id).textContent='（计算失败）';}
+    }
+  };
+  $('#hIn').addEventListener('input',debounce(upd,300));upd();
+  $('#hFile').addEventListener('change',async e=>{
+    const f=e.target.files[0];if(!f)return;
+    if(!hasSubtle){$('#hFOut').textContent='当前环境不支持 WebCrypto，无法计算文件哈希';return;}
+    $('#hFOut').textContent='计算中…';
+    const buf=await f.arrayBuffer();
+    if(!document.getElementById('hFOut'))return;
+    const lines=[`文件：${f.name}（${f.size} 字节）`];
+    for(const a of ['SHA-1','SHA-256','SHA-384','SHA-512']){
+      const d=await crypto.subtle.digest(a,buf);
+      lines.push(`${a}：${[...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('')}`);
+    }
+    $('#hFOut').textContent=lines.join('\n');
+  });
+});
+
+tool('jwt','code','🎫','JWT 解析','解析 JWT 的 Header / Payload / 过期时间',root=>{
+  root.innerHTML=`${tArea('jwIn','粘贴 JWT（eyJ… 格式）',6)}
+    <div class="btns">${btn('jwGo','解 析')}</div>${out('jwOut','hTall')}`;
+  const dec=p=>{p=p.replace(/-/g,'+').replace(/_/g,'/');while(p.length%4)p+='=';
+    return JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(p),c=>c.charCodeAt(0))));};
+  $('#jwGo').onclick=()=>{
+    const t=$('#jwIn').value.trim();
+    try{
+      const [h,p,sig]=t.split('.');
+      const H=dec(h),P=dec(p);
+      let exp='';
+      if(P.exp){const d=new Date(P.exp*1000);exp=d.getTime()<Date.now()
+        ?`已过期（${d.toLocaleString()}）`:`有效至 ${d.toLocaleString()}（剩余 ${Math.round((d.getTime()-Date.now())/60000)} 分钟）`;}
+      const fmt=o=>JSON.stringify(o,null,2);
+      $('#jwOut').textContent=
+        `── HEADER ──\n${fmt(H)}\n\n── PAYLOAD ──\n${fmt(P)}\n\n${exp?'── 有效期 ──\n'+exp+'\n\n':''}── SIGNATURE ──\n${sig||'（无）'}`;
+    }catch(e){$('#jwOut').textContent='解析失败：不是有效的 JWT（'+e.message+'）';}
+  };
+});
+
+/* ================= 单位换算 ================= */
+const UNITS={
+  length:{icon:'📏',name:'长度',u:{'纳米':1e-9,'微米':1e-6,'毫米':.001,'厘米':.01,'分米':.1,'米':1,'千米':1000,'英寸':.0254,'英尺':.3048,'码':.9144,'英里':1609.344,'海里':1852,'里(市)':500,'丈(市)':10/3,'尺(市)':1/3,'寸(市)':1/30,'光年':9.4607304726e15}},
+  weight:{icon:'⚖️',name:'重量',u:{'毫克':1e-6,'克':.001,'千克':1,'吨':1000,'两(市)':.05,'斤(市)':.5,'克拉':.0002,'盎司':.0283495231,'磅':.45359237,'英石':6.35029318,'美吨':907.18474,'英吨':1016.0469088}},
+  area:{icon:'🗺️',name:'面积',u:{'平方毫米':1e-6,'平方厘米':1e-4,'平方米':1,'公亩':100,'公顷':1e4,'平方公里':1e6,'平方英寸':6.4516e-4,'平方英尺':.09290304,'平方码':.83612736,'英亩':4046.8564224,'平方英里':2589988.110336,'亩(市)':666.6667}},
+  volume:{icon:'🥤',name:'体积容量',u:{'毫升':.001,'升':1,'立方米':1000,'立方厘米':.001,'茶匙':.00492892,'汤匙':.0147868,'液体盎司(美)':.0295735,'杯':.2365882,'品脱(美)':.473176,'夸脱(美)':.946353,'加仑(美)':3.785412,'加仑(英)':4.54609,'桶(原油)':158.9873}},
+  speed:{icon:'🏎️',name:'速度',u:{'毫米/秒':.001,'米/秒':1,'千米/小时':1/3.6,'英里/小时':.44704,'英尺/秒':.3048,'节':.5144444,'马赫(海平面)':340.29}},
+  data:{icon:'💾',name:'数据存储',u:{'比特':.125,'字节':1,'千字节(KB)':1e3,'兆字节(MB)':1e6,'吉字节(GB)':1e9,'太字节(TB)':1e12,'拍字节(PB)':1e15,'Kib':128,'Mib':1048576/8,'Gib':1073741824/8,'Tib':1099511627776/8}},
+  time:{icon:'⏱️',name:'时间',u:{'纳秒':1e-9,'微秒':1e-6,'毫秒':.001,'秒':1,'分钟':60,'小时':3600,'天':86400,'周':604800,'月(30天)':2592000,'季度':7776000,'年(365天)':31536000,'十年':315360000}},
+  power:{icon:'⚡',name:'功率',u:{'毫瓦':.001,'瓦特':1,'千瓦':1000,'兆瓦':1e6,'马力(公制)':735.49875,'马力(机械)':745.6999,'英尺·磅/分':.02259697,'卡路里/秒':4.1868,'英热单位/小时':.2930711}},
+  energy:{icon:'🔋',name:'能量',u:{'焦耳':1,'千焦':1000,'卡路里':4.1868,'千卡(大卡)':4186.8,'瓦时':3600,'千瓦时(度)':3.6e6,'英热单位':1055.056,'英尺·磅':1.355818,'电子伏特':1.602176634e-19,'吨TNT当量':4.184e9}},
+  pressure:{icon:'🎈',name:'压力',u:{'帕斯卡':1,'百帕':100,'千帕':1000,'兆帕':1e6,'巴':1e5,'毫巴':100,'标准大气压':101325,'毫米汞柱':133.3224,'厘米汞柱':1333.224,'磅/平方英寸':6894.757,'千克力/平方米':9.80665}},
+  temp:{icon:'🌡️',name:'温度',special:true,u:{'摄氏度':0,'华氏度':0,'开尔文':0}}
+};
+const TO_C={'摄氏度':v=>v,'华氏度':v=>(v-32)*5/9,'开尔文':v=>v-273.15};
+const FROM_C={'摄氏度':v=>v,'华氏度':v=>v*9/5+32,'开尔文':v=>v+273.15};
+function unitTool(key){
+  const d=UNITS[key];
+  tool('unit-'+key,'unit',d.icon,d.name+'换算',d.name+'常用单位快速互换',root=>{
+    const names=Object.keys(d.u);
+    const from0=names[0],to0=names[1]||names[0];
+    root.innerHTML=`<div class="row">${lbl('数值',inp('uv','','text','1'))}
+      ${lbl('从',sel('uf',names,from0))}${lbl('到',sel('ut',names,to0))}</div>
+      <div class="result" id="ures"></div>
+      <h4 style="margin-top:14px">${d.name}换算表（1 ${from0} =）</h4><div id="utab"></div>`;
+    const upd=()=>{
+      let v=parseFloat($('#uv').value);
+      if(isNaN(v)){try{v=evalExpr($('#uv').value);}catch(e){v=NaN;}}
+      const f=$('#uf').value,t=$('#ut').value;
+      let r;
+      if(d.special){if(isNaN(v))r=NaN;else r=FROM_C[t](TO_C[f](v));}
+      else r=v*d.u[f]/d.u[t];
+      $('#ures').innerHTML=isNaN(r)?'—':`${esc($('#uv').value)} ${esc(f)} = <span style="color:var(--pri)">${fmtSmart(r)}</span> ${esc(t)}`;
+      let base;
+      if(d.special)base=isNaN(v)?NaN:TO_C[f](v);
+      else base=v*d.u[f];
+      $('#utab').innerHTML='<table><tbody>'+names.map(n=>{
+        const val=d.special?(isNaN(base)?NaN:FROM_C[n](base)):base/d.u[n];
+        return `<tr><td>${n}</td><td style="font-family:var(--mono)">${isNaN(val)?'—':fmtSmart(val)}</td></tr>`;
+      }).join('')+'</tbody></table>';
+    };
+    ['uv','uf','ut'].forEach(id=>$('#'+id).addEventListener('input',upd));
+    $('#uf').addEventListener('change',upd);$('#ut').addEventListener('change',upd);upd();
+  });
+}
+Object.keys(UNITS).forEach(unitTool);
+
+/* ================= 计算工具 ================= */
+function evalExpr(str,deg){
+  str=String(str).replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-');
+  const FUNCS=['sin','cos','tan','asin','acos','atan','log','ln','sqrt','abs','round','floor','ceil','exp'];
+  const UNARY=new Set(['neg','pct'].concat(FUNCS));
+  const toks=[];let i=0;
+  while(i<str.length){
+    const c=str[i];
+    if(/\s/.test(c)){i++;continue;}
+    if(/[0-9.]/.test(c)){let j=i;while(j<str.length&&/[0-9.]/.test(str[j]))j++;
+      const v=parseFloat(str.slice(i,j));if(isNaN(v))throw new Error('数字格式错误');
+      toks.push({t:'n',v});i=j;continue;}
+    if(/[a-zA-Z]/.test(c)){let j=i;while(j<str.length&&/[a-zA-Z]/.test(str[j]))j++;
+      const w=str.slice(i,j).toLowerCase();
+      if(w==='pi')toks.push({t:'n',v:Math.PI});
+      else if(w==='e')toks.push({t:'n',v:Math.E});
+      else if(FUNCS.includes(w))toks.push({t:'f',v:w});
+      else if(w==='mod')toks.push({t:'o',v:'%'});
+      else throw new Error('未知符号：'+w);
+      i=j;continue;}
+    if('+-*/^()'.includes(c)){toks.push({t:'o',v:c});i++;continue;}
+    if(c==='%'){toks.push({t:'p'});i++;continue;}
+    throw new Error('无法识别的字符：'+c);
+  }
+  const prec={'+':1,'-':1,'*':2,'/':2,'%':2,'^':4,'u':3};
+  const outQ=[],st=[];let prev=null;
+  for(const tk of toks){
+    if(tk.t==='n')outQ.push(tk);
+    else if(tk.t==='f')st.push(tk);
+    else if(tk.t==='p')outQ.push({t:'f',v:'pct'});
+    else if(tk.v==='(')st.push(tk);
+    else if(tk.v===')'){
+      while(st.length&&st[st.length-1].v!=='(')outQ.push(st.pop());
+      if(!st.length)throw new Error('括号不匹配');
+      st.pop();
+      if(st.length&&st[st.length-1].t==='f')outQ.push(st.pop());
+    }else{
+      const op=tk.v;
+      const unary=!prev||(prev.t==='o'&&prev.v!==')')||prev.t==='f';
+      if(op==='-'&&unary){st.push({t:'o',v:'u'});prev=tk;continue;}
+      if(op==='+'&&unary){prev=tk;continue;}
+      while(st.length){
+        const top=st[st.length-1];
+        if(top.t==='f')break;
+        if(top.v==='(')break;
+        const pt=prec[top.v]||0,ct=prec[op];
+        if(pt>ct||(pt===ct&&op!=='^'))outQ.push(st.pop());else break;
+      }
+      st.push(tk);
+    }
+    prev=tk;
+  }
+  while(st.length){const t=st.pop();if(t.v==='(')throw new Error('括号不匹配');outQ.push(t);}
+  const v=[];
+  for(const tk of outQ){
+    if(tk.t==='n'){v.push(tk.v);continue;}
+    const f=tk.v;
+    if(f==='u'){
+      if(!v.length)throw new Error('表达式不完整');
+      v.push(-v.pop());continue;
+    }
+    if(UNARY.has(f)){
+      if(!v.length)throw new Error('表达式不完整');
+      const a=v.pop();
+      switch(f){
+        case 'neg':v.push(-a);break;case 'pct':v.push(a/100);break;
+        case 'sin':v.push(Math.sin(deg?a/180*Math.PI:a));break;
+        case 'cos':v.push(Math.cos(deg?a/180*Math.PI:a));break;
+        case 'tan':v.push(Math.tan(deg?a/180*Math.PI:a));break;
+        case 'asin':v.push(deg?Math.asin(a)*180/Math.PI:Math.asin(a));break;
+        case 'acos':v.push(deg?Math.acos(a)*180/Math.PI:Math.acos(a));break;
+        case 'atan':v.push(deg?Math.atan(a)*180/Math.PI:Math.atan(a));break;
+        case 'log':v.push(Math.log10(a));break;case 'ln':v.push(Math.log(a));break;
+        case 'sqrt':v.push(Math.sqrt(a));break;case 'abs':v.push(Math.abs(a));break;
+        case 'round':v.push(Math.round(a));break;case 'floor':v.push(Math.floor(a));break;
+        case 'ceil':v.push(Math.ceil(a));break;case 'exp':v.push(Math.exp(a));break;
+      }
+    }else{
+      if(v.length<2)throw new Error('表达式不完整');
+      const b=v.pop(),a=v.pop();
+      switch(f){
+        case '+':v.push(a+b);break;case '-':v.push(a-b);break;case '*':v.push(a*b);break;
+        case '/':v.push(a/b);break;case '%':v.push(a%b);break;case '^':v.push(Math.pow(a,b));break;
+      }
+    }
+  }
+  if(v.length!==1)throw new Error('表达式无效');
+  const r=v[0];
+  if(typeof r!=='number'||isNaN(r))throw new Error('结果无效（如除以零）');
+  return r;
+}
+function fmtCalc(x){
+  if(!isFinite(x))return '∞';
+  if(Math.abs(x)>=1e15||(Math.abs(x)<1e-9&&x!==0))return x.toExponential(8);
+  return String(parseFloat(x.toPrecision(12)));
+}
+function calcTool(id,name,desc,sci){
+  tool(id,'math',sci?'🧪':'🔆',name,desc,root=>{
+    const keys=sci
+      ?[['sin','fn'],['cos','fn'],['tan','fn'],['ln','fn'],['log','fn'],
+        ['√','fn'],['^','op'],['(',')'],['π','fn'],['DEG','fn'],
+        ['C','op'],['⌫','op'],['%','op'],['÷','op'],['×','op'],
+        ['7'],['8'],['9'],['−','op'],['E','fn'],
+        ['4'],['5'],['6'],['+','op'],['e','fn'],
+        ['1'],['2'],['3'],['abs','fn'],['round','fn'],
+        ['0'],['.'],['=','eq'],['floor','fn'],['sqrt','fn']]
+      :[['C','op'],['⌫','op'],['%','op'],['÷','op'],
+        ['7'],['8'],['9'],['×','op'],
+        ['4'],['5'],['6'],['−','op'],
+        ['1'],['2'],['3'],['+','op'],
+        ['0'],['.'],['=','eq'],['(',')']];
+    root.innerHTML=`<div class="calc"><div class="calc-screen">
+      <div class="calc-expr" id="ce"></div><div class="calc-res" id="cr">0</div></div>
+      <div class="calc-grid ${sci?'sci':''}">${keys.map(([k,c])=>`<button data-k="${esc(k)}" class="${c||''}">${k==='√'?'√':esc(k)}</button>`).join('')}</div>
+      <div class="muted center mt" style="font-size:12px">支持键盘输入：数字、运算符、回车（=）、退格、Esc（清空）${sci?'；DEG 切换角度/弧度':''}</div></div>`;
+    let expr='',degMode=true,justEq=false;
+    const disp=()=>{
+      $('#ce').textContent=expr;
+      if(!expr){$('#cr').textContent='0';return;}
+      try{$('#cr').textContent=fmtCalc(evalExpr(expr,degMode));}
+      catch(e){$('#cr').textContent=justEq?'错误':'…';}
+    };
+    const press=k=>{
+      if(k==='C'){expr='';justEq=false;}
+      else if(k==='⌫')expr=expr.slice(0,-1);
+      else if(k==='DEG'){degMode=!degMode;justEq=false;}
+      else if(k==='='){
+        try{expr=fmtCalc(evalExpr(expr,degMode));justEq=true;}
+        catch(e){justEq=true;$('#cr').textContent='错误';return;}
+      }
+      else{
+        if(justEq&&/[0-9.]/.test(k))expr='';
+        if(justEq&&'+-*/%^'.includes(k))justEq=false;
+        justEq=false;
+        const map={'−':'-','÷':'/','×':'*','√':'sqrt'};
+        expr+=(map[k]||k);
+        if(/^[a-z(]+$/.test(k)&&k!=='e'&&k!=='π')expr+='(';
+      }
+      disp();
+    };
+    root.addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(b)press(b.dataset.k);});
+    const kd=e=>{
+      const k=e.key;
+      if(/^[0-9.]$/.test(k))press(k);
+      else if('+-*/%^()'.includes(k)&&k.length===1)press(k);
+      else if(k==='Enter'){e.preventDefault();press('=');}
+      else if(k==='Backspace')press('⌫');
+      else if(k==='Escape')press('C');
+      else if(k==='s'||k==='S')press('sin');
+      else if(k==='r'||k==='R')press('sqrt');
+      else return;
+      e.preventDefault();
+    };
+    document.addEventListener('keydown',kd);
+    onClean(()=>document.removeEventListener('keydown',kd));
+    disp();
+  });
+}
+calcTool('calc','标准计算器','日常四则运算计算器，支持键盘',false);
+calcTool('calc-sci','科学计算器','三角函数、对数、幂运算、括号，支持角度/弧度',true);
+
+tool('expr','math','📃','多行表达式计算','每行一个表达式，批量计算结果',root=>{
+  root.innerHTML=`${tArea('exIn','每行一个表达式，例如：\n2+3*4\nsqrt(16)+1\n(100-30)/2\n2^10\nlog(1000)',8)}
+    <div class="btns">${btn('exGo','计 算')}<span class="muted">支持 + - * / ^ % ( ) 及 sin cos tan log ln sqrt abs round floor ceil exp mod、π、e</span></div>
+    <div class="tw"><table id="exOut"><thead><tr><th>表达式</th><th>结果</th></tr></thead><tbody></tbody></table></div>`;
+  const run=()=>{
+    const tb=$('#exOut tbody');tb.innerHTML='';
+    $('#exIn').value.split(/\r?\n/).forEach(line=>{
+      if(!line.trim())return;
+      let r;
+      try{r=`<b style="font-family:var(--mono)">${fmtCalc(evalExpr(line))}</b>`;}
+      catch(e){r=`<span class="badge err">${esc(e.message)}</span>`;}
+      tb.insertAdjacentHTML('beforeend',`<tr><td><code>${esc(line)}</code></td><td>${r}</td></tr>`);
+    });
+  };
+  $('#exGo').onclick=run;run();
+});
+
+tool('percent','math','💯','百分比计算器','求百分比、占比、增减率',root=>{
+  root.innerHTML=`
+    <div class="row">${lbl('求一个数的百分之几：',inp('p1a','如 200'))}${lbl('百分比 %',inp('p1b','如 15'))}</div>
+    <div class="result" id="p1r"></div><hr style="border-color:var(--line)">
+    <div class="row mt">${lbl('某数是另一数的百分之几：',inp('p2a','如 30'))}${lbl('占',inp('p2b','如 120'))}</div>
+    <div class="result" id="p2r"></div><hr style="border-color:var(--line)">
+    <div class="row mt">${lbl('增减率：从',inp('p3a','如 80'))}${lbl('到',inp('p3b','如 100'))}</div>
+    <div class="result" id="p3r"></div>`;
+  const g=id=>parseFloat($('#'+id).value);
+  const upd=()=>{
+    const a=g('p1a'),b=g('p1b');
+    $('#p1r').innerHTML=isFinite(a)&&isFinite(b)?`${a} 的 ${b}% = <span>${fmtSmart(a*b/100)}</span>`:'';
+    const c=g('p2a'),d=g('p2b');
+    $('#p2r').innerHTML=isFinite(c)&&isFinite(d)?`${c} 是 ${d} 的 <span>${d?fmtSmart(c/d*100):'—'}%</span>`:'';
+    const e=g('p3a'),f=g('p3b');
+    $('#p3r').innerHTML=isFinite(e)&&isFinite(f)&&e!==0
+      ?`从 ${e} 到 ${f}：<span>${fmtSmart((f-e)/Math.abs(e)*100)}%</span>（${f>=e?'增长':'下降'} ${fmtSmart(Math.abs(f-e))}）`:'';
+  };
+  ['p1a','p1b','p2a','p2b','p3a','p3b'].forEach(id=>$('#'+id).addEventListener('input',upd));upd();
+});
+
+/* ---- 金融 ---- */
+tool('loan','math','🏦','贷款计算器','等额本息 / 等额本金月供与利息明细',root=>{
+  root.innerHTML=`<div class="row">
+    ${lbl('贷款金额（万元）',inp('lnP','','text','100'))}
+    ${lbl('年利率（%）',inp('lnR','','text','4.0'))}
+    ${lbl('期限（年）',inp('lnY','','text','30'))}
+    <label class="fld"><span class="fl">明细表</span>${sel('lnM',[['ax','等额本息'],['bj','等额本金']])}</label></div>
+    <div class="cols2 mt">
+      <div class="fldbox"><div class="fl">等额本息</div><div id="lnAx"></div></div>
+      <div class="fldbox"><div class="fl">等额本金</div><div id="lnBj"></div></div>
+    </div>
+    <h4 class="mt" id="lnT"></h4><div class="tw" id="lnTab"></div>`;
+  const money=x=>fmtSmart(Math.round(x*100)/100);
+  function calcAx(P,r,n){
+    const m=P*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);
+    return {m,total:m*n,int:m*n-P,rows:(()=>{
+      let rest=P;const rows=[];
+      for(let i=1;i<=n;i++){const it=rest*r,pr=m-it;rest-=pr;
+        rows.push([i,pr,it,m,Math.max(rest,0)]);}
+      return rows;})()};
+  }
+  function calcBj(P,r,n){
+    const pr=P/n;let total=0;const rows=[];
+    for(let i=1;i<=n;i++){const it=(P-(i-1)*pr)*r,pay=pr+it;total+=it;
+      rows.push([i,pr,it,pay,P-i*pr]);}
+    return {first:rows[0][3],last:rows[n-1][3],int:total,rows};
+  }
+  const upd=()=>{
+    const P=parseFloat($('#lnP').value)*10000,R=parseFloat($('#lnR').value)/100,n=Math.round(parseFloat($('#lnY').value)*12);
+    if(!(P>0)||!(R>=0)||!(n>0)||n>1200){$('#lnAx').innerHTML=$('#lnBj').innerHTML='<span class="muted">请输入有效参数</span>';return;}
+    const ax=calcAx(P,R,n),bj=calcBj(P,R,n);
+    $('#lnAx').innerHTML=`<div class="kv"><span>每月还款</span><code>${money(ax.m)} 元</code></div>
+      <div class="kv"><span>还款总额</span><code>${money(ax.total)} 元</code></div>
+      <div class="kv"><span>利息总额</span><code style="color:var(--err)">${money(ax.int)} 元</code></div>`;
+    $('#lnBj').innerHTML=`<div class="kv"><span>首月还款</span><code>${money(bj.first)} 元</code></div>
+      <div class="kv"><span>末月还款</span><code>${money(bj.last)} 元</code></div>
+      <div class="kv"><span>利息总额</span><code style="color:var(--err)">${money(bj.int)} 元</code></div>
+      <div class="kv"><span>每月递减</span><code>${money(P/n*R)} 元</code></div>`;
+    const ax_=$('#lnM').value==='ax';
+    const data=ax_?ax:bj;
+    $('#lnT').textContent=(ax_?'等额本息':'等额本金')+'还款明细（前 24 期 + 末期）';
+    const rows=data.rows.filter((_,i)=>i<24||i===data.rows.length-1);
+    $('#lnTab').innerHTML=`<table><thead><tr><th>期数</th><th>应还本金</th><th>应还利息</th><th>月供</th><th>剩余本金</th></tr></thead>
+      <tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td>${money(r[1])}</td><td>${money(r[2])}</td><td>${money(r[3])}</td><td>${money(r[4])}</td></tr>`).join('')}</tbody></table>`;
+  };
+  ['lnP','lnR','lnY'].forEach(id=>$('#'+id).addEventListener('input',upd));
+  $('#lnM').addEventListener('change',upd);upd();
+});
+
+tool('compound','math','📈','复利计算器','本金 + 定投的复利增长测算',root=>{
+  root.innerHTML=`<div class="row">
+    ${lbl('初始本金（元）',inp('cpP','','text','10000'))}
+    ${lbl('每月定投（元）',inp('cpC','','text','1000'))}
+    ${lbl('年利率（%）',inp('cpR','','text','5'))}
+    ${lbl('投资年限（年）',inp('cpY','','text','10'))}</div>
+    <div class="result" id="cpR"></div>
+    <h4 class="mt">每年年末资产</h4><div class="tw" id="cpT"></div>`;
+  const upd=()=>{
+    const P=parseFloat($('#cpP').value)||0,C=parseFloat($('#cpC').value)||0,
+      r=(parseFloat($('#cpR').value)||0)/1200,y=Math.min(Math.round(parseFloat($('#cpY').value)||0),100);
+    if(y<=0){return;}
+    let bal=P;
+    const rows=[];
+    for(let m=1;m<=y*12;m++){bal=(bal+C)*(1+r);
+      if(m%12===0)rows.push([m/12,bal,P+C*m,bal-(P+C*m)]);}
+    const invested=P+C*y*12;
+    $('#cpR').innerHTML=`${y} 年后资产约 <span>${fmtSmart(Math.round(bal))}</span> 元
+      <small>（投入 ${fmtSmart(Math.round(invested))}，收益 ${fmtSmart(Math.round(bal-invested))}）</small>`;
+    $('#cpT').innerHTML=`<table><thead><tr><th>年份</th><th>年末资产</th><th>累计投入</th><th>累计收益</th></tr></thead>
+      <tbody>${rows.map(r2=>`<tr><td>${r2[0]}</td><td>${fmtSmart(Math.round(r2[1]))}</td><td>${fmtSmart(Math.round(r2[2]))}</td><td style="color:var(--ok)">${fmtSmart(Math.round(r2[3]))}</td></tr>`).join('')}</tbody></table>`;
+  };
+  ['cpP','cpC','cpR','cpY'].forEach(id=>$('#'+id).addEventListener('input',upd));upd();
+});
+
+tool('tax','math','🧾','个人所得税计算器','工资薪金（月度）与年终奖个税速算',root=>{
+  const MB=[[80000,.35,7160],[55000,.30,4410],[35000,.25,2660],[25000,.20,1410],[12000,.10,210],[3000,.03,0],[0,.03,0]];
+  const AB=[[960000,.45,181920],[660000,.35,85920],[420000,.30,52920],[300000,.25,31920],[144000,.10,16920],[36000,.03,2520],[0,.03,0]];
+  const bracket=(t,table)=>{for(const [lim,rate,quick] of table)if(t>lim)return {rate,quick,tax:Math.max(0,t*rate-quick)};return null;};
+  root.innerHTML=`
+    <div class="btns">${btn('tM','月度工资','ok')}${btn('tB','年终奖')}</div>
+    <div id="tBox"></div>`;
+  let mode='m';
+  const render=()=>{
+    if(mode==='m'){
+      $('#tBox').innerHTML=`<div class="row">${lbl('税前月薪（元）',inp('tS','','text','15000'))}
+        ${lbl('五险一金（元）',inp('tI','','text','2500'))}${lbl('专项附加扣除（元）',inp('tD','','text','1000'))}</div>
+        <div id="tOut"></div>`;
+      const upd=()=>{
+        const s=parseFloat($('#tS').value)||0,ins=parseFloat($('#tI').value)||0,ded=parseFloat($('#tD').value)||0;
+        const taxable=Math.max(0,s-5000-ins-ded);
+        const b=bracket(taxable,MB);
+        const tax=b?b.tax:0;
+        $('#tOut').innerHTML=`
+          <div class="kv"><span>应纳税所得额</span><code>${fmtSmart(Math.round(taxable))} 元</code></div>
+          <div class="kv"><span>适用税率</span><code>${(b?b.rate*100:0)}%（速算扣除 ${b?b.quick:0}）</code></div>
+          <div class="kv"><span>应缴个税</span><code style="color:var(--err)">${fmtSmart(Math.round(tax))} 元</code></div>
+          <div class="kv"><span>税后收入</span><code style="color:var(--ok)">${fmtSmart(Math.round(s-ins-tax))} 元</code></div>
+          <div class="kv"><span>实际税率</span><code>${s?fmtSmart(tax/s*100):0}%</code></div>
+          <div class="muted" style="font-size:12px">按 5000 元/月基本减除费用的月度预扣口径估算，实际以累计预扣法为准。</div>`;
+      };
+      ['tS','tI','tD'].forEach(id=>$('#'+id).addEventListener('input',upd));upd();
+    }else{
+      $('#tBox').innerHTML=`<div class="row">${lbl('年终奖金额（元）',inp('tA','','text','50000'))}</div><div id="tOut"></div>`;
+      const upd=()=>{
+        const a=parseFloat($('#tA').value)||0;
+        if(a<=0){$('#tOut').innerHTML='';return;}
+        const m=a/12;
+        let tax;
+        const AB2=[[36000,.03,0],[144000,.1,210],[300000,.2,1410],[420000,.25,2660],[660000,.3,4410],[960000,.35,7160],[Infinity,.45,15160]];
+        for(const [lim,r,q] of AB2){if(a>lim)continue;tax=Math.max(0,a*r-q);break;}
+        if(tax==null)tax=0;
+        $('#tOut').innerHTML=`
+          <div class="kv"><span>月均金额</span><code>${fmtSmart(Math.round(m))} 元</code></div>
+          <div class="kv"><span>计税方式</span><code>全年一次性奖金单独计税</code></div>
+          <div class="kv"><span>应缴个税</span><code style="color:var(--err)">${fmtSmart(Math.round(tax))} 元</code></div>
+          <div class="kv"><span>税后到手</span><code style="color:var(--ok)">${fmtSmart(Math.round(a-tax))} 元</code></div>
+          <div class="muted" style="font-size:12px">按全年一次性奖金单独计税口径估算。</div>`;
+      };
+      $('#tA').addEventListener('input',upd);upd();
+    }
+  };
+  $('#tM').onclick=()=>{mode='m';render();};
+  $('#tB').onclick=()=>{mode='b';render();};
+  render();
+});
+
+tool('bmi','math','💪','BMI 计算器','身体质量指数与健康体重范围',root=>{
+  root.innerHTML=`<div class="row">${lbl('身高（cm）',inp('bmH','','text','170'))}${lbl('体重（kg）',inp('bmW','','text','65'))}</div>
+    <div id="bmOut" class="mt"></div>`;
+  const upd=()=>{
+    const h=(parseFloat($('#bmH').value)||0)/100,w=parseFloat($('#bmW').value)||0;
+    if(h<=0||w<=0){$('#bmOut').innerHTML='';return;}
+    const bmi=w/(h*h);
+    let label,color;
+    if(bmi<18.5){label='偏瘦';color='#3b82f6';}
+    else if(bmi<24){label='正常';color='#16a34a';}
+    else if(bmi<28){label='偏胖';color='#d97706';}
+    else{label='肥胖';color='#dc2626';}
+    const lo=(18.5*h*h).toFixed(1),hi=(23.9*h*h).toFixed(1);
+    $('#bmOut').innerHTML=`
+      <div class="center"><span style="font-size:44px;font-weight:800;font-family:var(--mono);color:${color}">${bmi.toFixed(1)}</span>
+      <span class="badge" style="background:${color}22;color:${color};font-size:14px">${label}</span></div>
+      <div style="max-width:420px;margin:12px auto">
+        <div style="display:flex;height:10px;border-radius:5px;overflow:hidden">
+          <div style="flex:18.5;background:#3b82f6"></div><div style="flex:5.5;background:#16a34a"></div>
+          <div style="flex:4;background:#d97706"></div><div style="flex:6;background:#dc2626"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:2px"><span>&lt;18.5</span><span>18.5~24</span><span>24~28</span><span>≥28</span></div>
+        <div style="text-align:center;margin-top:4px">▼ 你的 BMI</div></div>
+      <div class="kv"><span>健康体重范围</span><code>${lo} ~ ${hi} kg</code></div>
+      <div class="muted" style="font-size:12px">采用中国成人标准（18.5≤BMI&lt;24 为正常）。BMI 仅供参考，不适用于运动员、孕产妇及未成年人。</div>`;
+  };
+  ['bmH','bmW'].forEach(id=>$('#'+id).addEventListener('input',upd));upd();
+});
+
+tool('age','math','🎂','年龄计算器','精确到年月日的年龄、生日信息',root=>{
+  root.innerHTML=`${lbl('出生日期','<input type="date" id="agB">')}<div id="agOut" class="mt"></div>`;
+  const upd=()=>{
+    const v=$('#agB').value;if(!v){$('#agOut').innerHTML='';return;}
+    const b=new Date(v+'T00:00:00'),now=new Date();
+    if(b>now){$('#agOut').innerHTML='<div class="warnbox">出生日期不能晚于今天</div>';return;}
+    let y=now.getFullYear()-b.getFullYear(),m=now.getMonth()-b.getMonth(),d=now.getDate()-b.getDate();
+    if(d<0){m--;d+=new Date(now.getFullYear(),now.getMonth(),0).getDate();}
+    if(m<0){y--;m+=12;}
+    const days=Math.floor((now-b)/86400000);
+    const nb=new Date(now.getFullYear(),b.getMonth(),b.getDate());
+    if(nb<now)nb.setFullYear(nb.getFullYear()+1);
+    const toNb=Math.ceil((nb-now)/86400000);
+    const wd='日一二三四五六'[b.getDay()];
+    const doy=Math.ceil((now-new Date(now.getFullYear(),0,1))/86400000);
+    $('#agOut').innerHTML=`
+      <div class="center big" style="font-family:var(--mono)">${y} <small class="muted">岁</small> ${m} <small class="muted">月</small> ${d} <small class="muted">天</small></div>
+      <div class="kv"><span>出生当天</span><code>${b.toLocaleDateString('zh-CN')} · 星期${wd}</code></div>
+      <div class="kv"><span>已生活</span><code>${days.toLocaleString()} 天（约 ${(days/365.25).toFixed(2)} 年）</code></div>
+      <div class="kv"><span>已生活小时</span><code>${(days*24).toLocaleString()} 小时</code></div>
+      <div class="kv"><span>今年已过</span><code>${doy} 天（第 ${Math.ceil(doy/7)} 周）</code></div>
+      <div class="kv"><span>距离下次生日</span><code>${toNb} 天</code></div>`;
+  };
+  $('#agB').addEventListener('input',upd);upd();
+});
+
+/* ================= 随机生成 ================= */
+function randInt(min,max){ // 含两端
+  const r=crypto.getRandomValues(new Uint32Array(1))[0]/2**32;
+  return Math.floor(r*(max-min+1))+min;
+}
+const CHARSETS={lower:'abcdefghijklmnopqrstuvwxyz',upper:'ABCDEFGHIJKLMNOPQRSTUVWXYZ',digit:'0123456789',symbol:'!@#$%^&*()-_=+[]{};:,.<>?/'};
+
+tool('pwd-gen','gen','🔑','密码生成器','自定义长度与字符集，批量生成强密码',root=>{
+  root.innerHTML=`<div class="row">
+      <label class="fld"><span class="fl">长度：<b id="pgL2">16</b></span><input type="range" id="pgL" min="4" max="64" value="16"></label>
+      ${lbl('生成数量',inp('pgN','','text','5'))}</div>
+    <div class="btns">${chk('pgU','大写 A-Z')}${chk('pgLw','小写 a-z')}${chk('pgD','数字 0-9')}${chk('pgS','符号 !@#')}${chk('pgX','排除易混淆 (0O1lI)',false)}${btn('pgGo','生成 🎲','ok')}</div>
+    <div id="pgOut"></div>`;
+  $('#pgL').addEventListener('input',()=>$('#pgL2').textContent=$('#pgL').value);
+  $('#pgGo').onclick=()=>{
+    let pool='';
+    if($('#pgU').checked)pool+=CHARSETS.upper;
+    if($('#pgLw').checked)pool+=CHARSETS.lower;
+    if($('#pgD').checked)pool+=CHARSETS.digit;
+    if($('#pgS').checked)pool+=CHARSETS.symbol;
+    if($('#pgX').checked)pool=pool.replace(/[0O1lI|`]/g,'');
+    if(!pool){$('#pgOut').innerHTML='<div class="warnbox">请至少选择一种字符类型</div>';return;}
+    const len=+$('#pgL').value,n=Math.min(Math.max(parseInt($('#pgN').value)||1,1),50);
+    const list=[];
+    for(let i=0;i<n;i++){
+      const bytes=crypto.getRandomValues(new Uint32Array(len));
+      list.push(Array.from(bytes,x=>pool[Math.floor(x/2**32*pool.length)]).join(''));
+    }
+    $('#pgOut').innerHTML=list.map((p,i)=>{setCopy('pg'+i,p);
+      return `<div class="kv"><code style="font-size:15px;letter-spacing:1px">${esc(p)}</code>${cpBtn('pg'+i)}</div>`;}).join('');
+  };
+  $('#pgGo').click();
+});
+
+tool('uuid','gen','🆔','UUID 生成器','批量生成 UUID v4（随机）',root=>{
+  root.innerHTML=`<div class="row">${lbl('数量',inp('uuN','','text','5'))}
+    <label class="fld"><span class="fl">格式</span>${sel('uuF',[['std','标准（含连字符）'],['up','大写'],['no','无连字符'],['ulid','ULID 风格']])}</label></div>
+    <div class="btns">${btn('uuGo','生 成','ok')}</div><div id="uuOut"></div>`;
+  const gen=()=>{
+    if(crypto.randomUUID)return crypto.randomUUID();
+    const b=crypto.getRandomValues(new Uint8Array(16));
+    b[6]=b[6]&0x0f|0x40;b[8]=b[8]&0x3f|0x80;
+    const h=[...b].map(x=>x.toString(16).padStart(2,'0')).join('');
+    return `${h.slice(0,8)}-${h.slice(8,12)}-${h.slice(12,16)}-${h.slice(16,20)}-${h.slice(20)}`;};
+  $('#uuGo').onclick=()=>{
+    const n=Math.min(Math.max(parseInt($('#uuN').value)||1,1),200),f=$('#uuF').value;
+    const list=Array.from({length:n},()=>{
+      let u=gen();
+      if(f==='up')u=u.toUpperCase();
+      else if(f==='no')u=u.replace(/-/g,'');
+      else if(f==='ulid'){u=Date.now().toString(32).toUpperCase().padStart(10,'0')+'-'+u.replace(/-/g,'').slice(0,16).toUpperCase();}
+      return u;});
+    setCopy('uuAll',list.join('\n'));
+    $('#uuOut').innerHTML=list.map((u,i)=>{setCopy('uu'+i,u);
+      return `<div class="kv"><code>${esc(u)}</code>${cpBtn('uu'+i)}</div>`;}).join('')+
+      `<div class="btns">${cpBtn('uuAll','复制全部')}</div>`;
+  };
+  $('#uuGo').click();
+});
+
+tool('random-num','gen','🎰','随机数生成','指定范围的随机整数 / 小数，可去重排序',root=>{
+  root.innerHTML=`<div class="row">${lbl('最小值',inp('rnA','','text','1'))}${lbl('最大值',inp('rnB','','text','100'))}
+    ${lbl('个数',inp('rnN','','text','6'))}
+    <label class="fld"><span class="fl">类型</span>${sel('rnT',[['int','整数'],['dec','小数(2位)']])}</label></div>
+    <div class="btns">${chk('rnU','不允许重复')}${chk('rnS','排序')}${btn('rnGo','生成 🎲','ok')}</div>
+    <div id="rnOut" class="center"></div>`;
+  $('#rnGo').onclick=()=>{
+    const a=Math.ceil(parseFloat($('#rnA').value)),b=Math.floor(parseFloat($('#rnB').value));
+    let n=Math.min(Math.max(parseInt($('#rnN').value)||1,1),1000);
+    if(!isFinite(a)||!isFinite(b)||a>b){$('#rnOut').innerHTML='<div class="warnbox">请输入有效范围</div>';return;}
+    const dec=$('#rnT').value==='dec';
+    const list=[];
+    if(!dec&&$('#rnU').checked){
+      const span=b-a+1;n=Math.min(n,span);
+      const set=new Set();
+      while(set.size<n)set.add(randInt(a,b));
+      list.push(...set);
+    }else{
+      for(let i=0;i<n;i++)list.push(dec?Math.round((a+Math.random()*(b-a))*100)/100:randInt(a,b));
+    }
+    if($('#rnS').checked)list.sort((x,y)=>x-y);
+    $('#rnOut').innerHTML=list.map(x=>`<span class="chip">${x}</span>`).join('');
+  };
+  $('#rnGo').click();
+});
+
+tool('random-name','gen','👥','随机姓名','随机生成中文姓名',root=>{
+  const SURN='王李张刘陈杨黄赵吴周徐孙马朱胡郭何林罗高郑梁谢宋唐许韩冯邓曹彭曾肖田董潘袁蔡蒋余于杜叶程苏魏吕丁任沈姚卢姜崔钟谭陆汪范金石廖贾夏韦付方白邹孟熊秦邱江尹薛闫段雷侯龙史陶黎贺顾毛郝龚邵万钱严覃武戴莫孔向汤';
+  const GIVEN='伟芳娜秀英敏静丽强磊军洋勇艳杰娟涛明超霞平刚桂华文轩宁晓婷宇浩然子涵雨欣怡佳琪晨曦梓萱博文昊天思远嘉懿睿渊志泽天佑俊驰雨泽烨磊鑫鹏炎彬鹤轩越彬风华靖琪明诚绍辉泓嘉烨磊铭萱蕊婷语嫣梦洁沛玲诗涵雅静婉婷雪慧雅芙梦璐玥彤星野星辰暖阳清越安澜亦竹南絮以晴云舒月白松雪竹青若尘闻笛念安知夏';
+  root.innerHTML=`<div class="row">${lbl('生成数量',inp('nmN','','text','8'))}
+    <label class="fld"><span class="fl">名字长度</span>${sel('nmL',[['r','随机（1-2字）'],['1','单字名'],['2','双字名']])}</label></div>
+    <div class="btns">${btn('nmGo','生成 🎲','ok')}</div><div id="nmOut"></div>`;
+  const pick=s=>s[randInt(0,s.length-1)];
+  $('#nmGo').onclick=()=>{
+    const n=Math.min(Math.max(parseInt($('#nmN').value)||1,1),100);
+    const list=[];
+    for(let i=0;i<n;i++){
+      const L=$('#nmL').value;
+      const len=L==='1'?1:L==='2'?2:randInt(1,2);
+      let g='';for(let j=0;j<len;j++)g+=pick(GIVEN);
+      list.push(pick(SURN)+g);
+    }
+    setCopy('nmAll',list.join('、'));
+    $('#nmOut').innerHTML=list.map((x,i)=>{setCopy('nm'+i,x);
+      return `<div class="kv"><span style="font-size:17px">${x}</span>${cpBtn('nm'+i)}</div>`;}).join('')+`<div class="btns">${cpBtn('nmAll','复制全部')}</div>`;
+  };
+  $('#nmGo').click();
+});
+
+tool('lottery','gen','🎯','抽签 / 随机点名','从名单中随机抽取一个或多个',root=>{
+  root.innerHTML=`${tArea('ltIn','每行一个名字或选项…',8,'张三\n李四\n王五\n赵六\n钱七')}
+    <div class="row">${lbl('抽取个数',inp('ltN','','text','1'))}</div>
+    <div class="btns">${btn('ltGo','开始抽取 🎉','ok')}${btn('ltSh','全部打乱顺序')}</div>
+    <div id="ltOut" class="center"></div>`;
+  $('#ltGo').onclick=()=>{
+    const items=$('#ltIn').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+    if(!items.length){$('#ltOut').innerHTML='<div class="warnbox">请先输入名单</div>';return;}
+    let n=Math.max(parseInt($('#ltN').value)||1,1);
+    const pool=[...items];const picked=[];
+    n=Math.min(n,pool.length);
+    for(let i=0;i<n;i++)picked.push(pool.splice(randInt(0,pool.length-1),1)[0]);
+    $('#ltOut').innerHTML=`<div style="margin:14px 0">${picked.map(x=>`<span class="chip" style="font-size:20px;padding:6px 18px">${esc(x)}</span>`).join(' ')}</div>`;
+  };
+  $('#ltSh').onclick=()=>{
+    const items=$('#ltIn').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+    for(let i=items.length-1;i>0;i--){const j=randInt(0,i);[items[i],items[j]]=[items[j],items[i]];}
+    $('#ltIn').value=items.join('\n');
+    $('#ltOut').innerHTML=`<div style="margin:10px 0">${items.map(x=>`<span class="chip">${esc(x)}</span>`).join('')}</div>`;
+  };
+});
+
+tool('dice','gen','🎲','掷骰子 / 抛硬币','虚拟骰子与硬币，支持多骰多面',root=>{
+  root.innerHTML=`<div class="row">${lbl('骰子数量',inp('dcN','','text','2'))}
+    <label class="fld"><span class="fl">骰子面数</span>${sel('dcF',[[6,'6面(标准)'],[4,'4面'],[8,'8面'],[10,'10面'],[12,'12面'],[20,'20面'],[2,'2面(硬币)']])}</label>
+    ${btn('dcGo','掷 ！','ok')}</div>
+    <div id="dcOut" class="center" style="font-size:40px;margin:16px 0"></div>
+    <div class="muted center" id="dcSum"></div>
+    <h4 class="mt">抛硬币</h4>
+    <div class="btns">${lbl('次数',inp('cnN','','text','1'))}${btn('cnGo','抛硬币 🪙')}</div>
+    <div id="cnOut" class="center"></div><div class="muted center" id="cnSum"></div>`;
+  const FACE=['⚀','⚁','⚂','⚃','⚄','⚅'];
+  $('#dcGo').onclick=()=>{
+    const n=Math.min(Math.max(parseInt($('#dcN').value)||1,1),10),f=+$('#dcF').value;
+    const rolls=Array.from({length:n},()=>randInt(1,f));
+    $('#dcOut').innerHTML=rolls.map(r=>f===6
+      ?`<span style="margin:0 6px">${FACE[r-1]}</span>`
+      :`<span class="chip" style="font-size:22px">${r}</span>`).join('');
+    $('#dcSum').textContent=n>1?`点数：${rolls.join(' + ')} = ${rolls.reduce((a,b)=>a+b,0)}`:`点数：${rolls[0]}`;
+  };
+  $('#cnGo').onclick=()=>{
+    const n=Math.min(Math.max(parseInt($('#cnN').value)||1,1),100);
+    let h=0;const res=[];
+    for(let i=0;i<n;i++){const isH=randInt(0,1);if(isH)h++;res.push(isH?'正面':'反面');}
+    $('#cnOut').innerHTML=res.map(x=>`<span class="chip">${x}</span>`).join('');
+    $('#cnSum').textContent=n>1?`正面 ${h} 次 / 反面 ${n-h} 次`:'';
+  };
+  $('#dcGo').click();
+});
+
+tool('lorem','gen','📄','假文生成器','生成 Lorem Ipsum 或中文占位文字',root=>{
+  const WORDS='lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua enim ad minim veniam quis nostrud exercitation ullamco laboris nisi aliquip ex ea commodo consequat duis aute irure in reprehenderit voluptate velit esse cillum eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt culpa qui officia deserunt mollit anim id est laborum'.split(' ');
+  const CN='在设计的世界里每一次尝试都是一次探索灵感如同流水般涌动不拘泥于形式而是追求内心的真诚表达简约而不简单细节之处见真章文字之间流淌着温度与力量无论时光如何变迁对美的追求始终如一'.split('');
+  root.innerHTML=`<div class="row">${lbl('段落数',inp('loN','','text','3'))}
+    <label class="fld"><span class="fl">类型</span>${sel('loT',[['lorem','Lorem Ipsum（英文）'],['cn','中文假文']])}</label>
+    ${btn('loGo','生成','ok')}</div>${tArea('loOut','',12)}`;
+  $('#loGo').onclick=()=>{
+    const n=Math.min(Math.max(parseInt($('#loN').value)||1,1),20);
+    const paras=[];
+    for(let i=0;i<n;i++){
+      if($('#loT').value==='lorem'){
+        const sents=[];
+        for(let s=0;s<Math.ceil(Math.random()*3)+3;s++){
+          const len=6+Math.floor(Math.random()*12);
+          const words=Array.from({length:len},()=>WORDS[Math.floor(Math.random()*WORDS.length)]);
+          sents.push(words.join(' ').replace(/^./,c=>c.toUpperCase())+'.');
+        }
+        paras.push(sents.join(' '));
+      }else{
+        const sents=[];
+        for(let s=0;s<Math.ceil(Math.random()*2)+2;s++){
+          const len=10+Math.floor(Math.random()*15);
+          let t='';for(let c=0;c<len;c++)t+=CN[Math.floor(Math.random()*CN.length)];
+          sents.push(t+'，'+(Math.random()<.5?'也是如此。':'亦然。'));
+        }
+        paras.push(sents.join(''));
+      }
+    }
+    $('#loOut').value=paras.join('\n\n');
+  };
+  $('#loGo').click();
+});
+
+/* ================= 二维码生成（QR Code, byte 模式, 版本1-6） ================= */
+const QR=(()=>{
+  const EXP=new Uint8Array(512),LOG=new Uint8Array(256);
+  for(let i=0,x=1;i<255;i++){EXP[i]=x;LOG[x]=i;x<<=1;if(x&0x100)x^=0x11d;}
+  for(let i=255;i<512;i++)EXP[i]=EXP[i-255];
+  const mul=(a,b)=>(a&&b)?EXP[LOG[a]+LOG[b]]:0;
+  function genPoly(n){let g=[1];
+    for(let i=0;i<n;i++){const ng=new Array(g.length+1).fill(0);
+      for(let k=0;k<g.length;k++){ng[k]^=mul(g[k],EXP[i]);ng[k+1]^=g[k];}
+      g=ng;}
+    return g;}
+  function rs(data,n){const g=genPoly(n),rem=new Array(n).fill(0);
+    for(const b of data){const f=b^rem[n-1];
+      for(let i=n-1;i>0;i--)rem[i]=rem[i-1];
+      rem[0]=0;
+      if(f)for(let k=0;k<n;k++)rem[k]^=mul(g[k],f);}
+    return rem;}
+  const EC_BITS={L:1,M:0,Q:3,H:2};
+  /* 标准块结构表（ISO/IEC 18004）：每版本/级别的纠错码字总数与分块数 */
+  const LVL={L:0,M:1,Q:2,H:3};
+  const TOTAL_CW={1:26,2:44,3:70,4:100,5:134,6:172};
+  const EC_TOTAL={1:[7,10,13,17],2:[10,16,22,28],3:[15,26,36,44],4:[20,36,52,64],5:[26,48,72,88],6:[36,64,96,112]};
+  const N_BLOCKS={1:[1,1,1,1],2:[1,1,1,1],3:[1,1,2,2],4:[1,2,2,4],5:[1,2,4,4],6:[2,4,4,4]};
+  function capBytes(level){return TOTAL_CW[6]-EC_TOTAL[6][LVL[level]]-2;}
+  function encode(text,level){
+    const bytes=Array.from(new TextEncoder().encode(text));
+    let ver=0;
+    for(let v=1;v<=6;v++){
+      const dc=TOTAL_CW[v]-EC_TOTAL[v][LVL[level]];
+      if(bytes.length<=dc-2){ver=v;break;}
+    }
+    if(!ver)throw new Error(`内容过长（${bytes.length} 字节），${level} 级最高 ${capBytes(level)} 字节，可尝试 L 级`);
+    const li=LVL[level];
+    const ecTotal=EC_TOTAL[ver][li],nb=N_BLOCKS[ver][li];
+    const totalData=TOTAL_CW[ver]-ecTotal;
+    const ecPerBlock=ecTotal/nb;
+    const bits=[];
+    const push=(val,len)=>{for(let i=len-1;i>=0;i--)bits.push((val>>>i)&1);};
+    push(4,4);push(bytes.length,8);
+    bytes.forEach(b=>push(b,8));
+    push(0,Math.min(4,totalData*8-bits.length));
+    while(bits.length%8)bits.push(0);
+    const data=[];
+    for(let i=0;i<bits.length;i+=8)data.push(bits.slice(i,i+8).reduce((a,x)=>a*2+x,0));
+    const PADS=[0xEC,0x11];
+    for(let i=0;data.length<totalData;i++)data.push(PADS[i%2]);
+    /* 分块：短块在前，长块在后；纠错块大小均分 */
+    const shortLen=Math.floor(totalData/nb),numShort=nb-totalData%nb;
+    const dbs=[],ecs=[];
+    let pos=0;
+    for(let i=0;i<nb;i++){
+      const dlen=shortLen+(i>=numShort?1:0);
+      const blk=data.slice(pos,pos+dlen);pos+=dlen;
+      dbs.push(blk);ecs.push(rs(blk,ecPerBlock).reverse());
+    }
+    const cw=[];
+    const maxD=Math.max(...dbs.map(b=>b.length)),maxE=Math.max(...ecs.map(b=>b.length));
+    for(let i=0;i<maxD;i++)for(const b of dbs)if(i<b.length)cw.push(b[i]);
+    for(let i=0;i<maxE;i++)for(const b of ecs)if(i<b.length)cw.push(b[i]);
+    return {version:ver,size:17+4*ver,codewords:cw};
+  }
+  let lastMask=null,lastF=null;
+  function makeMatrix(text,level){
+    const {version,size,codewords}=encode(text,level);
+    const M=Array.from({length:size},()=>new Array(size).fill(0));
+    const F=Array.from({length:size},()=>new Array(size).fill(false));
+    const set=(r,c,dark)=>{M[r][c]=dark?1:0;F[r][c]=true;};
+    function finder(r,c){
+      for(let dr=-1;dr<=7;dr++)for(let dc=-1;dc<=7;dc++){
+        const rr=r+dr,cc=c+dc;
+        if(rr<0||rr>=size||cc<0||cc>=size)continue;
+        const dark=dr>=0&&dr<=6&&dc>=0&&dc<=6&&(dr===0||dr===6||dc===0||dc===6||(dr>=2&&dr<=4&&dc>=2&&dc<=4));
+        set(rr,cc,dark);
+      }
+    }
+    finder(0,0);finder(0,size-7);finder(size-7,0);
+    for(let i=8;i<size-8;i++){const dark=i%2===0;set(6,i,dark);set(i,6,dark);}
+    const centers={2:[6,18],3:[6,22],4:[6,26],5:[6,30],6:[6,34]}[version];
+    if(centers)for(const r of centers)for(const c of centers){
+      if((r<=8&&c<=8)||(r<=8&&c>=size-9)||(r>=size-9&&c<=8))continue;
+      for(let dr=-2;dr<=2;dr++)for(let dc=-2;dc<=2;dc++)
+        set(r+dr,c+dc,Math.max(Math.abs(dr),Math.abs(dc))!==1);
+    }
+    for(let i=0;i<=8;i++){F[i][8]=true;F[8][i]=true;}
+    for(let i=0;i<8;i++){F[8][size-1-i]=true;F[size-1-i][8]=true;}
+    M[size-8][8]=1;F[size-8][8]=true;
+    let bi=0;
+    const totalBits=codewords.length*8;
+    for(let right=size-1;right>=1;right-=2){
+      if(right===6)right=5;
+      const up=((right+1)&2)===0;
+      for(let vert=0;vert<size;vert++){
+        for(let j=0;j<2;j++){
+          const c=right-j;
+          const r=up?size-1-vert:vert;
+          if(!F[r][c]&&bi<totalBits){
+            M[r][c]=(codewords[bi>>3]>>>(7-(bi&7)))&1;
+            bi++;
+          }
+        }
+      }
+    }
+    const maskFn=(m,r,c)=>{switch(m){
+      case 0:return (r+c)%2===0;case 1:return r%2===0;case 2:return c%3===0;
+      case 3:return (r+c)%3===0;case 4:return (Math.floor(r/2)+Math.floor(c/3))%2===0;
+      case 5:return (r*c)%2+(r*c)%3===0;case 6:return ((r*c)%2+(r*c)%3)%2===0;
+      default:return ((r+c)%2+(r*c)%3)%2===0;}};
+    function penalty(T){
+      let p=0;
+      for(let dir=0;dir<2;dir++)for(let i=0;i<size;i++){
+        let run=1;
+        for(let j=1;j<=size;j++){
+          const cur=j<size?(dir?T[j][i]:T[i][j]):-1;
+          const pre=j>0?(dir?T[j-1][i]:T[i][j-1]):-2;
+          if(j<size&&cur===pre){run++;}
+          else{if(run>=5)p+=3+run-5;run=1;}
+        }
+      }
+      for(let r=0;r<size-1;r++)for(let c=0;c<size-1;c++){
+        const v=T[r][c];
+        if(T[r][c+1]===v&&T[r+1][c]===v&&T[r+1][c+1]===v)p+=3;
+      }
+      const pat1=[1,0,1,1,1,0,1,0,0,0,0],pat2=[0,0,0,0,1,0,1,1,1,0,1];
+      const scan=get=>{
+        for(let i=0;i<size;i++)for(let j=0;j+11<=size;j++){
+          let m1=true,m2=true;
+          for(let k=0;k<11;k++){const v=get(i,j+k);
+            if(v!==pat1[k])m1=false;
+            if(v!==pat2[k])m2=false;
+            if(!m1&&!m2)break;}
+          if(m1)p+=40;if(m2)p+=40;
+        }};
+      scan((i,j)=>T[i][j]);scan((i,j)=>T[j][i]);
+      let dark=0;
+      for(let r=0;r<size;r++)for(let c=0;c<size;c++)dark+=T[r][c];
+      p+=Math.floor(Math.abs(dark*100/(size*size)-50)/5)*10;
+      return p;
+    }
+    function drawFormat(m,T){
+      const data=(EC_BITS[level]<<3)|m;
+      let rem=data;
+      for(let i=0;i<10;i++)rem=(rem<<1)^((rem>>>9)*0x537);
+      const bits2=((data<<10)|rem)^0x5412;
+      const gb=i=>(bits2>>>i)&1;
+      for(let i=0;i<=5;i++)T[i][8]=gb(i);
+      T[7][8]=gb(6);T[8][8]=gb(7);T[8][7]=gb(8);
+      for(let i=9;i<15;i++)T[8][14-i]=gb(i);
+      for(let i=0;i<8;i++)T[8][size-1-i]=gb(i);
+      for(let i=8;i<15;i++)T[size-15+i][8]=gb(i);
+      T[size-8][8]=1;
+    }
+    let best=null;
+    for(let m=0;m<8;m++){
+      const T=M.map(row=>row.slice());
+      for(let r=0;r<size;r++)for(let c=0;c<size;c++)
+        if(!F[r][c]&&maskFn(m,r,c))T[r][c]^=1;
+      const p=penalty(T);
+      if(!best||p<best.p)best={p,T,m};
+    }
+    lastMask=best.m;
+    lastF=F;
+    drawFormat(best.m,best.T);
+    return best.T;
+  }
+  function draw(canvas,text,level,scale){
+    const mat=makeMatrix(text,level);
+    const n=mat.length,Q=4,total=n+Q*2;
+    canvas.width=canvas.height=total*scale;
+    const ctx=canvas.getContext('2d');
+    ctx.fillStyle='#ffffff';ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle='#000000';
+    for(let r=0;r<n;r++)for(let c=0;c<n;c++)
+      if(mat[r][c])ctx.fillRect((c+Q)*scale,(r+Q)*scale,scale,scale);
+    return n;
+  }
+  return {draw,capBytes,makeMatrix,lastMask:()=>lastMask,lastF:()=>lastF,encode};
+})();
+
+tool('qrcode','gen','🦆','二维码生成器','文本 / 网址生成二维码图片，可下载',root=>{
+  root.innerHTML=`${tArea('qrIn','输入文字或网址，如 https://example.com',3,'https://example.com')}
+    <div class="row"><label class="fld"><span class="fl">纠错级别</span>
+      ${sel('qrL',[['M','M - 标准（推荐）'],['L','L - 容量最大'],['Q','Q - 较高'],['H','H - 最高']])}</label>
+    <label class="fld"><span class="fl">清晰度</span>${sel('qrS',[[6,'普通'],[10,'高清'],[16,'超清']],[10,'高清'])}</label>
+    <div class="fld"><span class="fl">​</span><span id="qrCap" class="muted"></span></div></div>
+    <div class="center mt" style="background:#fff;display:inline-block;padding:12px;border-radius:12px;border:1px solid var(--line)">
+      <canvas id="qrCv" width="10" height="10" style="max-width:min(320px,80vw);height:auto;image-rendering:pixelated"></canvas>
+    </div>
+    <div id="qrMsg"></div>
+    <div class="btns">${btn('qrDl','下载 PNG','ok')}<span class="muted">生成后可用手机扫码验证</span></div>`;
+  const upd=()=>{
+    try{
+      const n=QR.draw($('#qrCv'),$('#qrIn').value||' ',$('#qrL').value,+$('#qrS').value);
+      const bytes=new TextEncoder().encode($('#qrIn').value).length;
+      $('#qrCap').textContent=`${bytes} / ${QR.capBytes($('#qrL').value)} 字节 · ${n}×${n} 模块`;
+      $('#qrMsg').innerHTML='';
+    }catch(e){$('#qrMsg').innerHTML=`<div class="errbox">${esc(e.message)}</div>`;}
+  };
+  $('#qrIn').addEventListener('input',debounce(upd,300));
+  ['qrL','qrS'].forEach(id=>$('#'+id).addEventListener('change',upd));
+  $('#qrDl').onclick=()=>{
+    const a=document.createElement('a');
+    a.href=$('#qrCv').toDataURL('image/png');
+    a.download='qrcode.png';a.click();
+  };
+  upd();
+});
+
+/* ================= 颜色工具 ================= */
+function hexToRgb(h){
+  h=h.replace(/^#/,'').trim();
+  if(h.length===3)h=[...h].map(c=>c+c).join('');
+  if(!/^[0-9a-fA-F]{6}$/.test(h))return null;
+  return {r:parseInt(h.slice(0,2),16),g:parseInt(h.slice(2,4),16),b:parseInt(h.slice(4,6),16)};
+}
+const rgbToHex=(r,g,b)=>'#'+[r,g,b].map(x=>Math.round(Math.max(0,Math.min(255,x))).toString(16).padStart(2,'0')).join('');
+function rgbToHsl(r,g,b){
+  r/=255;g/=255;b/=255;
+  const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let h=0,s=0;const l=(mx+mn)/2;
+  if(mx!==mn){const d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);
+    h=mx===r?(g-b)/d+(g<b?6:0):mx===g?(b-r)/d+2:(r-g)/d+4;h*=60;}
+  return {h:Math.round(h),s:Math.round(s*100),l:Math.round(l*100)};
+}
+function hslToRgb(h,s,l){
+  s/=100;l/=100;
+  const k=n=>(n+h/30)%12,a=s*Math.min(l,1-l);
+  const f=n=>l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));
+  return {r:Math.round(f(0)*255),g:Math.round(f(8)*255),b:Math.round(f(4)*255)};
+}
+function lum(r,g,b){
+  const a=[r,g,b].map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);});
+  return .2126*a[0]+.7152*a[1]+.0722*a[2];
+}
+
+tool('color-conv','color','🎨','颜色转换器','HEX / RGB / HSL 互转，附明暗色阶',root=>{
+  root.innerHTML=`<div class="row" style="align-items:center">
+      <input type="color" id="ccP" value="#3b82f6" style="width:70px;height:56px">
+      ${lbl('HEX',inp('ccH','','text','#3b82f6'))}</div>
+    <div style="height:80px;border-radius:10px;border:1px solid var(--line);margin:10px 0" id="ccPrev"></div>
+    <div id="ccRows"></div>
+    <h4 class="mt">明暗色阶（点击复制）</h4><div id="ccShades" class="cards" style="grid-template-columns:repeat(9,1fr)"></div>`;
+  const upd=()=>{
+    const rgb=hexToRgb($('#ccP').value)||{r:59,g:130,b:246};
+    const hex=rgbToHex(rgb.r,rgb.g,rgb.b);
+    $('#ccH').value=hex;
+    $('#ccPrev').style.background=hex;
+    const hsl=rgbToHsl(rgb.r,rgb.g,rgb.b);
+    const rows=[
+      ['HEX',hex.toUpperCase()],
+      ['RGB',`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`],
+      ['HSL',`hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`]
+    ];
+    $('#ccRows').innerHTML=rows.map(([k,v],i)=>{setCopy('cc'+i,v);
+      return `<div class="kv"><span>${k}</span><div class="kvv"><code>${v}</code>${cpBtn('cc'+i)}</div></div>`;}).join('');
+    $('#ccShades').innerHTML=[90,80,70,60,50,40,30,20,10].map(l=>{
+      const c=hslToRgb(hsl.h,hsl.s,l);
+      const hx=rgbToHex(c.r,c.g,c.b);const k='ccs'+l;setCopy(k,hx);
+      return `<div class="swatch" data-cp="${k}" style="background:${hx};height:64px">${hx}</div>`;}).join('');
+  };
+  $('#ccP').addEventListener('input',upd);
+  $('#ccH').addEventListener('input',()=>{const v=$('#ccH').value.trim();
+    if(hexToRgb(v)){$('#ccP').value=hexToRgb(v)?rgbToHex(hexToRgb(v).r,hexToRgb(v).g,hexToRgb(v).b):v;upd();}});
+  upd();
+});
+
+tool('gradient','color','🌈','渐变色生成器','可视化调 CSS 线性 / 径向渐变',root=>{
+  root.innerHTML=`<div class="row">
+      ${lbl('颜色 1','<input type="color" id="grA" value="#3b82f6">')}
+      ${lbl('颜色 2','<input type="color" id="grB" value="#ec4899">')}
+      ${lbl('颜色 3（可选）','<input type="color" id="grC" value="#facc15">')}
+      ${chk('grUse3','启用颜色3',false)}</div>
+    <div class="row"><label class="fld"><span class="fl">类型</span>${sel('grT',[['linear','线性 linear'],['radial','径向 radial']])}</label>
+      <label class="fld"><span class="fl">角度：<b id="grAV2">90</b>°</span><input type="range" id="grAV" min="0" max="360" value="90"></label></div>
+    <div style="height:160px;border-radius:12px;border:1px solid var(--line);margin:10px 0" id="grPrev"></div>
+    ${out('grCss')}`;
+  const upd=()=>{
+    const a=$('#grA').value,b=$('#grB').value,c=$('#grC').value;
+    const use3=$('#grUse3').checked;
+    const stops=use3?`${a}, ${b}, ${c}`:`${a}, ${b}`;
+    const t=$('#grT').value;
+    const css=t==='linear'?`linear-gradient(${$('#grAV').value}deg, ${stops})`:`radial-gradient(circle, ${stops})`;
+    $('#grAV2').textContent=$('#grAV').value;
+    $('#grPrev').style.background=css;
+    $('#grCss').textContent=`background: ${css};`;
+    setCopy('grCss',`background: ${css};`);
+    if(!$('#grCss').nextElementSibling||!$('#grCss').nextElementSibling.matches('[data-cp]')){
+      $('#grCss').insertAdjacentHTML('afterend',`<div class="btns">${cpBtn('grCss','复制 CSS')}</div>`);
+    }
+  };
+  ['grA','grB','grC','grUse3','grT'].forEach(id=>$('#'+id).addEventListener('input',upd));
+  $('#grAV').addEventListener('input',upd);upd();
+});
+
+tool('palette','color','🖌️','配色方案生成','基于基色的互补 / 三分 / 邻近等配色',root=>{
+  root.innerHTML=`<div class="row" style="align-items:center">
+    <input type="color" id="plP" value="#2563eb" style="width:70px;height:56px">
+    <span class="muted">选择一个基色，自动生成多组配色</span></div><div id="plOut" class="mt"></div>`;
+  const upd=()=>{
+    const rgb=hexToRgb($('#plP').value)||{r:37,g:99,b:235};
+    const {h,s,l}=rgbToHsl(rgb.r,rgb.g,rgb.b);
+    const mk=(dh,ds,dl)=>{
+      const c=hslToRgb((h+dh+360)%360,Math.min(100,Math.max(0,ds)),Math.min(100,Math.max(0,dl)));
+      return rgbToHex(c.r,c.g,c.b);};
+    const groups=[
+      ['互补色',[[0,s,l],[180,s,l]]],
+      ['三分色',[[0,s,l],[120,s,l],[240,s,l]]],
+      ['邻近色',[[-30,s,l],[0,s,l],[30,s,l]]],
+      ['分裂互补',[[0,s,l],[150,s,l],[210,s,l]]],
+      ['同色系深浅',[[-8,Math.min(100,s+10),Math.min(92,l+25)],[0,s,Math.min(90,l+12)],[0,s,l],[0,Math.max(10,s-8),Math.max(20,l-12)],[0,Math.max(10,s-14),Math.max(12,l-24)]]]
+    ];
+    $('#plOut').innerHTML=groups.map(([name,cols],gi)=>{
+      const hexes=cols.map(([dh,ds,dl])=>mk(dh,ds,dl));
+      hexes.forEach((hx,i)=>setCopy(`pl${gi}_${i}`,hx));
+      return `<h4>${name}</h4><div class="cards" style="grid-template-columns:repeat(${Math.min(hexes.length,6)},1fr)">
+        ${hexes.map((hx,i)=>`<div class="swatch" data-cp="pl${gi}_${i}" style="background:${hx};height:72px">${hx}</div>`).join('')}</div>`;
+    }).join('');
+  };
+  $('#plP').addEventListener('input',upd);upd();
+});
+
+tool('contrast','color','🔍','对比度检查','检查文字与背景的 WCAG 对比度',root=>{
+  root.innerHTML=`<div class="row">
+    ${lbl('文字颜色','<input type="color" id="ctF" value="#1f2430">')}
+    ${lbl('背景颜色','<input type="color" id="ctB" value="#ffffff">')}</div>
+    <div id="ctPrev" style="border:1px solid var(--line);border-radius:10px;padding:26px;margin:10px 0">
+      <div style="font-size:22px;font-weight:700">大号标题文字 Sample 18px+ Bold</div>
+      <div class="mt">正文文字示例 —— The quick brown fox jumps over the lazy dog. 0123456789</div>
+      <div class="mt" style="font-size:12px">小号文字示例（12px）用于检测小字对比度是否达标。</div></div>
+    <div id="ctOut"></div>`;
+  const upd=()=>{
+    const f=hexToRgb($('#ctF').value),b=hexToRgb($('#ctB').value);
+    const L1=lum(f.r,f.g,f.b),L2=lum(b.r,b.g,b.b);
+    const ratio=(Math.max(L1,L2)+.05)/(Math.min(L1,L2)+.05);
+    $('#ctPrev').style.background=$('#ctB').value;
+    $$('#ctPrev > *').forEach(el=>el.style.color=$('#ctF').value);
+    const ok=v=>ratio>=v;
+    const badge=(v,label)=>`<span class="badge ${ok(v)?'ok':'err'}">${label} ${ok(v)?'✓ 通过':'✗ 不通过'}</span>`;
+    $('#ctOut').innerHTML=`
+      <div class="center"><span style="font-size:34px;font-weight:800;font-family:var(--mono)">${ratio.toFixed(2)} : 1</span></div>
+      <div class="btns" style="justify-content:center">${badge(3,'AA 大字')}${badge(4.5,'AA 正文')}${badge(7,'AAA 正文')}</div>`;
+  };
+  ['ctF','ctB'].forEach(id=>$('#'+id).addEventListener('input',upd));upd();
+});
+
+/* ================= 开发工具 ================= */
+tool('json','dev','🧾','JSON 格式化','格式化、压缩、校验 JSON',root=>{
+  root.innerHTML=`${tArea('jsIn','粘贴 JSON…',10,'{"name":"工具箱","tags":["离线","免费"],"version":1}')}
+    <div class="btns">${btn('jsF2','格式化(2空格)')}${btn('jsF4','格式化(4空格)')}${btn('jsMin','压缩')}${btn('jsSort','键名排序')}${btn('jsEsc','转义为字符串')}</div>
+    <div id="jsMsg"></div>${tArea('jsOut','',10)}`;
+  const parse=()=>{
+    try{return JSON.parse($('#jsIn').value);}catch(e){
+      $('#jsMsg').innerHTML=`<div class="errbox">JSON 语法错误：${esc(e.message)}</div>`;throw e;}
+  };
+  const act=f=>{try{const o=parse();$('#jsMsg').innerHTML='<div class="okbox">✓ JSON 有效</div>';$('#jsOut').value=f(o);}catch(e){}};
+  $('#jsF2').onclick=()=>act(o=>JSON.stringify(o,null,2));
+  $('#jsF4').onclick=()=>act(o=>JSON.stringify(o,null,4));
+  $('#jsMin').onclick=()=>act(o=>JSON.stringify(o));
+  $('#jsSort').onclick=()=>act(o=>JSON.stringify(o,(k,v)=>v&&typeof v==='object'&&!Array.isArray(v)
+    ?Object.keys(v).sort().reduce((a,key)=>(a[key]=v[key],a),{}):v,2));
+  $('#jsEsc').onclick=()=>{$('#jsOut').value=JSON.stringify($('#jsIn').value);};
+});
+
+tool('csv-json','dev','📊','CSV ↔ JSON','CSV 与 JSON 数组互相转换',root=>{
+  root.innerHTML=`<div class="row">${lbl('分隔符',sel('cvD',[[',','逗号 ,'],[';','分号 ;'],['\t','制表符 Tab']]))}
+    ${chk('cvH','首行为表头')}</div>
+    ${tArea('cvIn','粘贴 CSV 或 JSON…',9,'name,age,city\n张三,25,北京\n李四,30,上海')}
+    <div class="btns">${btn('cvJ','CSV → JSON')}${btn('cvC','JSON → CSV')}</div>
+    <div id="cvMsg"></div>${tArea('cvOut','',9)}`;
+  function parseCSV(text,delim){
+    const rows=[];let row=[],cur='',q=false;
+    for(let i=0;i<text.length;i++){const c=text[i];
+      if(q){if(c==='"'){if(text[i+1]==='"'){cur+='"';i++;}else q=false;}else cur+=c;}
+      else if(c==='"')q=true;
+      else if(c===delim){row.push(cur);cur='';}
+      else if(c==='\n'||c==='\r'){if(c==='\r'&&text[i+1]==='\n')i++;row.push(cur);cur='';rows.push(row);row=[];}
+      else cur+=c;}
+    if(cur!==''||row.length){row.push(cur);rows.push(row);}
+    return rows.filter(r=>r.length>1||r[0]!=='');
+  }
+  const qCell=v=>{v=String(v??'');return /[",\n;]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+  $('#cvJ').onclick=()=>{
+    try{
+      const rows=parseCSV($('#cvIn').value,$('#cvD').value);
+      if(!rows.length)throw new Error('空数据');
+      let out;
+      if($('#cvH').checked){
+        const head=rows[0];
+        out=rows.slice(1).map(r=>Object.fromEntries(head.map((h,i)=>[h.trim(),r[i]??''])));
+      }else out=rows.map(r=>[...r]);
+      $('#cvOut').value=JSON.stringify(out,null,2);
+      $('#cvMsg').innerHTML='';
+    }catch(e){$('#cvMsg').innerHTML=`<div class="errbox">${esc(e.message)}</div>`;}
+  };
+  $('#cvC').onclick=()=>{
+    try{
+      const data=JSON.parse($('#cvIn').value);
+      if(!Array.isArray(data)||!data.length)throw new Error('JSON 需为非空数组');
+      const keys=[...new Set(data.flatMap(o=>typeof o==='object'&&o?Object.keys(o):[]))];
+      const rows=data.map(o=>typeof o==='object'&&o&&!Array.isArray(o)?keys.map(k=>qCell(o[k])):qCell(String(o)));
+      $('#cvOut').value=[keys.map(qCell).join(','),...rows].join('\n');
+      $('#cvMsg').innerHTML='';
+    }catch(e){$('#cvMsg').innerHTML=`<div class="errbox">${esc(e.message)}</div>`;}
+  };
+});
+
+tool('regex','dev','🔭','正则表达式测试','实时匹配、高亮、捕获组、常用语法速查',root=>{
+  root.innerHTML=`<div class="row">${lbl('正则表达式',inp('reP','如 \\d+ 或 [a-z]+@\\w+\\.com'))}
+    ${lbl('标志',inp('reF','g i m 等','text','g'))}</div>
+    ${tArea('reT','测试文本…',7,'联系我：mail@example.com 或 backup@test.org，电话 13800138000')}
+    <div id="reMsg"></div>
+    <h4>匹配结果</h4><div id="reOut"></div>
+    <details><summary>常用正则速查</summary>
+      <table><tbody>
+      <tr><td><code>\\d</code> 数字</td><td><code>\\w</code> 字母数字下划线</td><td><code>\\s</code> 空白</td><td><code>.</code> 任意字符</td></tr>
+      <tr><td><code>*</code> 0+</td><td><code>+</code> 1+</td><td><code>?</code> 0或1</td><td><code>{2,5}</code> 2到5次</td></tr>
+      <tr><td><code>^</code> 开头</td><td><code>$</code> 结尾</td><td><code>[abc]</code> 字符集</td><td><code>(a|b)</code> 分组</td></tr>
+      <tr><td><code>\\b</code> 单词边界</td><td><code>(?=x)</code> 正向先行</td><td><code>(?!x)</code> 负向先行</td><td><code>[^abc]</code> 反集</td></tr>
+      </tbody></table></details>`;
+  const upd=()=>{
+    const p=$('#reP').value,t=$('#reT').value;
+    if(!p){$('#reMsg').innerHTML='';$('#reOut').innerHTML='<span class="muted">输入正则后自动匹配</span>';return;}
+    try{
+      const re=new RegExp(p,$('#reF').value||'g');
+      const matches=[...t.matchAll(re.global?re:new RegExp(re.source,re.flags+'g'))];
+      if(!matches.length){$('#reMsg').innerHTML='<div class="warnbox">未找到匹配</div>';$('#reOut').innerHTML='';return;}
+      $('#reMsg').innerHTML=`<div class="okbox">✓ 语法正确，找到 ${matches.length} 处匹配</div>`;
+      let html='',last=0;
+      for(const m of matches){
+        html+=esc(t.slice(last,m.index));
+        html+=`<mark>${esc(m[0])}</mark>`;
+        last=m.index+m[0].length;
+        if(!m[0].length)last++;
+      }
+      html+=esc(t.slice(last));
+      $('#reOut').innerHTML=`<div class="out" style="white-space:pre-wrap">${html||'<span class="muted">（无）</span>'}</div>
+        <table><thead><tr><th>#</th><th>匹配</th><th>位置</th><th>捕获组</th></tr></thead><tbody>
+        ${matches.slice(0,50).map((m,i)=>`<tr><td>${i+1}</td><td><code>${esc(m[0])}</code></td><td>${m.index}</td>
+        <td>${m.slice(1).map((g,gi)=>`<code>$${gi+1}=${esc(g??'')}</code>`).join(' ')||'—'}</td></tr>`).join('')}</tbody></table>`;
+    }catch(e){$('#reMsg').innerHTML=`<div class="errbox">正则错误：${esc(e.message)}</div>`;$('#reOut').innerHTML='';}
+  };
+  ['reP','reF','reT'].forEach(id=>$('#'+id).addEventListener('input',debounce(upd,250)));upd();
+});
+
+tool('css-format','dev','💠','CSS 美化 / 压缩','格式化或压缩 CSS 代码',root=>{
+  root.innerHTML=`${tArea('csIn','粘贴 CSS…',9,'body{margin:0;font-size:14px}.card{padding:16px;border-radius:8px;background:#fff}')}
+    <div class="btns">${btn('csF','美化')}${btn('csM','压缩')}${btn('csCp','复制结果','ghost')}</div>
+    ${tArea('csOut','',9)}`;
+  $('#csF').onclick=()=>{
+    let css=$('#csIn').value.replace(/\/\*[\s\S]*?\*\//g,m=>m).replace(/\s*{\s*/g,' {\n  ')
+      .replace(/;\s*/g,';\n  ').replace(/\s*}\s*/g,'\n}\n').replace(/\n\s*\n/g,'\n').replace(/\n {2}}/g,'}');
+    $('#csOut').value=css.trim();
+  };
+  $('#csM').onclick=()=>{
+    $('#csOut').value=$('#csIn').value.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\s+/g,' ')
+      .replace(/\s*([{}:;,>])\s*/g,'$1').replace(/;}/g,'}').trim();
+  };
+  $('#csCp').onclick=()=>copyText($('#csOut').value);
+});
+
+tool('sql-format','dev','🗄️','SQL 格式化','SQL 语句美化排版（基础版）',root=>{
+  root.innerHTML=`${tArea('sqIn','粘贴 SQL…',8,'select id,name,age from users where age>18 and city=\'北京\' order by age desc limit 10')}
+    <div class="btns">${btn('sqGo','格式化')}</div>${tArea('sqOut','',9)}`;
+  const MAJOR=['SELECT','FROM','WHERE','GROUP BY','HAVING','ORDER BY','LIMIT','INSERT INTO','VALUES','UPDATE','SET','DELETE FROM','LEFT JOIN','RIGHT JOIN','INNER JOIN','OUTER JOIN','FULL JOIN','JOIN','UNION ALL','UNION','ON','AND','OR'];
+  $('#sqGo').onclick=()=>{
+    let s=$('#sqIn').value.replace(/\s+/g,' ').trim();
+    s=s.replace(/\b(select|from|where|group by|having|order by|limit|insert into|values|update|set|delete from|left join|right join|inner join|outer join|full join|join|union all|union|on|and|or|as|desc|asc|not|null|in|like|between|is|distinct|count|sum|avg|max|min)\b/gi,w=>w.toUpperCase());
+    let out='';
+    for(const kw of ['SELECT','FROM','WHERE','GROUP BY','HAVING','ORDER BY','LIMIT','VALUES','SET','LEFT JOIN','RIGHT JOIN','INNER JOIN','JOIN','UNION ALL','UNION']){
+      s=s.replace(new RegExp('\\s*(?<![\\w\'"]|^)'+kw.replace(/ /g,'\\s+')+'(?![\\w\'"])','g'),'\n'+kw);
+    }
+    out=s.split('\n').map((line,i)=>{
+      line=line.trim();
+      if(/^(AND|OR)\b/.test(line))return '  '+line;
+      if(/^WHERE/.test(line)){return line.replace(/\b(AND|OR)\b/g,'\n  $1').replace(/\n/g,'\n');}
+      return line;
+    }).join('\n');
+    $('#sqOut').value=out;
+  };
+});
+
+tool('html-preview','dev','🖥️','HTML 实时预览','即时渲染 HTML 代码效果',root=>{
+  root.innerHTML=`<div class="split">${tArea('hpIn','<h1>你好！</h1>\n<p>直接输入 HTML 代码，右侧实时预览。</p>\n<div style="color:red;font-weight:bold">支持内联样式</div>',14)}
+    <div><iframe id="hpOut" style="width:100%;height:420px;border:1px solid var(--line);border-radius:10px;background:#fff" sandbox="allow-same-origin"></iframe></div></div>
+    <div class="btns">${btn('hpNew','在新标签页打开')}</div>`;
+  const upd=()=>{$('#hpOut').srcdoc=$('#hpIn').value;};
+  $('#hpIn').addEventListener('input',debounce(upd,300));upd();
+  $('#hpNew').onclick=()=>{
+    const url=URL.createObjectURL(new Blob([$('#hpIn').value],{type:'text/html'}));
+    window.open(url,'_blank');
+  };
+});
+
+tool('cron','dev','⏰','Cron 表达式解析','解析 5 位 cron 并计算未来执行时间',root=>{
+  root.innerHTML=`<div class="row">${lbl('Cron 表达式（分 时 日 月 周）',inp('crIn','','text','30 9 * * 1-5'))}
+    ${btn('crGo','解析')}</div>
+    <div id="crOut"></div>
+    <details><summary>语法说明</summary><table><tbody>
+      <tr><td><code>*</code></td><td>任意值</td><td><code>*/5</code></td><td>每隔 5</td></tr>
+      <tr><td><code>3-10</code></td><td>范围 3 到 10</td><td><code>1,15,30</code></td><td>枚举多个值</td></tr>
+      <tr><td>分</td><td>0-59</td><td>时</td><td>0-23</td></tr>
+      <tr><td>日</td><td>1-31</td><td>月</td><td>1-12 或 JAN-DEC</td></tr>
+      <tr><td>周</td><td>0-7（0 和 7 为周日）或 SUN-SAT</td><td></td><td></td></tr>
+    </tbody></table></details>`;
+  function parseField(f,min,max,names){
+    if(f===undefined||f==='')throw new Error('字段缺失');
+    if(f==='*')return null;
+    const set=new Set();
+    for(const part of f.split(',')){
+      const [rng,stepS]=part.split('/');
+      const step=stepS?(parseInt(stepS)||1):1;
+      let a,b;
+      const val=v=>{if(/^\d+$/.test(v))return parseInt(v);
+        if(names&&names[v.toUpperCase()]!=null)return names[v.toUpperCase()];
+        throw new Error('无法识别的值：'+v);};
+      if(rng==='*'){a=min;b=max;}
+      else if(rng.includes('-')){const p=rng.split('-');a=val(p[0]);b=val(p[1]);}
+      else{a=val(rng);if(stepS&&step>1){b=max;}else{b=a;}}
+      if(a<min||b>max||a>b)throw new Error(`值越界：${part}（允许 ${min}-${max}）`);
+      for(let v=a;v<=b;v+=step)set.add(v);
+    }
+    return set.size?set:null;
+  }
+  const WD=['日','一','二','三','四','五','六'];
+  const MON={JAN:1,FEB:2,MAR:3,APR:4,MAY:5,JUN:6,JUL:7,AUG:8,SEP:9,OCT:10,NOV:11,DEC:12};
+  const WEKN={SUN:0,MON:1,TUE:2,WED:3,THU:4,FRI:5,SAT:6};
+  const listStr=set=>[...set].sort((a,b)=>a-b).join('、');
+  $('#crGo').onclick=()=>{
+    const expr=$('#crIn').value.trim().split(/\s+/);
+    try{
+      if(expr.length!==5)throw new Error('需要 5 个字段（分 时 日 月 周）');
+      const mi=parseField(expr[0],0,59),hh=parseField(expr[1],0,23),
+        dd=parseField(expr[2],1,31),mo=parseField(expr[3],1,12,MON),ww=parseField(expr[4],0,7,WEKN);
+      const wset=ww?new Set([...ww].map(d=>d===7?0:d)):null;
+      const desc=[];
+      if(mo)desc.push(expr[3]==='*'?'':`在 ${listStr(mo)} 月`);
+      if(dd)desc.push(`每月 ${listStr(dd)} 日`);
+      if(wset)desc.push(`每周${[...wset].sort().map(d=>WD[d]).join('、每周')}`);
+      if(!hh&&!mi)desc.push('每分钟');
+      else if(!hh)desc.push(`每小时第 ${listStr(mi)} 分`);
+      else if(!mi)desc.push(`${listStr(hh)} 点整`);
+      else desc.push(`每天 ${[...hh].sort((a,b)=>a-b).map(h=>[...mi].sort((a,b)=>a-b).map(m=>String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'))).flat().join('、')}`);
+      const domStar=expr[2]==='*',dowStar=expr[4]==='*';
+      const match=d=>{
+        if(mi&&!mi.has(d.getMinutes()))return false;
+        if(hh&&!hh.has(d.getHours()))return false;
+        if(mo&&!mo.has(d.getMonth()+1))return false;
+        const domOk=!dd||dd.has(d.getDate()),dowOk=!wset||wset.has(d.getDay());
+        if(domStar&&dowStar)return true;
+        if(domStar)return dowOk;
+        if(dowStar)return domOk;
+        return domOk||dowOk;
+      };
+      const nexts=[];
+      const d=new Date();d.setSeconds(0,0);d.setMinutes(d.getMinutes()+1);
+      const limit=new Date();limit.setFullYear(limit.getFullYear()+3);
+      while(nexts.length<5&&d<limit){if(match(d))nexts.push(new Date(d));d.setMinutes(d.getMinutes()+1);}
+      $('#crOut').innerHTML=`
+        <div class="kv"><span>含义</span><code>${esc(desc.filter(Boolean).join('，')||expr.join(' '))}</code></div>
+        <div class="kv"><span>未来执行时间</span><span></span></div>
+        ${nexts.map((t,i)=>`<div class="kv"><span>#${i+1}</span><code>${t.toLocaleString('zh-CN')}</code></div>`).join('')||'<div class="warnbox">未来 3 年内没有匹配的执行时间</div>'}`;
+    }catch(e){$('#crOut').innerHTML=`<div class="errbox">${esc(e.message)}</div>`;}
+  };
+  $('#crGo').click();
+});
+
+tool('subnet','dev','🌐','IP 子网计算','IPv4 / CIDR 网段信息计算',root=>{
+  root.innerHTML=`<div class="row">${lbl('IP / 掩码位（如 192.168.1.66/24）',inp('sbIn','','text','192.168.1.66/24'))}
+    ${btn('sbGo','计算')}</div><div id="sbOut"></div>`;
+  const ip2int=s=>{const p=s.trim().split('.');
+    if(p.length!==4||p.some(x=>x===''||+x>255||isNaN(+x)))throw new Error('IP 地址格式错误');
+    return p.reduce((a,x)=>((a<<8)+ +x)>>>0,0);};
+  const int2ip=n=>[(n>>>24)&255,(n>>>16)&255,(n>>>8)&255,n&255].join('.');
+  const bin=n=>{const m=n>>>0;let s='';for(let i=31;i>=0;i--)s+=(m>>>i&1)+(i%8===0&&i?' ':'');return s;};
+  $('#sbGo').onclick=()=>{
+    try{
+      let [ipS,pfxS]=$('#sbIn').value.split('/');
+      if(pfxS===undefined)throw new Error('请附带掩码位，如 192.168.1.66/24');
+      const pfx=parseInt(pfxS);
+      if(!(pfx>=0&&pfx<=32))throw new Error('掩码位需在 0-32 之间');
+      const ip=ip2int(ipS);
+      const mask=pfx===0?0:(0xFFFFFFFF<<(32-pfx))>>>0;
+      const net=(ip&mask)>>>0,bc=(net|(~mask>>>0))>>>0;
+      const hosts=pfx>=31?(pfx===32?1:2):Math.pow(2,32-pfx)-2;
+      const first=pfx>=31?net:net+1,last=pfx>=31?bc:bc-1;
+      const cls=ip>>>30&1?(ip>>>29&1?'D 类(组播)':'E 类(保留)'):ip>>>31?'B 类':'A 类';
+      const p1=(ip>>>24)&255;
+      const cls2=p1<128?'A 类':p1<192?'B 类':p1<224?'C 类':'D/E 类';
+      const priv=(p1===10)||(p1===192&&(ip>>>16&255)===168)||(p1===172&&[(ip>>>16&255)]>=16&&((ip>>>16&255)<=31));
+      $('#sbOut').innerHTML=`<table><tbody>
+        <tr><td>IP 地址</td><td><code>${int2ip(ip)}</code></td><td>二进制</td><td><code>${bin(ip)}</code></td></tr>
+        <tr><td>子网掩码</td><td><code>${int2ip(mask)}</code> (/${pfx})</td><td>通配符掩码</td><td><code>${int2ip(~mask>>>0)}</code></td></tr>
+        <tr><td>网络地址</td><td><code>${int2ip(net)}</code></td><td>广播地址</td><td><code>${int2ip(bc)}</code></td></tr>
+        <tr><td>可用主机范围</td><td><code>${int2ip(first)} ~ ${int2ip(last)}</code></td><td>可用主机数</td><td><code>${hosts.toLocaleString()}</code></td></tr>
+        <tr><td>地址类别</td><td><code>${cls2}</code></td><td>私有地址</td><td>${priv?'<span class="badge ok">是</span>':'<span class="badge info">否（公网）</span>'}</td></tr>
+      </tbody></table>`;
+    }catch(e){$('#sbOut').innerHTML=`<div class="errbox">${esc(e.message)}</div>`;}
+  };
+  $('#sbGo').click();
+});
+
+tool('http-code','dev','📡','HTTP 状态码速查','常见状态码含义说明',root=>{
+  const CODES=[
+    [100,'Continue','继续，客户端应继续请求'],[101,'Switching Protocols','切换协议（如升级 WebSocket）'],
+    [200,'OK','请求成功'],[201,'Created','已创建（常用于 POST 创建资源）'],[204,'No Content','成功但无返回内容'],
+    [301,'Moved Permanently','永久重定向'],[302,'Found','临时重定向'],[304,'Not Modified','资源未修改，使用缓存'],
+    [307,'Temporary Redirect','临时重定向（保持方法）'],[308,'Permanent Redirect','永久重定向（保持方法）'],
+    [400,'Bad Request','请求语法错误'],[401,'Unauthorized','未认证（需要登录 / Token）'],[403,'Forbidden','已认证但无权限'],
+    [404,'Not Found','资源不存在'],[405,'Method Not Allowed','请求方法不被允许'],[408,'Request Timeout','请求超时'],
+    [409,'Conflict','资源冲突'],[410,'Gone','资源已永久删除'],[413,'Payload Too Large','请求体过大'],
+    [415,'Unsupported Media Type','不支持的媒体类型'],[418,"I'm a teapot",'我是茶壶（彩蛋）'],
+    [422,'Unprocessable Entity','参数校验失败'],[429,'Too Many Requests','请求过于频繁（限流）'],
+    [451,'Unavailable For Legal Reasons','因法律原因不可用'],
+    [500,'Internal Server Error','服务器内部错误'],[501,'Not Implemented','功能未实现'],[502,'Bad Gateway','网关收到无效响应'],
+    [503,'Service Unavailable','服务暂不可用（维护 / 过载）'],[504,'Gateway Timeout','网关超时'],[505,'HTTP Version Not Supported','HTTP 版本不受支持']
+  ];
+  const color=c=>c<200?'info':c<300?'ok':c<400?'info':c<500?'warn':'err';
+  root.innerHTML=`${lbl('筛选状态码或关键词',inp('hcQ','如 404 或 redirect'))}
+    <div class="tw"><table><thead><tr><th>状态码</th><th>名称</th><th>含义</th></tr></thead><tbody id="hcOut"></tbody></table></div>`;
+  const upd=()=>{
+    const q=$('#hcQ').value.trim().toLowerCase();
+    $('#hcOut').innerHTML=CODES.filter(([c,n,d])=>!q||String(c).includes(q)||n.toLowerCase().includes(q)||d.includes(q))
+      .map(([c,n,d])=>`<tr><td><span class="badge ${color(Math.floor(c/100)*100)}">${c}</span></td><td><code>${n}</code></td><td>${d}</td></tr>`).join('');
+  };
+  $('#hcQ').addEventListener('input',upd);upd();
+});
+
+tool('ascii','dev','🔡','ASCII 码表','完整 ASCII 字符对照表，支持搜索',root=>{
+  root.innerHTML=`${lbl('搜索（十进制 / 字符 / 名称）',inp('asQ','如 65 或 A 或 alpha'))}
+    <div class="tw"><table><thead><tr><th>十进制</th><th>十六进制</th><th>字符</th><th>说明</th></tr></thead><tbody id="asOut"></tbody></table></div>`;
+  const CTRL=['NUL 空字符','SOH 标题开始','STX 正文开始','ETX 正文结束','EOT 传输结束','ENQ 询问','ACK 确认','BEL 响铃',
+    'BS 退格','HT 水平制表','LF 换行','VT 垂直制表','FF 换页','CR 回车','SO 移出','SI 移入','DLE 数据链路转义','DC1 设备控制1',
+    'DC2 设备控制2','DC3 设备控制3','DC4 设备控制4','NAK 否认','SYN 同步空闲','ETB 传输块结束','CAN 取消','EM 媒介结束',
+    'SUB 替换','ESC 退出','FS 文件分隔','GS 组分隔','RS 记录分隔','US 单元分隔'];
+  const NAME=c=>c<32?CTRL[c]:c===127?'DEL 删除':'';
+  const upd=()=>{
+    const q=$('#asQ').value.trim().toLowerCase();
+    $('#asOut').innerHTML=Array.from({length:128},(_,c)=>{
+      const ch=String.fromCharCode(c);
+      const name=NAME(c)||`<code style="font-size:15px">${c===32?'空格':esc(ch)}</code>`;
+      const hay=String(c)+' '+c.toString(16)+' '+ch+' '+(NAME(c)||'');
+      if(q&&!hay.toLowerCase().includes(q))return '';
+      return `<tr><td>${c}</td><td>0x${c.toString(16).padStart(2,'0')}</td><td>${name}</td><td>${NAME(c)||'可打印字符'}</td></tr>`;
+    }).join('');
+  };
+  $('#asQ').addEventListener('input',upd);upd();
+});
+
+tool('keycode','dev','⌨️','按键码查询','按下任意键查看 keyCode / code / 修饰键',root=>{
+  root.innerHTML=`<div style="border:2px dashed var(--line);border-radius:12px;padding:44px;text-align:center" id="kcBox">
+      <div style="font-size:44px" id="kcKey">⌨️</div>
+      <p class="muted">在此页面按任意键盘按键…</p></div>
+    <div id="kcInfo"></div><div id="kcHis"></div>`;
+  const his=[];
+  const kd=e=>{
+    e.preventDefault();
+    $('#kcKey').textContent=e.key===' '?'Space':e.key;
+    const mods=[e.ctrlKey&&'Ctrl',e.altKey&&'Alt',e.shiftKey&&'Shift',e.metaKey&&'Meta'].filter(Boolean);
+    $('#kcInfo').innerHTML=`<div class="kv"><span>key</span><code>${esc(e.key)}</code></div>
+      <div class="kv"><span>code（物理键位）</span><code>${esc(e.code)}</code></div>
+      <div class="kv"><span>keyCode / which</span><code>${e.keyCode} / ${e.which}</code></div>
+      <div class="kv"><span>修饰键</span><code>${mods.join(' + ')||'无'}</code></div>`;
+    his.unshift(`${esc(e.key)} → ${e.keyCode}`);
+    if(his.length>8)his.pop();
+    $('#kcHis').innerHTML=`<h4 class="mt">最近按键</h4>`+his.map(h=>`<span class="chip">${h}</span>`).join('');
+  };
+  document.addEventListener('keydown',kd,true);
+  onClean(()=>document.removeEventListener('keydown',kd,true));
+});
+
+tool('ua','dev','🕵️','User-Agent 解析','解析浏览器 UA 中的浏览器 / 系统信息',root=>{
+  root.innerHTML=`${tArea('uaIn','',4,navigator.userAgent)}
+    <div class="btns">${btn('uaGo','解析')}</div>${out('uaOut')}`;
+  const run=()=>{
+    const ua=$('#uaIn').value;
+    let browser='未知',engine='未知';
+    if(/Edg\//.test(ua)){browser='Microsoft Edge '+((ua.match(/Edg\/([\d.]+)/)||[])[1]||'');engine='Blink';}
+    else if(/OPR\/|Opera/.test(ua)){browser='Opera '+((ua.match(/OPR\/([\d.]+)/)||[])[1]||'');engine='Blink';}
+    else if(/Chrome\//.test(ua)){browser='Chrome '+((ua.match(/Chrome\/([\d.]+)/)||[])[1]||'');engine='Blink';}
+    else if(/Firefox\//.test(ua)){browser='Firefox '+((ua.match(/Firefox\/([\d.]+)/)||[])[1]||'');engine='Gecko';}
+    else if(/Safari\//.test(ua)){browser='Safari '+((ua.match(/Version\/([\d.]+)/)||[])[1]||'');engine='WebKit';}
+    let os='未知系统';
+    if(/Windows NT 10\.0/.test(ua))os='Windows 10 / 11';
+    else if(/Windows NT 6\.3/.test(ua))os='Windows 8.1';
+    else if(/Windows NT 6\.1/.test(ua))os='Windows 7';
+    else if(/Windows/.test(ua))os='Windows';
+    else if(/Android ([\d.]+)/.test(ua))os='Android '+(ua.match(/Android ([\d.]+)/)||[])[1];
+    else if(/iPhone|iPad|iPod/.test(ua)){os='iOS '+(ua.match(/OS ([\d_]+)/)||[])[1]?.replace(/_/g,'.');
+      if(/iPad/.test(ua))os+=' (iPad)';else if(/iPhone/.test(ua))os+=' (iPhone)';}
+    else if(/Mac OS X ([\d_]+)/.test(ua))os='macOS '+(ua.match(/Mac OS X ([\d_]+)/)||[])[1].replace(/_/g,'.');
+    else if(/Linux/.test(ua))os='Linux';
+    const mobile=/Mobile|Android|iPhone/.test(ua),tablet=/iPad|Tablet/.test(ua);
+    $('#uaOut').innerHTML=[['浏览器',browser],['内核',engine],['操作系统',os],['设备类型',tablet?'平板':mobile?'手机':'桌面端'],['UA 原文',ua]]
+      .map(([k,v])=>`<div class="kv"><span>${k}</span><code>${esc(v||'—')}</code></div>`).join('');
+  };
+  $('#uaGo').onclick=run;run();
+});
+
+tool('radix','dev','🔟','进制转换','2-36 任意进制互转，附二进制位视图',root=>{
+  root.innerHTML=`<div class="row">${lbl('数值',inp('rdV','','text','255'))}
+    ${lbl('原进制',sel('rdF',[[2,'2 进制'],[8,'8 进制'],[10,'10 进制'],[16,'16 进制'],[36,'其他（下方选择）']],10))}
+    ${lbl('其他进制',sel('rdO',Array.from({length:35},(_,i)=>[i+2,(i+2)+' 进制']),36))}</div>
+    <div id="rdOut"></div>
+    <h4 class="mt">常用进制结果</h4><div id="rdAll"></div>
+    <div id="rdBits"></div>`;
+  const upd=()=>{
+    const v=$('#rdV').value.trim(),f=+$('#rdF').value,f2=f===36?+$('#rdO').value:f;
+    try{
+      if(!v)throw new Error('请输入数值');
+      const n=parseInt(v,f2);
+      if(isNaN(n))throw new Error(`「${v}」不是有效的 ${f2} 进制数`);
+      const res={2:n.toString(2),8:n.toString(8),10:n.toString(10),16:n.toString(16).toUpperCase()};
+      setCopy('rdAll',[2,8,10,16].map(b=>res[b]).join('\n'));
+      $('#rdAll').innerHTML=[['二进制',res[2]],['八进制',res[8]],['十进制',res[10]],['十六进制',res[16]]]
+        .map(([k,val],i)=>`<div class="kv"><span>${k}</span><div class="kvv"><code>${esc(val)}</code>${cpBtn('rda'+i)}</div></div>`).join('');
+      [2,8,10,16].forEach((b,i)=>setCopy('rda'+i,res[b]));
+      if(Number.isInteger(n)&&Math.abs(n)<2**32){
+        const bits=n<0?(n>>>0).toString(2):n.toString(2);
+        $('#rdBits').innerHTML=`<h4>二进制位（${bits.length} 位${n<0?'，按 32 位无符号解释':''}）</h4>
+          <div style="display:flex;flex-wrap:wrap;gap:3px;justify-content:center">${[...bits].map(b=>`<span style="width:22px;text-align:center;background:${b==='1'?'var(--pri)':'var(--bg)'};color:${b==='1'?'#fff':'var(--muted)'};border-radius:4px;font-family:var(--mono)">${b}</span>`).join('')}</div>`;
+      }else $('#rdBits').innerHTML='';
+      $('#rdOut').innerHTML='';
+    }catch(e){$('#rdOut').innerHTML=`<div class="errbox">${esc(e.message)}</div>`;$('#rdAll').innerHTML='';$('#rdBits').innerHTML='';}
+  };
+  ['rdV','rdF','rdO'].forEach(id=>$('#'+id).addEventListener('input',upd));upd();
+});
+
+/* ================= 日期时间 ================= */
+tool('timestamp','date','⏱️','时间戳转换','Unix 时间戳与日期互转（秒 / 毫秒）',root=>{
+  root.innerHTML=`<div class="kv"><span>当前时间戳（秒）</span><div class="kvv"><code id="tsNowS" style="font-size:16px"></code>${cpBtn('tsNowS')}</div></div>
+    <div class="kv"><span>当前时间戳（毫秒）</span><div class="kvv"><code id="tsNowMs"></code>${cpBtn('tsNowMs')}</div></div>
+    <div class="kv"><span>当前时间</span><code id="tsNowD"></code></div><hr style="border-color:var(--line)">
+    <div class="row mt">${lbl('时间戳 → 日期',inp('tsIn','如 1735689600 或 1735689600000'))}${btn('tsGo','转换')}
+    ${lbl('日期 → 时间戳','<input type="datetime-local" id="tsD">')}${btn('tsRev','转换')}</div>
+    ${out('tsOut')}`;
+  const upd=()=>{
+    const now=Date.now();
+    COPY.tsNowS=String(Math.floor(now/1000));COPY.tsNowMs=String(now);
+    $('#tsNowS').textContent=Math.floor(now/1000);
+    $('#tsNowMs').textContent=now;
+    $('#tsNowD').textContent=new Date().toLocaleString('zh-CN',{hour12:false});
+  };
+  tick(upd,1000);upd();
+  $('#tsGo').onclick=()=>{
+    let v=$('#tsIn').value.trim();
+    if(!/^\d{10,13}$/.test(v)){$('#tsOut').textContent='请输入 10 位（秒）或 13 位（毫秒）时间戳';return;}
+    const ms=v.length===10?v*1000:+v;
+    const d=new Date(ms);
+    $('#tsOut').textContent=`本地时间：${d.toLocaleString('zh-CN',{hour12:false})}\nUTC：${d.toUTCString()}\nISO 8601：${d.toISOString()}`;
+  };
+  $('#tsRev').onclick=()=>{
+    const v=$('#tsD').value;
+    if(!v){$('#tsOut').textContent='请先选择日期时间';return;}
+    const d=new Date(v);
+    $('#tsOut').textContent=`秒：${Math.floor(d.getTime()/1000)}\n毫秒：${d.getTime()}`;
+    setCopy('tsOut',$('#tsOut').textContent);
+  };
+});
+
+tool('world-clock','date','🌍','世界时钟','多时区实时时间对照（离线可用）',root=>{
+  const ALL=[['Asia/Shanghai','北京'],['Asia/Hong_Kong','香港'],['Asia/Taipei','台北'],['Asia/Tokyo','东京'],
+    ['Asia/Seoul','首尔'],['Asia/Singapore','新加坡'],['Asia/Bangkok','曼谷'],['Asia/Dubai','迪拜'],
+    ['Asia/Kolkata','孟买'],['Asia/Karachi','卡拉奇'],['Australia/Sydney','悉尼'],['Pacific/Auckland','奥克兰'],
+    ['Europe/London','伦敦'],['Europe/Paris','巴黎'],['Europe/Berlin','柏林'],['Europe/Moscow','莫斯科'],
+    ['America/New_York','纽约'],['America/Chicago','芝加哥'],['America/Denver','丹佛'],['America/Los_Angeles','洛杉矶'],
+    ['America/Vancouver','温哥华'],['America/Sao_Paulo','圣保罗'],['Africa/Cairo','开罗'],['Africa/Johannesburg','约翰内斯堡'],['UTC','UTC']];
+  let zones;
+  try{zones=JSON.parse(localStorage.getItem('tbx-zones')||'null')||['Asia/Shanghai','Europe/London','America/New_York','Asia/Tokyo'];}
+  catch(e){zones=['Asia/Shanghai'];}
+  root.innerHTML=`<div class="row">${lbl('添加城市',sel('wcSel',ALL))}${btn('wcAdd','添加')}</div>
+    <div class="cards" id="wcOut" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))"></div>
+    <div class="muted mt">时区数据内置于浏览器，完全离线可用。</div>`;
+  const upd=()=>{
+    $('#wcOut').innerHTML=zones.map(z=>{
+      const name=(ALL.find(a=>a[0]===z)||[z,z])[1];
+      let time='',date='',diff='';
+      try{
+        time=new Date().toLocaleTimeString('zh-CN',{timeZone:z,hour12:false});
+        date=new Date().toLocaleDateString('zh-CN',{timeZone:z,month:'long',day:'numeric',weekday:'short'});
+        const s=new Date().toLocaleString('en-US',{timeZone:z,timeZoneName:'shortOffset'});
+        diff=(s.match(/GMT[+-]?\d*/)||[''])[0];
+      }catch(e){time='不支持';}
+      return `<div class="clockcard"><button class="btn ghost sm" data-rm="${z}" style="float:right;padding:0 8px">✕</button>
+        <div class="c">${esc(name)}</div><div class="t">${esc(time)}</div><div class="c">${esc(date)} ${esc(diff)}</div></div>`;
+    }).join('');
+  };
+  $('#wcAdd').onclick=()=>{
+    const z=$('#wcSel').value;
+    if(!zones.includes(z))zones.push(z);
+    try{localStorage.setItem('tbx-zones',JSON.stringify(zones));}catch(e){}
+    upd();
+  };
+  $('#wcOut').addEventListener('click',e=>{
+    const b=e.target.closest('[data-rm]');if(!b)return;
+    zones=zones.filter(x=>x!==b.dataset.rm);
+    try{localStorage.setItem('tbx-zones',JSON.stringify(zones));}catch(e){}
+    upd();
+  });
+  tick(upd,1000);upd();
+});
+
+tool('stopwatch','date','⏲️','秒表','精确计秒，支持计次与重置',root=>{
+  root.innerHTML=`<div class="center" style="font-size:46px;font-family:var(--mono);font-weight:700" id="swD">00:00.00</div>
+    <div class="btns" style="justify-content:center">${btn('swS','开始','ok')}${btn('swL','计次','ghost')}${btn('swR','重置','danger')}</div>
+    <div id="swLaps"></div>`;
+  let t0=0,acc=0,running=false,laps=[];
+  const fmt=ms=>{
+    const m=Math.floor(ms/60000),s=Math.floor(ms%60000/1000),c=Math.floor(ms%1000/10);
+    return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(c).padStart(2,'0')}`;};
+  const upd=()=>{$('#swD').textContent=fmt(acc+(running?Date.now()-t0:0));};
+  const iv=tick(upd,33);
+  $('#swS').onclick=()=>{
+    if(running){acc+=Date.now()-t0;running=false;$('#swS').textContent='继续';$('#swS').className='btn ok';}
+    else{t0=Date.now();running=true;$('#swS').textContent='暂停';$('#swS').className='btn';}
+  };
+  $('#swL').onclick=()=>{
+    if(!running&&!acc)return;
+    const cur=acc+(running?Date.now()-t0:0);
+    laps.unshift([laps.length+1,cur-cur>0&&laps[0]?cur-laps.reduce((a,l)=>a,0):cur,cur]);
+    laps=laps.map((l,i)=>[i+1,l[1],l[2]]);
+    let prev=0;
+    const rows=laps.map(l=>{const lap=l[2]-prev;prev=l[2];return `<tr><td>#${l[0]}</td><td>${fmt(lap)}</td><td>${fmt(l[2])}</td></tr>`;});
+    $('#swLaps').innerHTML=rows.length?`<table><thead><tr><th>计次</th><th>单次</th><th>累计</th></tr></thead><tbody>${rows.join('')}</tbody></table>`:'';
+  };
+  $('#swR').onclick=()=>{acc=0;running=false;laps=[];$('#swS').textContent='开始';$('#swLaps').innerHTML='';upd();};
+});
+
+function beep(times=2,dur=0.18){
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    for(let i=0;i<times;i++){
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='sine';o.frequency.value=880;
+      o.connect(g);g.connect(ctx.destination);
+      const t=ctx.currentTime+i*(dur+0.12);
+      g.gain.setValueAtTime(0.001,t);g.gain.exponentialRampToValueAtTime(0.5,t+0.02);
+      g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+      o.start(t);o.stop(t+dur+0.05);
+    }
+    setTimeout(()=>ctx.close(),(times*(dur+0.12)+0.5)*1000);
+  }catch(e){}
+}
+
+tool('countdown','date','⏳','倒计时器','自定义倒计时，结束声音提醒',root=>{
+  root.innerHTML=`<div class="center" style="font-size:56px;font-family:var(--mono);font-weight:800" id="cdD">00:00</div>
+    <div class="pbar" style="max-width:420px;margin:10px auto"><div id="cdBar" style="width:0%"></div></div>
+    <div class="row" style="justify-content:center">
+      ${lbl('时',inp('cdH','','text','0'))}${lbl('分',inp('cdM','','text','5'))}${lbl('秒',inp('cdS','','text','0'))}</div>
+    <div class="btns" style="justify-content:center">
+      ${[1,3,5,10,25,60].map(m=>`<button class="btn ghost sm" data-p="${m}">${m}分钟</button>`).join('')}</div>
+    <div class="btns" style="justify-content:center">${btn('cdS2','开始','ok')}${btn('cdR','重置','danger')}</div>
+    <div id="cdMsg" class="center"></div>`;
+  let total=0,left=0,running=false,last=0;
+  const fmt=s=>{s=Math.max(0,Math.ceil(s));return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;};
+  const upd=()=>{
+    $('#cdD').textContent=fmt(left);
+    $('#cdBar').style.width=total?((1-left/total)*100)+'%':'0%';
+  };
+  const iv=tick(()=>{
+    if(!running)return;
+    const now=Date.now();
+    left-=(now-last)/1000;last=now;
+    if(left<=0){left=0;running=false;beep(3);$('#cdMsg').innerHTML='<div class="okbox" style="font-size:18px">⏰ 时间到！</div>';document.title='⏰ 时间到！';}
+    upd();
+  },200);
+  root.addEventListener('click',e=>{
+    const p=e.target.closest('[data-p]');
+    if(p){total=left=+p.dataset.p*60;running=false;$('#cdMsg').innerHTML='';upd();}
+  });
+  $('#cdS2').onclick=()=>{
+    if(running){running=false;$('#cdS2').textContent='继续';return;}
+    if(left<=0){
+      total=left=(parseInt($('#cdH').value)||0)*3600+(parseInt($('#cdM').value)||0)*60+(parseInt($('#cdS').value)||0);
+      if(left<=0){$('#cdMsg').innerHTML='<div class="warnbox">请设置倒计时时长</div>';return;}
+    }
+    running=true;last=Date.now();$('#cdS2').textContent='暂停';$('#cdMsg').innerHTML='';
+  };
+  $('#cdR').onclick=()=>{running=false;left=total=0;$('#cdS2').textContent='开始';$('#cdMsg').innerHTML='';upd();};
+  upd();
+});
+
+tool('pomodoro','date','🍅','番茄钟','25 分钟专注 + 5 分钟休息循环',root=>{
+  root.innerHTML=`<div class="center"><div style="font-size:60px" id="pmIcon">🍅</div>
+      <div style="font-size:46px;font-family:var(--mono);font-weight:800" id="pmD">25:00</div>
+      <div class="badge info" id="pmS">专注中</div></div>
+    <div class="pbar" style="max-width:420px;margin:12px auto"><div id="pmBar" style="width:0%"></div></div>
+    <div class="btns" style="justify-content:center">${btn('pmGo','开始','ok')}${btn('pmSkip','跳过本段','ghost')}${btn('pmR','重置','danger')}</div>
+    <div class="center muted" id="pmC">已完成专注 0 个 🍅</div>`;
+  const WORK=25*60,REST=5*60,LONG=15*60;
+  let phase='work',left=WORK,running=false,last=0,done=0,round=0;
+  const upd=()=>{
+    const s=Math.max(0,Math.ceil(left));
+    $('#pmD').textContent=`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+    const total=phase==='work'?WORK:(round%4===0?LONG:REST);
+    $('#pmBar').style.width=((1-left/total)*100)+'%';
+    $('#pmS').textContent=phase==='work'?'专注中':'休息中';
+    $('#pmIcon').textContent=phase==='work'?'🍅':'☕';
+    $('#pmC').textContent=`已完成专注 ${done} 个 🍅`;
+  };
+  tick(()=>{
+    if(!running)return;
+    const now=Date.now();left-=(now-last)/1000;last=now;
+    if(left<=0){
+      beep(2);
+      if(phase==='work'){done++;round++;phase='rest';left=round%4===0?LONG:REST;}
+      else{phase='work';left=WORK;}
+    }
+    upd();
+  },250);
+  $('#pmGo').onclick=()=>{
+    running=!running;
+    $('#pmGo').textContent=running?'暂停':'继续';
+    if(running)last=Date.now();
+  };
+  $('#pmSkip').onclick=()=>{
+    if(phase==='work'){phase='rest';left=round%4===0?LONG:REST;}
+    else{phase='work';left=WORK;}
+    upd();
+  };
+  $('#pmR').onclick=()=>{phase='work';left=WORK;running=false;done=0;round=0;$('#pmGo').textContent='开始';upd();};
+  upd();
+});
+
+tool('calendar','date','🗓️','日历','月历查看，含节日与日期详情',root=>{
+  const HOL={'1-1':'元旦','2-14':'情人节','3-8':'妇女节','3-12':'植树节','4-1':'愚人节','5-1':'劳动节','5-4':'青年节','6-1':'儿童节','7-1':'建党节','8-1':'建军节','9-10':'教师节','10-1':'国庆节','12-24':'平安夜','12-25':'圣诞节'};
+  const now=new Date();
+  let y=now.getFullYear(),m=now.getMonth(),selD=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  root.innerHTML=`<div class="row" style="align-items:center;justify-content:center;gap:6px">
+      ${btn('calP','◀','ghost sm')}${btn('calT','今天','ghost sm')}${btn('calN','▶','ghost sm')}
+      <h3 id="calH" style="margin:0 12px"></h3></div>
+    <div id="calGrid"></div><div id="calInfo"></div>`;
+  const upd=()=>{
+    $('#calH').textContent=`${y} 年 ${m+1} 月`;
+    const first=new Date(y,m,1),days=new Date(y,m+1,0).getDate();
+    const startDow=first.getDay();
+    let html='<table style="table-layout:fixed"><thead><tr>'+['日','一','二','三','四','五','六'].map((w,i)=>`<th style="text-align:center;${i===0||i===6?'color:var(--warn)':''}">${w}</th>`).join('')+'</tr></thead><tbody><tr>';
+    let cell=0;
+    for(let i=0;i<startDow;i++){html+='<td></td>';cell++;}
+    for(let d=1;d<=days;d++){
+      const date=new Date(y,m,d),dow=date.getDay();
+      const isToday=d===now.getDate()&&m===now.getMonth()&&y===now.getFullYear();
+      const isSel=selD&&d===selD.getDate()&&m===selD.getMonth()&&y===selD.getFullYear();
+      const hol=HOL[`${m+1}-${d}`];
+      html+=`<td data-d="${d}" style="text-align:center;cursor:pointer;border-radius:8px;${dow===0||dow===6?'color:var(--warn);':''}${isSel?'background:var(--pri);color:#fff;':''}${isToday&&!isSel?'box-shadow:inset 0 0 0 2px var(--pri);':''}">
+        <div style="font-weight:600">${d}</div>${hol?`<div style="font-size:10px;${isSel?'color:#fff':'color:var(--muted)'}">${hol}</div>`:''}</td>`;
+      cell++;
+      if(cell%7===0&&d<days)html+='</tr><tr>';
+    }
+    html+='</tr></tbody></table>';
+    $('#calGrid').innerHTML=html;
+    if(selD){
+      const doy=Math.ceil((selD-new Date(selD.getFullYear(),0,0))/86400000);
+      const week=Math.ceil(doy/7);
+      const diff=Math.round((selD-now)/86400000);
+      $('#calInfo').innerHTML=`<div class="kv"><span>选中日期</span><code>${selD.toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric',weekday:'long'})}</code></div>
+        <div class="kv"><span>年内第几天 / 第几周</span><code>第 ${doy} 天 · 第 ${week} 周</code></div>
+        <div class="kv"><span>距今天</span><code>${diff===0?'就是今天':diff>0?`${diff} 天后`:`${-diff} 天前`}</code></div>
+        ${HOL[`${selD.getMonth()+1}-${selD.getDate()}`]?`<div class="kv"><span>节日</span><code>${HOL[`${selD.getMonth()+1}-${selD.getDate()}`]}</code></div>`:''}`;
+    }
+  };
+  $('#calGrid').addEventListener('click',e=>{
+    const td=e.target.closest('[data-d]');
+    if(td){selD=new Date(y,m,+td.dataset.d);upd();}
+  });
+  $('#calP').onclick=()=>{m--;if(m<0){m=11;y--;}selD=null;upd();};
+  $('#calN').onclick=()=>{m++;if(m>11){m=0;y++;}selD=null;upd();};
+  $('#calT').onclick=()=>{y=now.getFullYear();m=now.getMonth();selD=new Date(y,m,now.getDate());upd();};
+  upd();
+});
+
+tool('date-calc','date','📅','日期计算','日期差、工作日、日期加减推算',root=>{
+  const today=new Date().toISOString().slice(0,10);
+  root.innerHTML=`<h4>两个日期相差</h4>
+    <div class="row">${lbl('开始日期','<input type="date" id="dcA" value="'+today+'">')}${lbl('结束日期','<input type="date" id="dcB">')}</div>
+    <div id="dcOut1"></div><hr style="border-color:var(--line)">
+    <h4 class="mt">日期推算</h4>
+    <div class="row">${lbl('基准日期',`<input type="date" id="dcBase" value="${today}">`)}
+      ${lbl('增减数值',inp('dcN','','text','30'))}
+      <label class="fld"><span class="fl">单位</span>${sel('dcU',[['d','天'],['w','周'],['m','月'],['y','年']])}</label>
+      <label class="fld"><span class="fl">方向</span>${sel('dcDir',[['+','之后'],['-','之前']])}</label></div>
+    <div id="dcOut2"></div>`;
+  const diff=()=>{
+    const a=$('#dcA').value,b=$('#dcB').value;
+    if(!a||!b){$('#dcOut1').innerHTML='<span class="muted">选择两个日期自动计算</span>';return;}
+    let d1=new Date(a),d2=new Date(b);
+    if(d1>d2)[d1,d2]=[d2,d1];
+    const days=Math.round((d2-d1)/86400000);
+    let work=0;const cur=new Date(d1);
+    if(days<=20000){while(cur<d2){const w=cur.getDay();if(w!==0&&w!==6)work++;cur.setDate(cur.getDate()+1);}}
+    let y=d2.getFullYear()-d1.getFullYear(),mo=d2.getMonth()-d1.getMonth(),dd=d2.getDate()-d1.getDate();
+    if(dd<0){mo--;dd+=new Date(d2.getFullYear(),d2.getMonth(),0).getDate();}
+    if(mo<0){y--;mo+=12;}
+    $('#dcOut1').innerHTML=`<div class="kv"><span>相差</span><code>${days.toLocaleString()} 天 = ${y} 年 ${mo} 个月 ${dd} 天</code></div>
+      <div class="kv"><span>折合</span><code>${(days/7).toFixed(1)} 周 · ${(days/30.44).toFixed(1)} 个月</code></div>
+      <div class="kv"><span>其中工作日（周一至五）</span><code>${work.toLocaleString()} 天</code></div>`;
+  };
+  const add=()=>{
+    const base=$('#dcBase').value,n=parseInt($('#dcN').value);
+    if(!base||isNaN(n)){$('#dcOut2').innerHTML='';return;}
+    const d=new Date(base);
+    const u=$('#dcU').value,dir=$('#dcDir').value==='+'?1:-1;
+    const nn=n*dir;
+    if(u==='d')d.setDate(d.getDate()+nn);
+    else if(u==='w')d.setDate(d.getDate()+nn*7);
+    else if(u==='m')d.setMonth(d.getMonth()+nn);
+    else d.setFullYear(d.getFullYear()+nn);
+    $('#dcOut2').innerHTML=`<div class="kv"><span>推算结果</span><code>${d.toLocaleDateString('zh-CN',{year:'numeric',month:'long',day:'numeric'})} · 星期${'日一二三四五六'[d.getDay()]}</code></div>`;
+  };
+  ['dcA','dcB'].forEach(id=>$('#'+id).addEventListener('input',diff));
+  ['dcBase','dcN','dcU','dcDir'].forEach(id=>$('#'+id).addEventListener('input',add));
+  diff();add();
+});
+
+/* ================= 图片媒体 ================= */
+function fileToImage(file){
+  return new Promise((res,rej)=>{
+    const url=URL.createObjectURL(file);
+    const img=new Image();
+    img.onload=()=>res({img,url});
+    img.onerror=()=>{URL.revokeObjectURL(url);rej(new Error('无法解析该图片文件'));};
+    img.src=url;
+  });
+}
+function humanSize(n){return n<1024?n+' B':n<1048576?(n/1024).toFixed(1)+' KB':(n/1048576).toFixed(2)+' MB';}
+
+tool('img-base64','img','🔤','图片转 Base64','图片文件转 DataURL / CSS / HTML 代码',root=>{
+  root.innerHTML=`<div style="border:2px dashed var(--line);border-radius:12px;padding:26px;text-align:center">
+      <input type="file" id="ibF" accept="image/*"></div>
+    <div id="ibPrev" class="center mt"></div><div id="ibMsg"></div>
+    <div id="ibRows"></div>`;
+  $('#ibF').addEventListener('change',async e=>{
+    const f=e.target.files[0];if(!f)return;
+    try{
+      const dataUrl=await new Promise((res,rej)=>{
+        const r=new FileReader();
+        r.onload=()=>res(r.result);r.onerror=()=>rej(new Error('读取失败'));r.readAsDataURL(f);
+      });
+      $('#ibPrev').innerHTML=`<img src="${dataUrl}" style="max-width:100%;max-height:220px;border-radius:10px;border:1px solid var(--line)">`;
+      const b64=dataUrl.split(',')[1];
+      setCopy('ibB64',b64);setCopy('ibCss',`background-image: url("${dataUrl}");`);
+      setCopy('ibHtml',`<img src="${dataUrl}" alt="">`);
+      $('#ibMsg').innerHTML=`<div class="okbox">✓ ${esc(f.name)} · ${humanSize(f.size)} · Base64 后 ${humanSize(b64.length)}</div>`;
+      $('#ibRows').innerHTML=[['Data URL',dataUrl.slice(0,96)+'…'],['CSS background-image',`url("${dataUrl.slice(0,60)}…")`],['HTML img 标签',`<img src="${dataUrl.slice(0,60)}…">`]]
+        .map(([k,v],i)=>`<div class="kv"><span>${k}</span><div class="kvv"><code>${esc(v)}</code>${cpBtn(i===0?'ibB64':i===1?'ibCss':'ibHtml')}</div></div>`).join('');
+    }catch(err){$('#ibMsg').innerHTML=`<div class="errbox">${esc(err.message)}</div>`;}
+  });
+});
+
+tool('img-compress','img','🗜️','图片压缩','调整尺寸与质量，减小图片体积',root=>{
+  root.innerHTML=`<div style="border:2px dashed var(--line);border-radius:12px;padding:20px;text-align:center">
+      <input type="file" id="icF" accept="image/*"></div>
+    <div class="row mt" style="display:none" id="icOpts">
+      <label class="fld"><span class="fl">最大宽度 <b id="icWV">1920</b>px</span><input type="range" id="icW" min="100" max="4000" value="1920"></label>
+      <label class="fld"><span class="fl">质量 <b id="icQV">80</b>%</span><input type="range" id="icQ" min="10" max="100" value="80"></label>
+      <label class="fld"><span class="fl">格式</span>${sel('icF2',[['image/jpeg','JPEG（体积小）'],['image/webp','WebP（更小）'],['image/png','PNG（无损）']])}</label></div>
+    <div id="icMsg"></div><div id="icPrev" class="center mt"></div><div id="icStats"></div>`;
+  let img=null,srcSize=0,srcName='image';
+  const run=async()=>{
+    if(!img)return;
+    const canvas=document.createElement('canvas');
+    const maxW=+$('#icW').value;
+    const scale=Math.min(1,maxW/img.naturalWidth);
+    canvas.width=Math.round(img.naturalWidth*scale);
+    canvas.height=Math.round(img.naturalHeight*scale);
+    canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+    const type=$('#icF2').value;
+    const q=type==='image/png'?undefined:+$('#icQ').value/100;
+    canvas.toBlob(blob=>{
+      if(!blob){$('#icMsg').innerHTML='<div class="errbox">转换失败</div>';return;}
+      const url=URL.createObjectURL(blob);
+      $('#icPrev').innerHTML=`<img src="${url}" style="max-width:100%;max-height:300px;border-radius:10px;border:1px solid var(--line)">`;
+      const pct=srcSize?((1-blob.size/srcSize)*100).toFixed(1):'—';
+      $('#icStats').innerHTML=`<div class="kv"><span>原始大小</span><code>${humanSize(srcSize)}</code></div>
+        <div class="kv"><span>压缩后</span><code>${humanSize(blob.size)}（${canvas.width}×${canvas.height}）</code></div>
+        <div class="kv"><span>节省</span><code style="color:${blob.size<srcSize?'var(--ok)':'var(--err)'}">${pct}%</code></div>
+        <div class="btns">${btn('icDl','下载压缩图','ok')}</div>`;
+      $('#icDl').onclick=()=>{const a=document.createElement('a');a.href=url;
+        a.download=srcName.replace(/\.\w+$/,'')+'-compressed.'+type.split('/')[1].replace('jpeg','jpg');a.click();};
+    },type,q);
+  };
+  $('#icW').addEventListener('input',()=>{$('#icWV').textContent=$('#icW').value;run();});
+  $('#icQ').addEventListener('input',()=>{$('#icQV').textContent=$('#icQ').value;run();});
+  $('#icF2').addEventListener('change',run);
+  $('#icF').addEventListener('change',async e=>{
+    const f=e.target.files[0];if(!f)return;
+    try{
+      const r=await fileToImage(f);img=r.img;srcSize=f.size;srcName=f.name;
+      URL.revokeObjectURL(r.url);
+      $('#icOpts').style.display='flex';
+      $('#icMsg').innerHTML=`<div class="okbox">✓ 已载入 ${esc(f.name)}（${img.naturalWidth}×${img.naturalHeight}，${humanSize(f.size)}）</div>`;
+      run();
+    }catch(err){$('#icMsg').innerHTML=`<div class="errbox">${esc(err.message)}</div>`;}
+  });
+});
+
+tool('img-convert','img','🔁','图片格式转换','PNG / JPEG / WebP 互相转换',root=>{
+  root.innerHTML=`<div style="border:2px dashed var(--line);border-radius:12px;padding:20px;text-align:center">
+      <input type="file" id="imF" accept="image/*"></div>
+    <div class="row mt" id="imOpts" style="display:none">
+      <label class="fld"><span class="fl">目标格式</span>${sel('imT',[['image/png','PNG'],['image/jpeg','JPEG'],['image/webp','WebP']])}</label>
+      ${lbl('背景色（转 JPEG 时透明区填充）','<input type="color" id="imBg" value="#ffffff">')}</div>
+    <div id="imMsg"></div><div id="imPrev" class="center mt"></div><div id="imDl" class="btns" style="justify-content:center"></div>`;
+  let img=null,name='image';
+  const run=()=>{
+    if(!img)return;
+    const canvas=document.createElement('canvas');
+    canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;
+    const ctx=canvas.getContext('2d');
+    if($('#imT').value==='image/jpeg'){ctx.fillStyle=$('#imBg').value;ctx.fillRect(0,0,canvas.width,canvas.height);}
+    ctx.drawImage(img,0,0);
+    const url=canvas.toDataURL($('#imT').value,0.92);
+    const ext=$('#imT').value.split('/')[1].replace('jpeg','jpg');
+    $('#imPrev').innerHTML=`<img src="${url}" style="max-width:100%;max-height:300px;border-radius:10px;border:1px solid var(--line)">`;
+    $('#imDl').innerHTML=`<a class="btn ok" href="${url}" download="${name.replace(/\.\w+$/,'')}.${ext}">下载 ${ext.toUpperCase()}</a>`;
+  };
+  $('#imT').addEventListener('change',run);$('#imBg').addEventListener('input',run);
+  $('#imF').addEventListener('change',async e=>{
+    const f=e.target.files[0];if(!f)return;
+    try{const r=await fileToImage(f);img=r.img;name=f.name;URL.revokeObjectURL(r.url);
+      $('#imOpts').style.display='flex';
+      $('#imMsg').innerHTML=`<div class="okbox">✓ ${img.naturalWidth}×${img.naturalHeight}</div>`;run();
+    }catch(err){$('#imMsg').innerHTML=`<div class="errbox">${esc(err.message)}</div>`;}
+  });
+});
+
+tool('img-picker','img','🎨','图片取色器','点击图片任意位置取色',root=>{
+  root.innerHTML=`<div style="border:2px dashed var(--line);border-radius:12px;padding:20px;text-align:center">
+      <input type="file" id="pkF" accept="image/*"></div>
+    <div class="split mt"><div class="center"><canvas id="pkC" style="max-width:100%;cursor:crosshair;border-radius:8px;border:1px solid var(--line)"></canvas>
+      <div class="muted" id="pkPos">载入图片后，点击取色（右侧为放大镜）</div></div>
+      <div class="center"><canvas id="pkZ" width="150" height="150" style="border:1px solid var(--line);border-radius:8px;image-rendering:pixelated"></canvas>
+      <div id="pkCol" class="mt"></div></div></div>`;
+  const zc=$('#pkZ').getContext('2d');
+  let imgData=null,canvas=$('#pkC');
+  $('#pkF').addEventListener('change',async e=>{
+    const f=e.target.files[0];if(!f)return;
+    try{
+      const r=await fileToImage(f);
+      canvas.width=r.img.naturalWidth;canvas.height=r.img.naturalHeight;
+      canvas.getContext('2d').drawImage(r.img,0,0);
+      imgData=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height);
+      URL.revokeObjectURL(r.url);
+    }catch(err){$('#pkPos').textContent=err.message;}
+  });
+  const px=(x,y)=>{
+    if(!imgData||x<0||y<0||x>=canvas.width||y>=canvas.height)return null;
+    const i=(y*canvas.width+x)*4;
+    return [imgData.data[i],imgData.data[i+1],imgData.data[i+2]];
+  };
+  const zoom=(x,y)=>{
+    zc.fillStyle='#222';zc.fillRect(0,0,150,150);
+    const R=7,S=10;
+    for(let dy=-R;dy<=R;dy++)for(let dx=-R;dx<=R;dx++){
+      const p=px(x+dx,y+dy);if(!p)continue;
+      zc.fillStyle=`rgb(${p[0]},${p[1]},${p[2]})`;
+      zc.fillRect(75+(dx-0.5)*S,75+(dy-0.5)*S,S,S);
+    }
+    zc.strokeStyle='#fff';zc.lineWidth=2;zc.strokeRect(75-6,75-6,12,12);
+  };
+  canvas.addEventListener('mousemove',e=>{
+    const r=canvas.getBoundingClientRect();
+    const x=Math.floor((e.clientX-r.left)/r.width*canvas.width);
+    const y=Math.floor((e.clientY-r.top)/r.height*canvas.height);
+    const p=px(x,y);
+    if(p){zoom(x,y);$('#pkPos').textContent=`(${x}, ${y}) · 移动预览，点击选定`;}
+  });
+  canvas.addEventListener('click',e=>{
+    const r=canvas.getBoundingClientRect();
+    const x=Math.floor((e.clientX-r.left)/r.width*canvas.width);
+    const y=Math.floor((e.clientY-r.top)/r.height*canvas.height);
+    const p=px(x,y);
+    if(!p)return;
+    const hex=rgbToHex(p[0],p[1],p[2]);
+    setCopy('pkHex',hex);
+    $('#pkCol').innerHTML=`<div class="swatch" data-cp="pkHex" style="background:${hex};max-width:220px;margin:0 auto">${hex}</div>
+      <div class="muted">rgb(${p[0]}, ${p[1]}, ${p[2]}) · 点击色块复制</div>`;
+  });
+});
+
+tool('img-info','img','🔍','图片信息查看','尺寸、大小、类型、宽高比',root=>{
+  root.innerHTML=`<div style="border:2px dashed var(--line);border-radius:12px;padding:20px;text-align:center">
+      <input type="file" id="iiF" accept="image/*"></div>
+    <div id="iiPrev" class="center mt"></div><div id="iiOut"></div>`;
+  $('#iiF').addEventListener('change',async e=>{
+    const f=e.target.files[0];if(!f)return;
+    try{
+      const r=await fileToImage(f);
+      const ratio=(r.img.naturalWidth/r.img.naturalHeight).toFixed(3);
+      $('#iiPrev').innerHTML=`<img src="${r.url}" style="max-width:100%;max-height:240px;border-radius:10px;border:1px solid var(--line)">`;
+      $('#iiOut').innerHTML=[
+        ['文件名',f.name],['类型',f.type||'未知'],['文件大小',humanSize(f.size)],
+        ['宽 × 高',`${r.img.naturalWidth} × ${r.img.naturalHeight} px`],
+        ['宽高比',ratio===parseFloat(ratio).toFixed(3)?ratio:ratio],['总像素',(r.img.naturalWidth*r.img.naturalHeight).toLocaleString()],
+        ['最后修改',new Date(f.lastModified).toLocaleString('zh-CN')]
+      ].map(([k,v])=>`<div class="kv"><span>${k}</span><code>${esc(String(v))}</code></div>`).join('');
+    }catch(err){$('#iiOut').innerHTML=`<div class="errbox">${esc(err.message)}</div>`;}
+  });
+});
+
+tool('camera','img','📷','摄像头预览','调用本地摄像头预览与拍照（数据不外传）',root=>{
+  root.innerHTML=`<div class="center"><video id="cmV" autoplay playsinline muted style="max-width:100%;max-height:420px;border-radius:12px;background:#000"></video></div>
+    <div class="btns" style="justify-content:center">${btn('cmGo','开启摄像头','ok')}${btn('cmSnap','拍照 📸','ghost')}${btn('cmStop','关闭','danger')}</div>
+    <div id="cmMsg"></div><div id="cmShot" class="center mt"></div>`;
+  let stream=null;
+  const stop=()=>{if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}};
+  onClean(stop);
+  $('#cmGo').onclick=async()=>{
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:1280},height:{ideal:720}},audio:false});
+      $('#cmV').srcObject=stream;
+      $('#cmMsg').innerHTML='<div class="okbox">✓ 摄像头已开启</div>';
+    }catch(e){$('#cmMsg').innerHTML=`<div class="errbox">无法开启摄像头：${esc(e.message)}（请检查浏览器权限；需 HTTPS 或本地文件）</div>`;}
+  };
+  $('#cmSnap').onclick=()=>{
+    const v=$('#cmV');
+    if(!stream||!v.videoWidth){$('#cmMsg').innerHTML='<div class="warnbox">请先开启摄像头</div>';return;}
+    const c=document.createElement('canvas');
+    c.width=v.videoWidth;c.height=v.videoHeight;
+    c.getContext('2d').drawImage(v,0,0);
+    const url=c.toDataURL('image/png');
+    $('#cmShot').innerHTML=`<img src="${url}" style="max-width:100%;max-height:300px;border-radius:10px;border:1px solid var(--line)">
+      <div class="btns" style="justify-content:center"><a class="btn ok" href="${url}" download="snapshot.png">下载照片</a></div>`;
+  };
+  $('#cmStop').onclick=()=>{stop();$('#cmMsg').innerHTML='<div class="muted">摄像头已关闭</div>';};
+});
+
+tool('eyedropper','img','💧','屏幕取色','从屏幕任意位置吸取颜色（浏览器支持时）',root=>{
+  if(!window.EyeDropper){
+    root.innerHTML=`<div class="warnbox">当前浏览器不支持屏幕取色 API（EyeDropper）。<br>
+      需要 Chrome / Edge 95+ 等基于 Chromium 的现代浏览器。可以改用「图片取色器」工具。</div>`;
+    return;
+  }
+  root.innerHTML=`<div class="btns">${btn('edGo','开始取色 💧','ok')}<span class="muted">点击后选择屏幕上的任意像素</span></div>
+    <div id="edOut" class="cards" style="grid-template-columns:repeat(auto-fill,minmax(120px,1fr))"></div>`;
+  let n=0;
+  $('#edGo').onclick=async()=>{
+    try{
+      const r=await new EyeDropper().open();
+      const k='ed'+(n++);
+      setCopy(k,r.sRGBHex);
+      $('#edOut').insertAdjacentHTML('afterbegin',
+        `<div class="swatch" data-cp="${k}" style="background:${r.sRGBHex};height:72px">${r.sRGBHex.toUpperCase()}</div>`);
+    }catch(e){/* 用户取消 */}
+  };
+});
+
+tool('tts','img','🗣️','文本转语音','朗读文本，可调语速音调（使用系统本地语音）',root=>{
+  if(!('speechSynthesis' in window)){
+    root.innerHTML='<div class="warnbox">当前浏览器不支持语音合成 API。</div>';return;
+  }
+  root.innerHTML=`${tArea('ttIn','输入要朗读的文本…',5,'你好，这是一段测试语音。')}
+    <div class="row">
+      <label class="fld"><span class="fl">语音</span><select id="ttV"><option>加载中…</option></select></label>
+      <label class="fld"><span class="fl">语速 <b id="ttRV2">1.0</b></span><input type="range" id="ttR" min="5" max="20" value="10"></label>
+      <label class="fld"><span class="fl">音调 <b id="ttPV2">1.0</b></span><input type="range" id="ttP" min="5" max="20" value="10"></label></div>
+    <div class="btns">${btn('ttGo','▶ 朗读','ok')}${btn('ttPz','⏸ 暂停','ghost')}${btn('ttCt','⏹ 停止','danger')}</div>
+    <div id="ttMsg" class="muted"></div>`;
+  const load=()=>{
+    if(!document.getElementById('ttV'))return;
+    const vs=speechSynthesis.getVoices();
+    if(!vs.length)return;
+    $('#ttV').innerHTML=vs.map((v,i)=>`<option value="${i}">${esc(v.name)}（${esc(v.lang)}）</option>`).join('');
+    const zh=vs.findIndex(v=>/zh|Chinese/i.test(v.lang));
+    if(zh>=0)$('#ttV').value=zh;
+    $('#ttMsg').textContent=`共 ${vs.length} 个本地语音`;
+  };
+  load();speechSynthesis.onvoiceschanged=load;
+  $('#ttR').addEventListener('input',()=>$('#ttRV2').textContent=(+$('#ttR').value/10).toFixed(1));
+  $('#ttP').addEventListener('input',()=>$('#ttPV2').textContent=(+$('#ttP').value/10).toFixed(1));
+  $('#ttGo').onclick=()=>{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance($('#ttIn').value);
+    const vs=speechSynthesis.getVoices();
+    if(vs[$('#ttV').value])u.voice=vs[+$('#ttV').value];
+    u.rate=+$('#ttR').value/10;u.pitch=+$('#ttP').value/10;
+    speechSynthesis.speak(u);
+  };
+  $('#ttPz').onclick=()=>{if(speechSynthesis.speaking)speechSynthesis.paused?speechSynthesis.resume():speechSynthesis.pause();};
+  $('#ttCt').onclick=()=>speechSynthesis.cancel();
+  onClean(()=>speechSynthesis.cancel());
+});
+
+/* ================= 生活助手 ================= */
+tool('notepad','life','📒','快速记事本','自动保存的本地便签，可导出 txt',root=>{
+  root.innerHTML=`<div class="btns">${btn('npSave','立即保存','ok')}${btn('npDl','导出 .txt','ghost')}
+    <input type="file" id="npImp" accept=".txt" style="display:none"><button class="btn ghost sm" id="npImpB">导入 .txt</button>
+    ${btn('npClr','清空','danger')}<span class="muted" id="npStat"></span></div>
+    ${tArea('npT','',16)}`;
+  const KEY='tbx-notepad';
+  try{$('#npT').value=localStorage.getItem(KEY)||'';}catch(e){}
+  let n=0;
+  const stat=s=>$('#npStat').textContent=s;
+  const save=auto=>{
+    try{localStorage.setItem(KEY,$('#npT').value);stat((auto?'自动保存':'已保存')+' ✓ '+new Date().toLocaleTimeString('zh-CN'));}
+    catch(e){stat('保存失败（浏览器存储不可用）');}
+  };
+  $('#npT').addEventListener('input',debounce(()=>save(true),800));
+  $('#npT').addEventListener('input',()=>stat(`已输入 ${$('#npT').value.length} 字…`));
+  $('#npSave').onclick=()=>save(false);
+  $('#npDl').onclick=()=>download('记事本.txt',$('#npT').value);
+  $('#npImpB').onclick=()=>$('#npImp').click();
+  $('#npImp').addEventListener('change',e=>{
+    const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();r.onload=()=>{$('#npT').value=r.result;save(false);};r.readAsText(f,'utf-8');
+  });
+  $('#npClr').onclick=()=>{if(confirm('确定清空全部内容？')){$('#npT').value='';save(false);}};
+  stat(`已输入 ${$('#npT').value.length} 字`);
+});
+
+tool('todo','life','✅','待办清单','本地保存的简单待办事项',root=>{
+  let items;
+  try{items=JSON.parse(localStorage.getItem('tbx-todo')||'[]');}catch(e){items=[];}
+  root.innerHTML=`<div class="row">${inp('tdIn','添加待办，回车确认…')}${btn('tdAdd','添加')}</div>
+    <div class="btns">${chk('tdA','显示全部')}${chk('tdD','只看未完成',false)}${btn('tdClr','清除已完成','ghost sm')}<span class="muted" id="tdC"></span></div>
+    <div id="tdOut"></div>`;
+  const save=()=>{try{localStorage.setItem('tbx-todo',JSON.stringify(items));}catch(e){}};
+  const upd=()=>{
+    const mode=$('#tdA').checked?'all':$('#tdD').checked?'active':'all';
+    const list=items.filter(it=>mode==='all'||!it.done);
+    $('#tdOut').innerHTML=list.length?list.map(it=>`
+      <div class="kv"><label class="chk" style="margin:0"><input type="checkbox" data-ck="${it.id}"${it.done?' checked':''}>
+      <span style="${it.done?'text-decoration:line-through;color:var(--muted)':''}">${esc(it.text)}</span></label>
+      <button class="btn ghost sm" data-del="${it.id}">✕</button></div>`).join('')
+      :'<div class="muted center" style="padding:24px">暂无待办 🎉</div>';
+    $('#tdC').textContent=`共 ${items.length} 项，未完成 ${items.filter(i=>!i.done).length} 项`;
+  };
+  const add=()=>{
+    const v=$('#tdIn').value.trim();
+    if(!v)return;
+    items.unshift({id:Date.now()+Math.random().toString(16).slice(2),text:v,done:false});
+    $('#tdIn').value='';save();upd();
+  };
+  $('#tdAdd').onclick=add;
+  $('#tdIn').addEventListener('keydown',e=>{if(e.key==='Enter')add();});
+  $('#tdOut').addEventListener('change',e=>{
+    const ck=e.target.closest('[data-ck]');
+    if(ck){const it=items.find(x=>x.id===ck.dataset.ck);if(it){it.done=ck.checked;save();upd();}}
+  });
+  $('#tdOut').addEventListener('click',e=>{
+    const d=e.target.closest('[data-del]');
+    if(d){items=items.filter(x=>x.id!==d.dataset.del);save();upd();}
+  });
+  $('#tdClr').onclick=()=>{items=items.filter(x=>!x.done);save();upd();};
+  ['tdA','tdD'].forEach(id=>$('#'+id).addEventListener('change',()=>{if(id==='tdA'&&$('#tdA').checked)$('#tdD').checked=false;if(id==='tdD'&&$('#tdD').checked)$('#tdA').checked=false;upd();}));
+  upd();
+});
+
+tool('tip','life','💈','小费计算','餐费小费与人均分摊',root=>{
+  root.innerHTML=`<div class="row">${lbl('账单金额（元）',inp('tpB','','text','300'))}
+    <label class="fld"><span class="fl">小费比例：<b id="tpPV2">15</b>%</span><input type="range" id="tpP" min="0" max="30" value="15"></label>
+    ${lbl('人数',inp('tpN','','text','4'))}</div>
+    <div class="btns">${[0,10,15,20].map(v=>`<button class="btn ghost sm" data-tp="${v}">${v}%</button>`).join('')}</div>
+    <div id="tpOut"></div>`;
+  const upd=()=>{
+    $('#tpPV2').textContent=$('#tpP').value;
+    const b=parseFloat($('#tpB').value)||0,p=+$('#tpP').value,n=Math.max(1,parseInt($('#tpN').value)||1);
+    const tip=b*p/100,total=b+tip;
+    $('#tpOut').innerHTML=`
+      <div class="kv"><span>小费</span><code>${tip.toFixed(2)} 元</code></div>
+      <div class="kv"><span>总计</span><code>${total.toFixed(2)} 元</code></div>
+      <div class="kv"><span>人均（含小费）</span><code style="font-size:18px;color:var(--pri)">${(total/n).toFixed(2)} 元</code></div>`;
+  };
+  ['tpB','tpN'].forEach(id=>$('#'+id).addEventListener('input',upd));
+  $('#tpP').addEventListener('input',upd);
+  root.addEventListener('click',e=>{const b=e.target.closest('[data-tp]');if(b){$('#tpP').value=b.dataset.tp;upd();}});
+  upd();
+});
+
+tool('rmb','life','💰','人民币大写','金额转中文大写（壹贰叁…），财务报销用',root=>{
+  root.innerHTML=`<div class="row">${lbl('金额（元，最多万亿）',inp('rmIn','','text','12345.67'))}</div>
+    ${out('rmOut')}`;
+  const upd=()=>{
+    const num=parseFloat($('#rmIn').value);
+    if(isNaN(num)||num<0||num>=1e13){$('#rmOut').textContent='请输入 0 ~ 10万亿 之间的有效金额';return;}
+    const D='零壹贰叁肆伍陆柒捌玖',U=['','拾','佰','仟'],G=['','万','亿','万亿'];
+    const [intS,decS]=num.toFixed(2).split('.');
+    let s='';
+    const n=intS.replace(/^0+(?=\d)/,'').length;
+    const int2=intS.replace(/^0+(?=\d)/,'');
+    let zeroPending=false;
+    for(let i=0;i<int2.length;i++){
+      const d=+int2[i],pos=int2.length-1-i;
+      if(d===0){zeroPending=true;}
+      else{
+        if(zeroPending&&s&&!s.endsWith('零'))s+='零';
+        zeroPending=false;
+        s+=D[d]+U[pos%4]+G[Math.floor(pos/4)];
+      }
+    }
+    if(!s)s='零';
+    let dec='';
+    const j=+decS[0],f=+decS[1];
+    if(j)dec+=D[j]+'角';
+    else if(f&&int2!=='0')dec+='零';
+    if(f)dec+=D[f]+'分';
+    $('#rmOut').textContent=`¥ ${num.toFixed(2)} = ${s}元${dec||'整'}`;
+  };
+  $('#rmIn').addEventListener('input',upd);upd();
+});
+
+tool('fuel','life','⛽','油耗计算','百公里油耗与每公里成本',root=>{
+  root.innerHTML=`<div class="row">${lbl('行驶里程（公里）',inp('fuD','','text','400'))}
+    ${lbl('耗油量（升）',inp('fuL','','text','30'))}${lbl('油价（元/升）',inp('fuP','','text','7.8'))}</div>
+    <div id="fuOut"></div>`;
+  const upd=()=>{
+    const d=parseFloat($('#fuD').value),l=parseFloat($('#fuL').value),p=parseFloat($('#fuP').value);
+    if(!(d>0)||!(l>0)||!(p>0)){$('#fuOut').innerHTML='<span class="muted">输入里程、耗油量和油价</span>';return;}
+    const per100=l/d*100,cost=l*p;
+    $('#fuOut').innerHTML=`
+      <div class="kv"><span>百公里油耗</span><code style="font-size:18px;color:var(--pri)">${per100.toFixed(2)} L</code></div>
+      <div class="kv"><span>本次油费</span><code>${cost.toFixed(2)} 元</code></div>
+      <div class="kv"><span>每公里成本</span><code>${(cost/d).toFixed(3)} 元</code></div>
+      <div class="kv"><span>1000 公里约需</span><code>${(per100*10*p).toFixed(0)} 元</code></div>`;
+  };
+  ['fuD','fuL','fuP'].forEach(id=>$('#'+id).addEventListener('input',upd));upd();
+});
+
+tool('zodiac','life','🐉','生肖星座','查生肖、星座与性格简介',root=>{
+  const Z=['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪'];
+  const ZTXT={'鼠':'机智灵活，适应力强','牛':'勤劳务实，稳重可靠','虎':'勇敢自信，天生领袖','兔':'温和细心，人缘极佳','龙':'气度不凡，抱负远大','蛇':'冷静睿智，直觉敏锐','马':'热情奔放，行动力强','羊':'温柔体贴，富有同情心','猴':'聪明机敏，多才多艺','鸡':'勤奋守时，注重细节','狗':'忠诚正直，值得信赖','猪':'乐观豁达，福气深厚'};
+  const XS=[['摩羯',[1,19]],['水瓶',[2,18]],['双鱼',[3,20]],['白羊',[4,19]],['金牛',[5,20]],['双子',[6,21]],['巨蟹',[7,22]],['狮子',[8,22]],['处女',[9,22]],['天秤',[10,23]],['天蝎',[11,22]],['射手',[12,21]],['摩羯',[12,31]]];
+  root.innerHTML=`<div class="row">${lbl('出生年份',inp('zdY','','text','2000'))}
+    ${lbl('出生日期（查星座）','<input type="date" id="zdD">')}</div>
+    <div id="zdOut"></div>`;
+  const upd=()=>{
+    let html='';
+    const y=parseInt($('#zdY').value);
+    if(y>=1900&&y<=2100){
+      const z=Z[(y-4)%12];
+      const years=[0,1,2,3].map(i=>y-i*12).filter(v=>v>=1900).reverse();
+      html+=`<h4>生肖</h4><div class="center big">🧧 属${z}（${y} 年生）</div>
+        <div class="muted center">${ZTXT[z]}</div>
+        <div class="center mt">同属相年份：${years.map(v=>`<span class="chip">${v}</span>`).join('')}</div>`;
+    }
+    const dv=$('#zdD').value;
+    if(dv){
+      const [,mm,dd]=dv.split('-').map(Number);
+      let name='';
+      for(const [nm,[m2,d2]] of XS){if(mm<m2||(mm===m2&&dd<=d2)){name=nm;break;}}
+      const EMO={白羊:'🐏',金牛:'🐂',双子:'👯',巨蟹:'🦀',狮子:'🦁',处女:'🌾',天秤:'⚖️',天蝎:'🦂',射手:'🏹',摩羯:'🐐',水瓶:'🏺',双鱼:'🐟'};
+      html+=`<h4 class="mt">星座</h4><div class="center big">${EMO[name]||''} ${name}座</div>
+        <div class="muted center">出生日期 ${mm} 月 ${dd} 日</div>`;
+    }
+    $('#zdOut').innerHTML=html||'<span class="muted">输入出生年份或选择日期</span>';
+  };
+  ['zdY','zdD'].forEach(id=>$('#'+id).addEventListener('input',upd));upd();
+});
+
+/* ================= 休闲游戏 ================= */
+tool('rps','fun','✊','石头剪刀布','人机对战，记分板统计',root=>{
+  const H=['✊ 石头','✌️ 剪刀','✋ 布'];
+  let win=0,lose=0,draw=0;
+  root.innerHTML=`<div class="btns" style="justify-content:center">${H.map((h,i)=>`<button class="btn" data-h="${i}" style="font-size:18px;padding:14px 22px">${h}</button>`).join('')}</div>
+    <div class="center" style="font-size:40px" id="rpShow"></div>
+    <div id="rpMsg" class="center big"></div>
+    <div class="btns" style="justify-content:center"><span class="badge ok">胜 <b id="rpW">0</b></span><span class="badge err">负 <b id="rpL">0</b></span><span class="badge info">平 <b id="rpD">0</b></span>${btn('rpR','清零','ghost sm')}</div>`;
+  root.addEventListener('click',e=>{
+    const b=e.target.closest('[data-h]');if(!b)return;
+    const me=+b.dataset.h,ai=randInt(0,2);
+    $('#rpShow').textContent=`你：${H[me]}  ⚡  电脑：${H[ai]}`;
+    const r=(me-ai+3)%3;
+    if(r===1){win++;$('#rpMsg').innerHTML='<span style="color:var(--ok)">🎉 你赢了！</span>';}
+    else if(r===2){lose++;$('#rpMsg').innerHTML='<span style="color:var(--err)">😭 你输了</span>';}
+    else{draw++;$('#rpMsg').innerHTML='<span style="color:var(--muted)">🤝 平局</span>';}
+    $('#rpW').textContent=win;$('#rpL').textContent=lose;$('#rpD').textContent=draw;
+  });
+  $('#rpR').onclick=()=>{win=lose=draw=0;$('#rpW').textContent=$('#rpL').textContent=$('#rpD').textContent=0;$('#rpShow').textContent='';$('#rpMsg').textContent='';};
+});
+
+tool('ttt','fun','⭕','井字棋','对战 AI（可切换难度），必胜算法',root=>{
+  let bd=Array(9).fill(''),over=false,score={w:0,l:0,d:0},hard=true;
+  const LINES=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  const winner=b=>{for(const [a,b2,c] of LINES)if(b[a]&&b[a]===b[b2]&&b[a]===b[c])return b[a];
+    return b.every(Boolean)?'draw':null;};
+  function minimax(b,aiTurn){
+    const w=winner(b);
+    if(w==='O')return {v:1};if(w==='X')return {v:-1};if(w==='draw')return {v:0};
+    let best={v:aiTurn?-2:2,i:-1};
+    for(let i=0;i<9;i++)if(!b[i]){
+      b[i]=aiTurn?'O':'X';
+      const r=minimax(b,!aiTurn);b[i]='';
+      if(aiTurn?r.v>best.v:r.v<best.v)best={v:r.v,i};
+    }
+    return best;
+  }
+  root.innerHTML=`<div class="btns" style="justify-content:center">${btn('ttMode','难度：无敌模式','ghost')}</div>
+    <div id="ttB" style="display:grid;grid-template-columns:repeat(3,90px);gap:8px;justify-content:center"></div>
+    <div class="center big mt" id="ttMsg"></div>
+    <div class="btns" style="justify-content:center"><span class="badge ok">胜 <b id="ttW">0</b></span><span class="badge err">负 <b id="ttL">0</b></span><span class="badge info">平 <b id="ttD">0</b></span>${btn('ttR','重新开始','ghost sm')}</div>`;
+  const draw=()=>{
+    $('#ttB').innerHTML=bd.map((v,i)=>`<button data-i="${i}" style="height:90px;font-size:40px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:${v==='O'?'var(--pri)':'var(--warn)'};cursor:${v?'default':'pointer'}">${v}</button>`).join('');
+  };
+  const move=i=>{
+    if(over||bd[i])return;
+    bd[i]='X';draw();
+    let w=winner(bd);
+    if(w){end(w);return;}
+    $('#ttMsg').textContent='AI 思考中…';
+    setTimeout(()=>{
+      let idx=-1;
+      if(hard)idx=minimax([...bd],true).i;
+      else{const empty=bd.map((v,j)=>v?-1:j).filter(j=>j>=0);idx=empty[randInt(0,empty.length-1)];}
+      if(idx>=0)bd[idx]='O';
+      draw();w=winner(bd);
+      if(w)end(w);else $('#ttMsg').textContent='轮到你了（❌）';
+    },250);
+  };
+  const end=w=>{
+    over=true;
+    if(w==='X'){score.w++;$('#ttMsg').innerHTML='<span style="color:var(--ok)">🎉 你赢了！</span>';}
+    else if(w==='O'){score.l++;$('#ttMsg').innerHTML='<span style="color:var(--err)">AI 获胜</span>';}
+    else{score.d++;$('#ttMsg').textContent='🤝 平局';}
+    $('#ttW').textContent=score.w;$('#ttL').textContent=score.l;$('#ttD').textContent=score.d;
+  };
+  const reset=()=>{bd=Array(9).fill('');over=false;$('#ttMsg').textContent='你先走（❌）';draw();};
+  $('#ttB').addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(b)move(+b.dataset.i);});
+  $('#ttR').onclick=reset;
+  $('#ttMode').onclick=()=>{hard=!hard;$('#ttMode').textContent=hard?'难度：无敌模式':'难度：简单模式';reset();};
+  reset();
+});
+
+tool('memory','fun','🃏','记忆翻牌','翻出全部配对，考验记忆力',root=>{
+  const EMO=['🍎','🌸','🚀','🐶','🎵','⚽','🌈','🍕'];
+  root.innerHTML=`<div class="btns" style="justify-content:center"><span class="muted" id="mmStats">翻牌 0 次</span>${btn('mmR','重新开始','ghost sm')}</div>
+    <div id="mmGrid" style="display:grid;grid-template-columns:repeat(4,80px);gap:8px;justify-content:center"></div>
+    <div class="center big mt" id="mmMsg"></div>`;
+  let cards,open,lock,moves,matched;
+  const reset=()=>{
+    cards=[...EMO,...EMO].map(v=>({v,flipped:false,done:false}));
+    for(let i=cards.length-1;i>0;i--){const j=randInt(0,i);[cards[i],cards[j]]=[cards[j],cards[i]];}
+    open=[];lock=false;moves=0;matched=0;
+    $('#mmMsg').textContent='';stats();draw();
+  };
+  const stats=()=>$('#mmStats').textContent=`翻牌 ${moves} 次 · 已配对 ${matched}/${EMO.length}`;
+  const draw=()=>{
+    $('#mmGrid').innerHTML=cards.map((c,i)=>`<button data-i="${i}" style="height:80px;font-size:34px;border-radius:10px;cursor:pointer;
+      background:${c.done||c.flipped?'#fff':'var(--pri)'};border:1px solid var(--line);color:${c.done?'#16a34a':'#333'};opacity:${c.done?.55:1}">${c.done||c.flipped?c.v:'❓'}</button>`).join('');
+  };
+  $('#mmGrid').addEventListener('click',e=>{
+    const b=e.target.closest('[data-i]');if(!b||lock)return;
+    const c=cards[+b.dataset.i];
+    if(c.done||c.flipped)return;
+    c.flipped=true;open.push(c);moves++;draw();stats();
+    if(open.length===2){
+      lock=true;
+      if(open[0].v===open[1].v){
+        open.forEach(o=>o.done=true);matched++;open=[];
+        lock=false;draw();stats();
+        if(matched===EMO.length)$('#mmMsg').innerHTML=`<span style="color:var(--ok)">🎉 全部配对完成！共用 ${moves} 次</span>`;
+      }else setTimeout(()=>{open.forEach(o=>o.flipped=false);open=[];lock=false;draw();},700);
+    }
+  });
+  $('#mmR').onclick=reset;
+  try{
+    const best=localStorage.getItem('tbx-memory-best');
+    if(best)$('#mmStats').textContent+=` · 最佳纪录 ${best} 次`;
+  }catch(e){}
+  reset();
+});
+
+tool('g2048','fun','🔢','2048','经典数字合并小游戏（方向键 / 滑动）',root=>{
+  root.innerHTML=`<div class="btns" style="justify-content:center">
+      <span class="badge info">得分 <b id="g2S">0</b></span><span class="badge ok">最佳 <b id="g2B">0</b></span>${btn('g2R','新游戏','ghost sm')}</div>
+    <div class="g2048" id="g2G"></div>
+    <div class="center mt">
+      <div class="btns" style="justify-content:center">
+        <button class="btn ghost" data-m="up">↑</button></div>
+      <div class="btns" style="justify-content:center">
+        <button class="btn ghost" data-m="left">←</button>
+        <button class="btn ghost" data-m="down">↓</button>
+        <button class="btn ghost" data-m="right">→</button></div>
+      <div class="muted">使用键盘方向键或 WASD，合并相同数字，目标 2048！</div></div>
+    <div class="center big" id="g2Msg"></div>`;
+  const COLORS={2:'#eee4da',4:'#ede0c8',8:'#f2b179',16:'#f59563',32:'#f67c5f',64:'#f65e3b',128:'#edcf72',256:'#edcc61',512:'#edc850',1024:'#edc53f',2048:'#edc22e'};
+  let g,score,over,won,best=0;
+  try{best=+localStorage.getItem('tbx-2048')||0;}catch(e){}
+  $('#g2B').textContent=best;
+  const empty=()=>{const r=[];for(let i=0;i<4;i++)for(let j=0;j<4;j++)if(!g[i][j])r.push([i,j]);return r;};
+  const addTile=()=>{const e=empty();if(!e.length)return;const [i,j]=e[randInt(0,e.length-1)];g[i][j]=Math.random()<0.9?2:4;};
+  const draw=()=>{
+    $('#g2G').innerHTML=g.flat().map(v=>`<div class="cell" style="${v?`background:${COLORS[v]||'#3c3a32'};color:${v>4?'#f9f6f2':'#776e65'};font-size:${String(v).length>3?'20px':'26px'}`:''}">${v||''}</div>`).join('');
+    $('#g2S').textContent=score;
+    if(score>best){best=score;$('#g2B').textContent=best;try{localStorage.setItem('tbx-2048',best);}catch(e){}}
+  };
+  const canMove=()=>{
+    for(let i=0;i<4;i++)for(let j=0;j<4;j++){
+      if(!g[i][j])return true;
+      if(j<3&&g[i][j]===g[i][j+1])return true;
+      if(i<3&&g[i][j]===g[i+1][j])return true;
+    }
+    return false;
+  };
+  function slide(row){
+    const a=row.filter(v=>v);
+    for(let i=0;i<a.length-1;i++)if(a[i]===a[i+1]){a[i]*=2;score+=a[i];a.splice(i+1,1);}
+    while(a.length<4)a.push(0);
+    return a;
+  }
+  const move=dir=>{
+    if(over)return;
+    let moved=false;
+    if(dir==='left'||dir==='right'){
+      for(let i=0;i<4;i++){
+        const row=slide(dir==='left'?g[i]:[...g[i]].reverse());
+        const nn=dir==='left'?row:row.reverse();
+        if(nn.some((v,j)=>g[i][j]!==v)){g[i]=nn;moved=true;}
+      }
+    }else{
+      for(let j=0;j<4;j++){
+        const col=[g[0][j],g[1][j],g[2][j],g[3][j]];
+        const row=slide(dir==='up'?col:[...col].reverse());
+        const nn=dir==='up'?row:row.reverse();
+        for(let i=0;i<4;i++)if(g[i][j]!==nn[i]){g[i][j]=nn[i];moved=true;}
+      }
+    }
+    if(moved){addTile();draw();
+      if(!won&&g.flat().includes(2048)){won=true;$('#g2Msg').innerHTML='<span style="color:var(--ok)">🎉 达成 2048！继续挑战更高分</span>';}
+      if(!canMove()){over=true;$('#g2Msg').innerHTML='<span style="color:var(--err)">游戏结束！按「新游戏」再来一局</span>';}
+    }
+  };
+  const reset=()=>{g=Array.from({length:4},()=>Array(4).fill(0));score=0;over=false;won=false;$('#g2Msg').textContent='';addTile();addTile();draw();};
+  $('#g2R').onclick=reset;
+  root.addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b)move(b.dataset.m);});
+  const kd=e=>{
+    const map={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',s:'down',a:'left',d:'right',W:'up',S:'down',A:'left',D:'right'};
+    if(map[e.key]){e.preventDefault();move(map[e.key]);}
+  };
+  document.addEventListener('keydown',kd);
+  onClean(()=>document.removeEventListener('keydown',kd));
+  reset();
+});
+
+tool('typing','fun','⌨️','打字速度测试','测量打字速度（字/分）与准确率',root=>{
+  const EN=['The quick brown fox jumps over the lazy dog.','Practice makes perfect, keep typing every day.','A journey of a thousand miles begins with a single step.','Actions speak louder than words in every language.','Simplicity is the ultimate sophistication of design.'];
+  const CN=['生活就像一盒巧克力，你永远不知道下一颗是什么味道。','千里之行始于足下，不积跬步无以至千里。','工欲善其事，必先利其器；磨刀不误砍柴工。','山重水复疑无路，柳暗花明又一村。','学而不思则罔，思而不学则殆，温故而知新。'];
+  root.innerHTML=`<div class="row"><label class="fld"><span class="fl">文本类型</span>${sel('tyT',[['cn','中文'],['en','英文']])}</label>${btn('tyNew','换一句 🔄','ghost')}</div>
+    <div class="tt-display mt" id="tyShow"></div>
+    ${tArea('tyIn','开始输入上方文字…',4)}
+    <div class="stat-grid" id="tyStats"></div>`;
+  let target='',start=0,done=false;
+  const render=()=>{
+    const typed=$('#tyIn').value;
+    let html='';
+    for(let i=0;i<target.length;i++){
+      const cls=i<typed.length?(typed[i]===target[i]?'done':'bad'):(i===typed.length?'cur':'');
+      html+=`<span class="${cls}">${esc(target[i])}</span>`;
+    }
+    $('#tyShow').innerHTML=html;
+    const sec=(Date.now()-start)/1000;
+    const correct=[...typed].filter((c,i)=>c===target[i]).length;
+    const cpm=sec>0.5?Math.round(correct/(sec/60)):0;
+    const acc2=typed.length?Math.round(correct/typed.length*100):100;
+    $('#tyStats').innerHTML=[
+      ['用时',done?((end-start)/1000).toFixed(1)+'s':sec>0.5?sec.toFixed(0)+'s':'—'],
+      ['速度',(cpm||0)+' 字/分'],['准确率',acc2+'%'],['进度',Math.round(typed.length/target.length*100)+'%']
+    ].map(([k,v])=>`<div class="stat"><b>${v}</b><span>${k}</span></div>`).join('');
+    if(!done&&typed.length>=target.length){
+      done=true;end=Date.now();
+      const acc3=Math.round(correct/target.length*100);
+      if(acc3>=90)beep(1,0.1);
+    }
+  };
+  let end=0;
+  const news=()=>{
+    const pool=$('#tyT').value==='cn'?CN:EN;
+    target=pool[randInt(0,pool.length-1)];
+    $('#tyIn').value='';start=0;done=false;end=0;render();
+  };
+  $('#tyNew').onclick=news;
+  $('#tyT').addEventListener('change',news);
+  $('#tyIn').addEventListener('input',()=>{if(!start)start=Date.now();render();});
+  news();
+});
+
+tool('reaction','fun','⚡','反应速度测试','测试从绿灯亮起点击的速度',root=>{
+  root.innerHTML=`<div id="rxBox" style="min-height:240px;border-radius:14px;background:var(--bg);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;text-align:center;user-select:none">
+      <div><div style="font-size:44px" id="rxIcon">⚡</div><div id="rxMsg" class="big">点击开始</div><div class="muted" id="rxHint">变绿后立刻点击！</div></div></div>
+    <div class="center mt muted" id="rxHis">尚无记录</div>`;
+  let state='idle',t0=0,timer=null,times=[];
+  const box=$('#rxBox');
+  const set=(bg,icon,msg,hint)=>{
+    box.style.background=bg;
+    $('#rxIcon').textContent=icon;$('#rxMsg').textContent=msg;$('#rxHint').textContent=hint||'';
+  };
+  box.addEventListener('click',()=>{
+    if(state==='idle'){
+      state='wait';set('rgba(220,38,38,.25)','✋','等待变绿…','提前点击算犯规');
+      timer=setTimeout(()=>{
+        state='go';t0=Date.now();
+        set('rgba(22,163,74,.4)','👆','现在点击！','');beep(1,0.06);
+      },1000+Math.random()*3000);
+    }else if(state==='wait'){
+      clearTimeout(timer);state='idle';
+      set('var(--bg)','🙈','犯规！','等变绿了再点，点击重新开始');
+    }else if(state==='go'){
+      const ms=Date.now()-t0;state='idle';
+      times.unshift(ms);if(times.length>6)times.pop();
+      const best=Math.min(...times);
+      set('var(--bg)',ms<250?'🚀':ms<350?'⚡':'🐢',ms+' ms',
+        ms<250?'超神反应！':ms<350?'反应敏捷':'还可以更快，点击再试');
+      try{localStorage.setItem('tbx-react',best);}catch(e){}
+      $('#rxHis').innerHTML=times.map(t=>`<span class="chip">${t} ms</span>`).join('')+`　最佳：${best} ms`;
+    }else{
+      state='idle';set('var(--bg)','⚡','点击开始','变绿后立刻点击！');
+    }
+  });
+});
+
+/* ================= 启动 ================= */
+$('#foot').textContent='🧰 离线工具百宝箱 · 共 '+TOOLS.length+' 个工具 · 纯本地运行，数据不出浏览器 · 可将本页另存到电脑或手机随时使用';
+renderHome();
+route();
+window.addEventListener('hashchange',route);
+$('#stat').textContent=TOOLS.length+' 个工具 · 离线可用';
+</script>
+</body>
+</html>

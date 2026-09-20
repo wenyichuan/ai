@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>八字命理排盘 · 生辰算命</title>
+<style>
+:root{
+  --paper:#f6f1e6; --card:#fffdf6; --ink:#2b2620; --ink2:#5b5346;
+  --cinnabar:#9e2a22; --cinnabar2:#c0392b; --gold:#b8860b; --line:#e4d9c2;
+  --wx-mu:#2f9e44; --wx-huo:#d63324; --wx-tu:#8b5e26; --wx-jin:#b8860b; --wx-shui:#2456a6;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;scroll-padding-top:64px;}
+body{
+  font-family:"Noto Serif SC","Source Han Serif SC","Songti SC","SimSun",serif;
+  background:var(--paper); color:var(--ink); line-height:1.75;
+  background-image:radial-gradient(circle at 20% 10%, rgba(158,42,34,.045), transparent 40%),
+                   radial-gradient(circle at 85% 90%, rgba(184,134,11,.05), transparent 45%);
+}
+.kai{font-family:"KaiTi","STKaiti","楷体","BiauKai",serif;}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px;}
+/* ---------- header ---------- */
+header{background:linear-gradient(135deg,#241f1a 0%,#3a2420 55%,#4a2a22 100%);color:#f3e9d2;padding:44px 16px 38px;text-align:center;position:relative;overflow:hidden;}
+header::before,header::after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(211,178,111,.22);}
+header::before{width:340px;height:340px;left:-120px;top:-140px;}
+header::after{width:420px;height:420px;right:-160px;bottom:-220px;}
+.taiji{width:58px;height:58px;margin:0 auto 14px;border-radius:50%;background:linear-gradient(90deg,#f3e9d2 50%,#9e2a22 50%);position:relative;border:2px solid #d3b26f;animation:spin 24s linear infinite;}
+.taiji::before,.taiji::after{content:"";position:absolute;left:50%;transform:translateX(-50%);border-radius:50%;}
+.taiji::before{width:28px;height:28px;top:0;background:#9e2a22;}
+.taiji::after{width:28px;height:28px;bottom:0;background:#f3e9d2;}
+@keyframes spin{to{transform:rotate(360deg);}}
+header h1{font-size:34px;letter-spacing:10px;text-indent:10px;font-weight:700;color:#f0dfb6;text-shadow:0 2px 8px rgba(0,0,0,.4);}
+header .sub{margin-top:10px;font-size:14px;color:#cbb98d;letter-spacing:4px;}
+/* ---------- nav ---------- */
+nav{position:sticky;top:0;z-index:50;background:rgba(36,31,26,.96);backdrop-filter:blur(6px);box-shadow:0 2px 10px rgba(0,0,0,.18);}
+nav .wrap{display:flex;gap:2px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+nav a{flex:0 0 auto;color:#d8c9a3;text-decoration:none;font-size:14px;padding:12px 14px;letter-spacing:1px;border-bottom:2px solid transparent;white-space:nowrap;}
+nav a:hover{color:#f0dfb6;border-bottom-color:var(--gold);}
+/* ---------- cards / sections ---------- */
+section{margin-top:34px;}
+.sec-title{display:flex;align-items:center;gap:10px;font-size:21px;font-weight:700;color:var(--cinnabar);margin-bottom:14px;letter-spacing:2px;}
+.sec-title::before{content:"";width:6px;height:24px;background:linear-gradient(180deg,var(--cinnabar2),var(--gold));border-radius:3px;}
+.sec-title small{font-size:12px;color:#9a8f7a;font-weight:400;letter-spacing:1px;}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;box-shadow:0 3px 14px rgba(90,70,30,.07);margin-bottom:16px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr;}}
+/* ---------- form ---------- */
+#inputCard{margin-top:-30px;position:relative;z-index:5;box-shadow:0 6px 22px rgba(60,40,10,.14);}
+.form-row{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:13px;color:var(--ink2);}
+.field select,.field input{font-family:inherit;font-size:15px;padding:8px 10px;border:1px solid #d6c9a8;border-radius:8px;background:#fffefa;color:var(--ink);outline:none;min-width:96px;}
+.field select:focus,.field input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(184,134,11,.12);}
+.seg{display:inline-flex;border:1px solid #d6c9a8;border-radius:8px;overflow:hidden;}
+.seg button{font-family:inherit;font-size:14px;padding:8px 16px;border:none;background:#fffefa;color:var(--ink2);cursor:pointer;}
+.seg button.on{background:var(--cinnabar);color:#fdf3dd;}
+.btn{font-family:inherit;font-size:17px;letter-spacing:6px;text-indent:6px;padding:12px 44px;background:linear-gradient(135deg,#a5342a,#7c1f18);color:#f7ecd2;border:none;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(140,40,25,.35);}
+.btn:hover{filter:brightness(1.08);}
+.btn:active{transform:translateY(1px);}
+.btn-sm{font-size:14px;letter-spacing:2px;padding:8px 22px;}
+.hint{font-size:12px;color:#a3977e;margin-top:6px;}
+/* ---------- overview ---------- */
+.ov-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+@media(max-width:760px){.ov-grid{grid-template-columns:repeat(2,1fr);}}
+.ov-item{background:#faf6ea;border:1px dashed #d9c9a4;border-radius:10px;padding:10px 12px;text-align:center;}
+.ov-item .k{font-size:12px;color:#9a8c6e;}
+.ov-item .v{font-size:17px;font-weight:700;color:var(--ink);margin-top:2px;}
+/* ---------- bazi table ---------- */
+table.bazi{width:100%;border-collapse:collapse;text-align:center;}
+table.bazi th,table.bazi td{border:1px solid var(--line);padding:8px 4px;}
+table.bazi th{background:#f4ecd8;font-size:14px;color:var(--ink2);letter-spacing:2px;width:96px;}
+.gan-zhi{font-size:42px;line-height:1.25;display:inline-block;}
+.zang{font-size:15px;line-height:1.6;}
+.ten-god{font-size:15px;color:#7a4a12;}
+.nayin{font-size:14px;color:#6b5d40;}
+.rela{display:inline-block;font-size:12px;padding:1px 8px;border-radius:20px;margin:2px;border:1px solid;}
+.rela.he{background:#e7f4e8;color:#22743a;border-color:#9fd3a8;}
+.rela.chong{background:#fbe6e3;color:#a92c20;border-color:#e8a49c;}
+.rela.xing{background:#fdf0dd;color:#9a6210;border-color:#e3c184;}
+.rela.hai{background:#f1e8f7;color:#6d3d96;border-color:#cba9e2;}
+.rela.kong{background:#eeeae0;color:#8a8070;border-color:#c9bfa6;border-style:dashed;}
+.rela.yangren{background:#fdeaea;color:#c0392b;border-color:#e8a49c;}
+.badge-line{margin-top:10px;font-size:13px;color:var(--ink2);}
+.badge-line b{color:var(--cinnabar);}
+/* ---------- wuxing bars ---------- */
+.wx-row{display:flex;align-items:center;gap:10px;margin:10px 0;}
+.wx-name{width:64px;font-size:16px;font-weight:700;text-align:center;}
+.wx-bar{flex:1;height:20px;background:#f0e9d6;border-radius:10px;overflow:hidden;}
+.wx-bar i{display:block;height:100%;border-radius:10px;transition:width .8s ease;}
+.wx-num{width:120px;font-size:13px;color:var(--ink2);}
+.advice{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
+.adv-chip{background:#faf3e0;border:1px solid #e0d0a6;border-radius:10px;padding:8px 14px;font-size:14px;}
+.adv-chip b{color:var(--cinnabar);}
+/* ---------- dayun ---------- */
+.dayun-scroll{overflow-x:auto;padding-bottom:6px;}
+.dayun-strip{display:flex;gap:10px;min-width:max-content;}
+.du{width:118px;flex:0 0 auto;border:1px solid var(--line);border-radius:12px;padding:10px 8px;text-align:center;background:#fbf7ec;position:relative;}
+.du.cur{border-color:var(--cinnabar);background:#fdf0e7;box-shadow:0 0 0 2px rgba(158,42,34,.25);}
+.du .tag{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--cinnabar);color:#f7ecd2;font-size:11px;padding:0 8px;border-radius:8px;white-space:nowrap;}
+.du .dz2{font-size:26px;line-height:1.3;}
+.du .age{font-size:12px;color:#8a7c5e;margin-top:2px;}
+.du .yr{font-size:12px;color:#a3957a;}
+.du .tg{font-size:12px;color:#7a4a12;}
+table.plain{width:100%;border-collapse:collapse;font-size:14px;}
+table.plain th,table.plain td{border-bottom:1px solid #eee3c9;padding:7px 8px;text-align:center;}
+table.plain th{background:#f4ecd8;color:#6b5d40;letter-spacing:1px;}
+table.plain tr:hover td{background:#fbf6e9;}
+/* ---------- shensha / misc ---------- */
+.ss-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;}
+.ss-item{background:#faf6ea;border:1px solid #e8dcc0;border-radius:10px;padding:10px 12px;font-size:13px;}
+.ss-item b{color:var(--cinnabar);font-size:15px;}
+.ss-item .cx{color:#9a8c6e;font-size:12px;}
+.poem{font-family:"KaiTi","STKaiti","楷体",serif;font-size:19px;line-height:2;text-align:center;color:#4a3a1e;background:#fbf5e4;border:1px dashed #d9c9a4;border-radius:12px;padding:16px;margin:12px 0;}
+.gu-weight{text-align:center;font-size:15px;color:var(--ink2);}
+.gu-weight b{font-size:26px;color:var(--cinnabar);font-family:"KaiTi","楷体",serif;}
+.desc-p{font-size:15px;margin:8px 0;color:#3d362b;}
+.tag-inline{display:inline-block;background:#f3ead4;border-radius:6px;padding:0 8px;margin:2px;font-size:13px;color:#7a5a1e;}
+.note{font-size:12.5px;color:#9a8f7a;background:#f8f3e4;border-radius:8px;padding:8px 12px;margin-top:10px;}
+.hidden{display:none!important;}
+footer{margin-top:46px;padding:26px 16px 40px;background:#241f1a;color:#b7a682;text-align:center;font-size:13px;line-height:2;}
+footer b{color:#d3b26f;}
+.today-box{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px;}
+@media(max-width:760px){.today-box{grid-template-columns:repeat(2,1fr);}}
+.today-box .tb{background:#241f1a;color:#e8d9b0;border-radius:12px;padding:12px 6px;text-align:center;}
+.today-box .tb .t{font-size:12px;color:#b7a682;}
+.today-box .tb .g{font-size:30px;font-family:"KaiTi","楷体",serif;line-height:1.4;}
+.today-box .tb .w{font-size:12px;color:#c9a86a;}
+#resultArea{display:none;}
+.warn-box{background:#fdf0e7;border:1px solid #eecdb2;border-radius:10px;color:#8c4a1d;padding:10px 14px;font-size:14px;margin-bottom:14px;}
+</style>
+</head>
+<body>
+<header>
+  <div class="taiji"></div>
+  <h1>八字命理排盘</h1>
+  <div class="sub">生辰八字 · 五行喜忌 · 大运流年 · 称骨合婚 —— 全部本地计算，数据不出本机</div>
+</header>
+<nav>
+  <div class="wrap">
+    <a href="#inputCard">排盘</a>
+    <a href="#sec-pan">命盘</a>
+    <a href="#sec-wx">五行</a>
+    <a href="#sec-read">解读</a>
+    <a href="#sec-dayun">大运流年</a>
+    <a href="#sec-ss">神煞</a>
+    <a href="#sec-cg">称骨</a>
+    <a href="#sec-zodiac">星肖</a>
+    <a href="#sec-hehun">合婚</a>
+    <a href="#sec-today">今日干支</a>
+    <a href="#sec-method">方法说明</a>
+  </div>
+</nav>
+<div class="wrap" id="top">
+  <section>
+    <div class="card" id="inputCard">
+      <div class="sec-title">输入生辰 <small>公历 / 农历均可 · 时辰按北京时间</small></div>
+      <div class="form-row">
+        <div class="field"><label>历法</label>
+          <div class="seg"><button id="btnSolar" class="on" type="button">公历</button><button id="btnLunar" type="button">农历</button></div>
+        </div>
+        <div class="field"><label>姓名（可不填）</label><input id="fName" placeholder="称呼" style="width:110px"></div>
+        <div class="field"><label>性别</label>
+          <div class="seg"><button id="btnMale" class="on" type="button">男</button><button id="btnFemale" type="button">女</button></div>
+        </div>
+        <div class="field"><label>年份</label><select id="fYear"></select></div>
+        <div class="field"><label>月</label><select id="fMonth"></select></div>
+        <div class="field"><label id="lblDay">日</label><select id="fDay"></select></div>
+        <div class="field" id="leapField" style="display:none"><label>闰月</label>
+          <label style="display:flex;gap:4px;align-items:center;font-size:14px;"><input type="checkbox" id="fLeap" style="width:auto"> 是闰月 <span id="leapHint" class="hint" style="margin:0"></span></label>
+        </div>
+        <div class="field"><label>出生时间</label><select id="fHour"></select></div>
+      </div>
+      <div style="margin-top:18px;text-align:center;">
+        <button class="btn" id="btnGo" type="button">开 始 排 盘</button>
+        <div class="hint">年柱以立春为界、月柱以节气为界、日柱以夜 23 时（子时）换日、时辰按五鼠遁起 —— 计算全程在本机完成。</div>
+      </div>
+    </div>
+  </section>
+
+  <div id="resultArea">
+    <div id="warnArea"></div>
+    <section id="sec-pan">
+      <div class="sec-title">四柱命盘 <small id="ovWho"></small></div>
+      <div class="card" id="ovCard"></div>
+      <div class="card" id="panCard"></div>
+      <div class="card" id="relaCard"></div>
+    </section>
+    <section id="sec-wx">
+      <div class="sec-title">五行分析 <small>个数与力量评分 · 喜用神建议</small></div>
+      <div class="grid2">
+        <div class="card" id="wxCard"></div>
+        <div class="card" id="xiyongCard"></div>
+      </div>
+    </section>
+    <section id="sec-read">
+      <div class="sec-title">命格解读 <small>性格 · 格局 · 事业财运 · 婚姻 · 健康</small></div>
+      <div class="card" id="readCard"></div>
+      <div class="grid2">
+        <div class="card" id="careerCard"></div>
+        <div class="card" id="marriageCard"></div>
+      </div>
+      <div class="card" id="healthCard"></div>
+    </section>
+    <section id="sec-dayun">
+      <div class="sec-title">大运流年 <small>每十年一运 · 未来流年提示</small></div>
+      <div class="card" id="dayunCard"></div>
+      <div class="card" id="liunianCard"></div>
+    </section>
+    <section id="sec-ss">
+      <div class="sec-title">神煞 <small>以日干、年支、日支查得</small></div>
+      <div class="card" id="ssCard"></div>
+    </section>
+    <section id="sec-cg">
+      <div class="sec-title">称骨算命 <small>袁天罡称骨歌 · 农历年月日时骨重</small></div>
+      <div class="card" id="cgCard"></div>
+    </section>
+    <section id="sec-zodiac">
+      <div class="sec-title">生肖与星座 <small>属相以立春为界</small></div>
+      <div class="grid2">
+        <div class="card" id="zodiacCard"></div>
+        <div class="card" id="astroCard"></div>
+      </div>
+    </section>
+  </div>
+
+  <section id="sec-hehun">
+    <div class="sec-title">合婚配对 <small>双方八字 · 生肖与日主关系</small></div>
+    <div class="card">
+      <div class="form-row" style="align-items:flex-end;">
+        <div class="field"><label>对方性别</label>
+          <div class="seg"><button id="btnM2" class="on" type="button">男</button><button id="btnF2" type="button">女</button></div>
+        </div>
+        <div class="field"><label>对方生年（公历）</label><select id="hYear"></select></div>
+        <div class="field"><label>月</label><select id="hMonth"></select></div>
+        <div class="field"><label>日</label><select id="hDay"></select></div>
+        <div class="field"><label>对方时辰</label><select id="hHour"></select></div>
+        <div class="field"><button class="btn btn-sm" id="btnHe" type="button">查 配 对</button></div>
+      </div>
+      <div id="hehunResult"></div>
+    </div>
+  </section>
+
+  <section id="sec-today">
+    <div class="sec-title">今日干支 · 万年历 <small>本机实时 · 可查任意日期</small></div>
+    <div class="card" id="todayCard">
+      <div class="today-box" id="todayBox"></div>
+      <div id="todayLunar" style="text-align:center;margin-top:10px;font-size:14px;color:var(--ink2);"></div>
+      <div class="form-row" style="margin-top:14px;">
+        <div class="field"><label>查询日期（公历）</label><input type="date" id="qDate" style="min-width:160px"></div>
+        <div class="field"><button class="btn btn-sm" id="btnQuery" type="button">查 万 年 历</button></div>
+      </div>
+      <div id="queryResult" style="margin-top:8px;font-size:14px;color:var(--ink2);"></div>
+    </div>
+  </section>
+
+  <section id="sec-method">
+    <div class="sec-title">计算方法说明 <small>本程序所用规则</small></div>
+    <div class="card" style="font-size:14px;color:#4a4335;">
+      <p class="desc-p"><b>· 年柱：</b>以<b>立春</b>（太阳视黄经 315°，北京时间精确到分钟）为岁界，立春前属上一年干支；立春时刻用天文公式（Meeus 太阳黄经低阶算法）计算，并与 1900-3000 年《通用节气表》逐日校验。</p>
+      <p class="desc-p"><b>· 月柱：</b>以十二「节」（立春、惊蛰、清明、立夏、芒种、小暑、立秋、白露、寒露、立冬、大雪、小寒）划分月份，过节换月；月干按<b>五虎遁</b>（甲己之年丙作首……）由年干推得。</p>
+      <p class="desc-p"><b>· 日柱：</b>以六十甲子循环，基准日经史实核对（如 1949-10-01 为甲子日、2000-01-01 为戊午日）；夜 23 时起作次日子时（晚子时并入次日）。</p>
+      <p class="desc-p"><b>· 时柱：</b>每两小时一时辰，23-1 时为子时；时干按<b>五鼠遁</b>（甲己还加甲……）由日干推得。</p>
+      <p class="desc-p"><b>· 农历：</b>采用通行万年历数据（1900-3000，含闰月与大小月，香港天文台资料校核），用于农历生日输入与称骨算命。</p>
+      <p class="desc-p"><b>· 大运：</b>阳年生男、阴年生女顺排，阴年生男、阳年生女逆排；顺数至下一节、逆数至上一节，<b>三天折一年</b>（一天折四个月），起运后每十年一换。</p>
+      <p class="desc-p"><b>· 五行：</b>天干各计 1.0，地支本气 1.0、中气 0.5、余气 0.3，月支本气司令加倍；日主以同类（比劫＋印星）与异类（食伤＋财＋官杀）力量对比判旺衰，取喜用神为参考建议。</p>
+      <p class="desc-p"><b>· 称骨：</b>按农历年（干支）、月、日、时骨重相加，男命女命各有歌诀，为唐代袁天罡流传之法。</p>
+      <p class="desc-p"><b>· 命宫 / 胎元：</b>命宫以月支数（寅起正月）加时支数，不满十四以十四减、满则以二十六减，逢之安命，命宫干以五虎遁取；胎元为月干进一、月支进三。</p>
+      <div class="note">所有计算均在您的浏览器内完成，不联网、不上传任何信息。八字命理属传统民俗文化，供学习与娱乐参考，请勿作为医疗、投资、婚嫁等重大决策依据。</div>
+    </div>
+  </section>
+</div>
+<footer>
+  <div class="wrap">
+    <b>八字命理排盘</b> · 单文件离线应用<br>
+    本应用仅供传统文化学习与娱乐参考，输出内容不构成任何现实建议；相信科学，理性看待命理。
+  </div>
+</footer>
+<script>
+/* ==== 内嵌基础数据表（1900-3000 通行万年历与节气数据，公式版应用） ==== */
+const LUNAR_INFO = [19416,19168,42352,21717,53856,55632,91476,22176,39632,21970,19168,42422,42192,53840,119381,46400,54944,44450,38320,84343,18800,42160,46261,27216,27968,109396,11104,38256,21234,18800,25958,54432,59984,92821,23248,11104,100067,37600,116951,51536,54432,120998,46416,22176,107956,9680,37584,53938,43344,46423,27808,46416,86869,19872,42416,83315,21168,43432,59728,27296,44710,43856,19296,43748,42352,21088,62051,55632,23383,22176,38608,19925,19152,42192,54484,53840,54616,46400,46752,103846,38320,18864,43380,42160,45690,27216,27968,44870,43872,38256,19189,18800,25776,29859,59984,27480,23232,43872,38613,37600,51552,55636,54432,55888,30034,22176,43959,9680,37584,51893,43344,46240,47780,44368,21977,19360,42416,86390,21168,43312,31060,27296,44368,23378,19296,42726,42208,53856,60005,54576,23200,30371,38608,19195,19152,42192,118966,53840,54560,56645,46496,22224,21938,18864,42359,42160,43600,111189,27936,44448,84835,37744,18936,18800,25776,92326,59984,27296,108228,43744,37600,53987,51552,54615,54432,55888,23893,22176,42704,21972,21200,43448,43344,46240,46758,44368,21920,43940,42416,21168,45683,26928,29495,27296,44368,84821,19296,42352,21732,53600,59752,54560,55968,92838,22224,19168,43476,41680,53584,62034,54560,56103,46496,21968,19893,18864,42160,54452,43600,46425,27936,44384,22374,37744,18800,26996,21680,27216,31315,27296,109223,43728,21216,51941,43360,54432,124068,55632,23227,22176,42704,86486,21200,43216,119125,45728,46416,27986,21920,107943,42416,21168,43381,26800,29328,47780,27472,11707,19296,42352,21222,53600,59568,27941,55952,23376,14035,10976,41943,41680,53584,54614,46368,54928,87460,21936,11002,17840,41648,43702,43344,46240,111269,44368,21936,11123,17776,25463,21168,26960,27990,23200,43856,22228,19168,42352,25954,53920,60070,54608,23200,44709,42704,19168,43699,42192,53943,45712,46416,87382,11680,38352,83380,18864,42233,25776,27280,46742,27472,11104,39780,37744,18800,26979,58528,60071,55952,23376,11989,10976,37600,115412,51536,54489,46240,46736,22439,21936,9680,38325,37552,43344,117075,46240,46504,44368,21936,74613,9584,21168,107188,26960,27835,23200,43856,84694,19168,42352,21717,53856,59728,30035,23200,43943,38352,19168,42422,42192,53840,55893,46400,54944,44449,38320,19319,18864,42160,46261,27216,44352,109395,11104,103784,37744,18800,25958,58528,59984,92820,23248,11104,43746,37600,51926,51536,54432,56485,46672,22176,46515,9680,37815,37552,43344,46422,29856,46416,23892,19872,42416,25970,21168,43686,59728,27296,109221,43856,19296,43747,42352,21207,53856,55632,92502,22176,39632,83412,19152,42234,42192,53840,119895,46400,46752,103845,38320,18864,43379,42160,45752,27216,27968,46918,43872,38256,82676,18800,25776,29859,59984,93271,23232,43872,38613,37600,51552,55636,54432,55976,46416,22176,108982,9680,37584,51893,43344,46240,62625,46416,87383,19360,42416,21877,21168,43312,31060,27296,44456,43856,19296,42726,42352,21088,60005,55584,55968,87714,38608,19415,19152,42192,54453,53840,54560,120132,46496,22250,38320,18864,42358,42160,45648,47700,27936,44448,27490,37744,19190,18800,25776,27813,59984,27424,47811,43872,37848,37600,51552,54614,54432,55888,23893,22176,43728,26066,21200,108727,43344,46240,111269,44368,21920,43939,42416,86648,21104,26928,30006,27296,44368,84820,19296,42352,83171,53856,125031,54560,55952,28325,22224,19168,43476,42192,53944,53840,54560,56103,46496,22224,19893,18864,42160,115891,43600,46424,27936,44384,86885,21360,18800,26996,25776,27304,59984,27296,109222,43728,21216,51941,51552,54432,62627,55632,23383,22176,42704,21973,21200,43344,55636,46240,46442,44368,21920,42918,42416,21168,43381,26928,29328,109203,27984,77143,19296,42352,21221,53600,59568,91428,55952,27498,22224,10976,42454,41680,53584,119125,46368,55952,30114,21936,11191,17840,41648,45749,43344,46368,48420,44368,21936,21361,17776,90486,21168,26960,92501,23200,43856,84691,19168,107751,42336,54432,60070,55632,23200,108196,42704,19168,51889,43216,54455,45712,46416,87381,13728,38352,21939,18864,43383,26800,27280,46742,27472,11680,39780,38256,20968,53600,58528,60071,55952,23376,11989,10976,37600,53972,51536,54615,46240,46736,88470,21936,10704,38324,41648,108857,43344,46240,46758,44368,21920,43892,9584,21168,45747,26960,27991,23200,43856,22229,19168,42352,21844,53856,59754,54608,23200,109223,38608,19168,106933,42192,53840,119379,46400,120408,11680,38320,84342,18864,42160,46260,27216,46427,27472,11104,38758,37744,18800,90469,58528,59984,31379,23232,43992,10976,37600,51926,51536,54432,56485,46672,22176,54705,9680,37815,37552,43344,119125,29856,46416,85331,21920,107880,42352,21168,43686,59728,27808,109220,43856,19296,101090,42352,21207,53856,59680,60757,23200,39632,22227,19152,42423,42192,53840,55894,46400,54944,40356,38320,19120,43379,42160,45751,27216,27968,111429,43872,38320,21363,18800,25959,54432,59984,28246,23232,43872,38612,37600,51552,59731,54432,55975,46416,22176,44453,42448,37584,53939,43344,111704,29856,46416,87382,19872,42416,21876,21168,43312,92467,27296,109735,43856,19296,107237,42336,53856,123492,55584,56009,54944,39632,84438,19152,42192,54453,53840,54587,46400,46752,22439,38320,18864,106869,42160,45648,47700,27936,44489,43872,38256,19190,18800,25776,27813,59984,27936,105122,43856,86743,37600,51552,54614,54432,55888,87380,22176,109224,42448,21200,43702,43344,46240,111781,46416,21920,43939,42416,21367,21104,26928,30006,27296,44368,23379,19296,42472,42208,53856,60006,54560,55952,28325,22224,19168,43731,42192,53943,53840,54560,121126,46752,22224,21939,18864,107640,42160,43600,46678,27936,44384,23396,21360,18800,26995,25776,27303,59984,27424,44710,43856,21344,115428,51552,54489,54432,55888,23383,22176,42704,21973,21200,43344,117075,46224,46504,44368,21920,107429,42416,21168,106868,26928,29369,27280,27984,12118,19296,42352,21733,53600,59680,62755,55952,27560,22224,10976,42454,42192,53584,55637,54560,55977,46480,22192,11191,18864,41648,45749,43600,46368,109859,44368,87399,21360,18800,25974,21680,27216,31060,27296,43882,43728,21344,42726,43360,54432,60581,55632,23200,46755,42704,19415,19120,43216,54454,45712,46400,56660,21920,38378,38320,21168,43382,26800,29328,111253,27984,11680,101219,38256,86247,53600,59552,125094,55952,23376,75476,10976,37627,41680,53584,54615,46240,55952,23957,21936,10960,99763,41648,43448,43344,46240,111782,44368,21920,43876,42352,21241,21168,26960,27991,23200,43856,86741,19168,42352,21844,53856,59816,55632,23200,109222,38608,19152,43700,42192,53944,45648,46400,55127,11680,38320,19893,18864,42160,46260,27216,46488,27984,11616,38758,37744,18800,26980,58528,60010,55888,23360,109271,10976,37600,51925,51536,54432,119971,46672,87640,21936,10704,102838,37552,43344,55636,46240,46442,44368,21920,42854,42352,21168,43685,59728,27808,47779,43856,19416,19168,42352,86230];
+const TERM_INFO = ["9778397bd097c36b0b6fc9274c91aa","97b6b97bd19801ec9210c965cc920e","97bcf97c3598082c95f8c965cc920f","97bd0b06bdb0722c965ce1cfcc920f","b027097bd097c36b0b6fc9274c91aa","97b6b97bd19801ec9210c965cc920e","97bcf97c359801ec95f8c965cc920f","97bd0b06bdb0722c965ce1cfcc920f","b027097bd097c36b0b6fc9274c91aa","97b6b97bd19801ec9210c965cc920e","97bcf97c359801ec95f8c965cc920f","97bd0b06bdb0722c965ce1cfcc920f","b027097bd097c36b0b6fc9274c91aa","9778397bd19801ec9210c965cc920e","97b6b97bd19801ec95f8c965cc920f","97bd09801d98082c95f8e1cfcc920f","97bd097bd097c36b0b6fc9210c8dc2","9778397bd197c36c9210c9274c91aa","97b6b97bd19801ec95f8c965cc920e","97bd09801d98082c95f8e1cfcc920f","97bd097bd097c36b0b6fc9210c8dc2","9778397bd097c36c9210c9274c91aa","97b6b97bd19801ec95f8c965cc920e","97bcf97c3598082c95f8e1cfcc920f","97bd097bd097c36b0b6fc9210c8dc2","9778397bd097c36c9210c9274c91aa","97b6b97bd19801ec9210c965cc920e","97bcf97c3598082c95f8c965cc920f","97bd097bd097c35b0b6fc920fb0722","9778397bd097c36b0b6fc9274c91aa","97b6b97bd19801ec9210c965cc920e","97bcf97c3598082c95f8c965cc920f","97bd097bd097c35b0b6fc920fb0722","9778397bd097c36b0b6fc9274c91aa","97b6b97bd19801ec9210c965cc920e","97bcf97c359801ec95f8c965cc920f","97bd097bd097c35b0b6fc920fb0722","9778397bd097c36b0b6fc9274c91aa","97b6b97bd19801ec9210c965cc920e","97bcf97c359801ec95f8c965cc920f","97bd097bd097c35b0b6fc920fb0722","9778397bd097c36b0b6fc9274c91aa","97b6b97bd19801ec9210c965cc920e","97bcf97c359801ec95f8c965cc920f","97bd097bd07f595b0b6fc920fb0722","9778397bd097c36b0b6fc9210c8dc2","9778397bd19801ec9210c9274c920e","97b6b97bd19801ec95f8c965cc920f","97bd07f5307f595b0b0bc920fb0722","7f0e397bd097c36b0b6fc9210c8dc2","9778397bd097c36c9210c9274c920e","97b6b97bd19801ec95f8c965cc920f","97bd07f5307f595b0b0bc920fb0722","7f0e397bd097c36b0b6fc9210c8dc2","9778397bd097c36c9210c9274c91aa","97b6b97bd19801ec9210c965cc920e","97bd07f1487f595b0b0bc920fb0722","7f0e397bd097c36b0b6fc9210c8dc2","9778397bd097c36b0b6fc9274c91aa","97b6b97bd19801ec9210c965cc920e","97bcf7f1487f595b0b0bb0b6fb0722","7f0e397bd097c35b0b6fc920fb0722","9778397bd097c36b0b6fc9274c91aa","97b6b97bd19801ec9210c965cc920e","97bcf7f1487f595b0b0bb0b6fb0722","7f0e397bd097c35b0b6fc920fb0722","9778397bd097c36b0b6fc9274c91aa","97b6b97bd19801ec9210c965cc920e","97bcf7f1487f531b0b0bb0b6fb0722","7f0e397bd097c35b0b6fc920fb0722","9778397bd097c36b0b6fc9274c91aa","97b6b97bd19801ec9210c965cc920e","97bcf7f1487f531b0b0bb0b6fb0722","7f0e397bd07f595b0b6fc920fb0722","9778397bd097c36b0b6fc9274c91aa","97b6b97bd19801ec9210c9274c920e","97bcf7f0e47f531b0b0bb0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","9778397bd097c36b0b6fc9210c91aa","97b6b97bd197c36c9210c9274c920e","97bcf7f0e47f531b0b0bb0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","9778397bd097c36b0b6fc9210c8dc2","9778397bd097c36c9210c9274c920e","97b6b7f0e47f531b0723b0b6fb0722","7f0e37f5307f595b0b0bc920fb0722","7f0e397bd097c36b0b6fc9210c8dc2","9778397bd097c36b0b70c9274c91aa","97b6b7f0e47f531b0723b0b6fb0721","7f0e37f1487f595b0b0bb0b6fb0722","7f0e397bd097c35b0b6fc9210c8dc2","9778397bd097c36b0b6fc9274c91aa","97b6b7f0e47f531b0723b0b6fb0721","7f0e27f1487f595b0b0bb0b6fb0722","7f0e397bd097c35b0b6fc920fb0722","9778397bd097c36b0b6fc9274c91aa","97b6b7f0e47f531b0723b0b6fb0721","7f0e27f1487f531b0b0bb0b6fb0722","7f0e397bd097c35b0b6fc920fb0722","9778397bd097c36b0b6fc9274c91aa","97b6b7f0e47f531b0723b0b6fb0721","7f0e27f1487f531b0b0bb0b6fb0722","7f0e397bd097c35b0b6fc920fb0722","9778397bd097c36b0b6fc9274c91aa","97b6b7f0e47f531b0723b0b6fb0721","7f0e27f1487f531b0b0bb0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","9778397bd097c36b0b6fc9274c91aa","97b6b7f0e47f531b0723b0787b0721","7f0e27f0e47f531b0b0bb0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","9778397bd097c36b0b6fc9210c91aa","97b6b7f0e47f149b0723b0787b0721","7f0e27f0e47f531b0723b0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","9778397bd097c36b0b6fc9210c8dc2","977837f0e37f149b0723b0787b0721","7f07e7f0e47f531b0723b0b6fb0722","7f0e37f5307f595b0b0bc920fb0722","7f0e397bd097c35b0b6fc9210c8dc2","977837f0e37f14998082b0787b0721","7f07e7f0e47f531b0723b0b6fb0721","7f0e37f1487f595b0b0bb0b6fb0722","7f0e397bd097c35b0b6fc9210c8dc2","977837f0e37f14998082b0787b06bd","7f07e7f0e47f531b0723b0b6fb0721","7f0e27f1487f531b0b0bb0b6fb0722","7f0e397bd097c35b0b6fc920fb0722","977837f0e37f14998082b0787b06bd","7f07e7f0e47f531b0723b0b6fb0721","7f0e27f1487f531b0b0bb0b6fb0722","7f0e397bd097c35b0b6fc920fb0722","977837f0e37f14998082b0787b06bd","7f07e7f0e47f531b0723b0b6fb0721","7f0e27f1487f531b0b0bb0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","977837f0e37f14998082b0787b06bd","7f07e7f0e47f531b0723b0b6fb0721","7f0e27f1487f531b0b0bb0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","977837f0e37f14998082b0787b06bd","7f07e7f0e47f149b0723b0787b0721","7f0e27f0e47f531b0b0bb0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","977837f0e37f14998082b0723b06bd","7f07e7f0e37f149b0723b0787b0721","7f0e27f0e47f531b0723b0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","977837f0e37f14898082b0723b02d5","7ec967f0e37f14998082b0787b0721","7f07e7f0e47f531b0723b0b6fb0722","7f0e37f1487f595b0b0bb0b6fb0722","7f0e37f0e37f14898082b0723b02d5","7ec967f0e37f14998082b0787b0721","7f07e7f0e47f531b0723b0b6fb0722","7f0e37f1487f531b0b0bb0b6fb0722","7f0e37f0e37f14898082b0723b02d5","7ec967f0e37f14998082b0787b06bd","7f07e7f0e47f531b0723b0b6fb0721","7f0e37f1487f531b0b0bb0b6fb0722","7f0e37f0e37f14898082b072297c35","7ec967f0e37f14998082b0787b06bd","7f07e7f0e47f531b0723b0b6fb0721","7f0e27f1487f531b0b0bb0b6fb0722","7f0e37f0e37f14898082b072297c35","7ec967f0e37f14998082b0787b06bd","7f07e7f0e47f531b0723b0b6fb0721","7f0e27f1487f531b0b0bb0b6fb0722","7f0e37f0e366aa89801eb072297c35","7ec967f0e37f14998082b0787b06bd","7f07e7f0e47f149b0723b0787b0721","7f0e27f1487f531b0b0bb0b6fb0722","7f0e37f0e366aa89801eb072297c35","7ec967f0e37f14998082b0723b06bd","7f07e7f0e47f149b0723b0787b0721","7f0e27f0e47f531b0723b0b6fb0722","7f0e37f0e366aa89801eb072297c35","7ec967f0e37f14998082b0723b06bd","7f07e7f0e37f14998083b0787b0721","7f0e27f0e47f531b0723b0b6fb0722","7f0e37f0e366aa89801eb072297c35","7ec967f0e37f14898082b0723b02d5","7f07e7f0e37f14998082b0787b0721","7f07e7f0e47f531b0723b0b6fb0722","7f0e36665b66aa89801e9808297c35","665f67f0e37f14898082b0723b02d5","7ec967f0e37f14998082b0787b0721","7f07e7f0e47f531b0723b0b6fb0722","7f0e36665b66a449801e9808297c35","665f67f0e37f14898082b0723b02d5","7ec967f0e37f14998082b0787b06bd","7f07e7f0e47f531b0723b0b6fb0721","7f0e36665b66a449801e9808297c35","665f67f0e37f14898082b072297c35","7ec967f0e37f14998082b0787b06bd","7f07e7f0e47f531b0723b0b6fb0721","7f0e26665b66a449801e9808297c35","665f67f0e37f1489801eb072297c35","7ec967f0e37f14998082b0787b06bd","7f07e7f0e47f531b0723b0b6fb0721","7f0e27f1487f531b0b0bb0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","9778397bd097c36b0b6fc9274c91aa","97b6b97bd197c36c9210c9274c920e","97bcf7f0e47f531b0723b0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","9778397bd097c36b0b6fc9210c91aa","97b6b97bd197c36b0b70c9274c920e","97bcf7f0e47f531b0723b0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","9778397bd097c35b0b6fc9210c91aa","97b6b97bd097c36b0b6fc9274c920e","97bcf7f0e47f531b0723b0b6fb0722","7f0e397bd07f595b0b0bb0b6fb0722","9778397bd097c35b0b6fc9210c8dc2","97b6b97bd097c36b0b6fc9274c920e","97bcf7f0e47f531b0723b0b6fb0722","7f0e37f5307f531b0b0bb0b6fb0722","9778397bd097c35b0b6fc9210c8dc2","9778397bd097c36b0b6fc9274c920e","97b6b7f0e47f531b0723b0b6fb0722","7f0e37f1487f531b0b0bb0b6fb0722","7f0e397bd097c35b0b6fc920fc8dc2","9778397bd097c36b0b6fc9274c91aa","97b6b7f0e47f531b0723b0b6fb0721","7f0e37f1487f531b0b0bb0b6fb0722","7f0e397bd097c35b0b0bc920fb0722","9778397bd097c36b0b6fc9274c91aa","97b6b7f0e47f531b0723b0b6fb0721","7f0e27f1487f531b0b0bb0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","9778397bd097c36b0b6fc9274c91aa","97b6b7f0e47f149b0723b0787b0721","7f0e27f1487f531b0723b0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","9778397bd097c36b0b6fc9274c91aa","97b6b7f0e47f14998083b0787b0721","7f0e27f0e47f531b0723b0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","9778397bd097c35b0b6fc9210c91aa","97b6b7f0e37f14998082b0787b0721","7f0e27f0e47f531b0723b0b6fb0722","7f0e397bd07f595b0b0bb0b6fb0722","9778397bd097c35b0b6fc9210c91aa","97b6b7f0e37f14998082b0787b0721","7f0e27f0e47f531b0723b0b6fb0722","7f0e397bd07f531b0b0bb0b6fb0722","9778397bd097c35b0b6fc9210c8dc2","97b6b7f0e37f14998082b0787b0721","7f0e27f0e47f531b0723b0b6fb0722","7f0e37f5307f531b0b0bb0b6fb0722","9778397bd097c35b0b6fc9210c8dc2","977837f0e37f14998082b0787b0721","7f07e7f0e47f531b0723b0b6fb0722","7f0e37f1487f531b0b0bb0b6fb0722","7f0e397bd097c35b0b0bc920fc8dc2","977837f0e37f14998082b0787b06bd","7f07e7f0e47f531b0723b0b6fb0721","7f0e37f1487f531b0b0bb0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","977837f0e37f14998082b0787b06bd","7f07e7f0e47f149b0723b0b6fb0721","7f0e27f1487f531b0723b0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","977837f0e37f14998082b0787b06bd","7f07e7f0e47f14998083b0787b0721","7f0e27f1487f531b0723b0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","977837f0e37f14998082b0723b06bd","7f07e7f0e47f14998083b0787b0721","7f0e27f0e47f531b0723b0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","977837f0e37f14898082b0723b06bd","7f07e7f0e37f14998082b0787b0721","7f0e27f0e47f531b0723b0b6fb0722","7f0e397bd07f531b0b0bb0b6fb0722","977837f0e37f14898082b0723b06bd","7f07e7f0e37f14998082b0787b0721","7f0e27f0e47f531b0723b0b6fb0722","7f0e397bd07f531b0b0bb0b6fb0722","977837f0e37f14898082b0723b02d5","7f07e7f0e37f14998082b0787b0721","7f0e27f0e47f531b0723b0b6fb0722","7f0e37f1487f531b0b0bb0b6fb0722","977837f0e37f14898082b0723b02d5","7f07e7f0e37f14998082b0787b0721","7f07e7f0e47f531b0723b0b6fb0722","7f0e37f1487f531b0b0bb0b6fb0722","977837f0e37f1489801eb0722b02d5","7ec967f0e37f14998082b0787b0721","7f07e7f0e47f531b0723b0b6fb0722","7f0e37f1487f531b0b0bb0b6fb0722","7f0e37f0e366aa89801eb072297c35","7ec967f0e37f14998082b0787b06bd","7f07e7f0e47f14998083b0787b0721","7f0e27f1487f531b0723b0b6fb0722","7f0e37f0e366aa89801eb072297c35","7ec967f0e37f14898082b0787b06bd","7f07e7f0e47f14998083b0787b0721","7f0e27f0e47f531b0723b0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","9778397bd097c35b0b6fc9210c91aa","97b6b97bd197c36b0b6fc9274c920e","97bcf97bd19801ec9210c965cc920f","97bd097bd07f595b0b0bb0b6fb0722","9778397bd097c35b0b6fc9210c91aa","97b6b97bd097c36b0b6fc9274c920e","97bcf97bd19801ec9210c965cc920f","97bd097bd07f531b0b0bb0b6fb0722","9778397bd097c35b0b6fc9210c91aa","97b6b97bd097c36b0b6fc9274c920e","97bcf97bd19801ec9210c965cc920f","97bd097bd07f531b0b0bb0b6fb0722","9778397bd097c35b0b6fc9210c8dc2","97b6b97bd097c36b0b6fc9274c920e","97bcf97bd19801ec9210c965cc920f","97bd07f1487f531b0b0bb0b6fb0722","9778397bd097c35b0b0bc9210c8dc2","97b6b97bd097c36b0b6fc9274c920e","97b6b97bd19801ec9210c965cc920f","97bd07f1487f531b0b0bb0b6fb0722","9778397bd07f595b0b0bc920fc8dc2","9778397bd097c36b0b6fc9274c920e","97b6b97bd197c36c9210c965cc920f","97bd07f1487f531b0723b0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","9778397bd097c36b0b6fc9274c91aa","97b6b97bd197c36b0b70c9274c920e","97bd07f1487f531b0723b0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","9778397bd097c35b0b6fc9210c91aa","97b6b97bd197c36b0b6fc9274c920e","97bcf7f0e47f531b0723b0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","9778397bd097c35b0b6fc9210c91aa","97b6b97bd097c36b0b6fc9274c920e","97bcf7f0e47f531b0723b0b6fb0722","7f0e397bd07f531b0b0bb0b6fb0722","9778397bd097c35b0b6fc9210c91aa","97b6b97bd097c36b0b6fc9274c920e","97bcf7f0e47f531b0723b0b6fb0722","7f0e397bd07f531b0b0bb0b6fb0722","9778397bd097c35b0b6fc9210c91aa","97b6b97bd097c36b0b6fc9274c920e","97bcf7f0e47f531b0723b0b6fb0722","7f0e397bd07f531b0b0bb0b6fb0722","9778397bd097c35b0b0bc9210c91aa","97b6b97bd097c36b0b6fc9274c920e","97bcf7f0e47f531b0723b0b6fb0722","7f0e37f1487f531b0b0bb0b6fb0722","9778397bd097c35b0b0bc9210c8dc2","97b6b97bd097c36b0b6fc9274c920e","97bcf7f0e47f149b0723b0b6fb0722","7f0e37f1487f531b0723b0b6fb0722","9778397bd07f595b0b0bc920fc8dc2","9778397bd097c36b0b6fc9274c920e","97b6b7f0e47f14998083b0787b0722","7f0e37f1487f531b0723b0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","9778397bd097c35b0b6fc9274c91aa","97b6b7f0e47f14998082b0787b0722","7f0e37f1487f531b0723b0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","9778397bd097c35b0b6fc9210c91aa","97b6b7f0e47f14998082b0787b0721","7f0e27f1487f531b0723b0b6fb0722","7f0e397bd07f531b0b0bb0b6fb0722","9778397bd097c35b0b6fc9210c91aa","97b6b7f0e37f14998082b0787b0721","7f0e27f0e47f531b0723b0b6fb0722","7f0e397bd07f531b0b0bb0b6fb0722","9778397bd097c35b0b6fc9210c91aa","97b6b7f0e37f14998082b0787b0721","7f0e27f0e47f531b0723b0b6fb0722","7f0e397bd07f531b0b0bb0b6fb0722","9778397bd097c35b0b0bc9210c91aa","97b6b7f0e37f14998082b0787b0721","7f0e27f0e47f531b0723b0b6fb0722","7f0e397bd07f531b0b0bb0b6fb0722","9778397bd097c35b0b0bc9210c91aa","97b6b7f0e37f14998082b0787b0721","7f0e27f0e47f531b0723b0b6fb0722","7f0e37f1487f531b0723b0b6fb0722","9778397bd07f595b0b0bc9210c8dc2","97b6b7f0e37f14998082b0787b0721","7f0e27f0e47f14998083b0b6fb0722","7f0e37f1487f531b0723b0b6fb0722","9778397bd07f595b0b0bc920fc8dc2","977837f0e37f14898082b0787b0721","7f07e7f0e47f14998082b0787b0722","7f0e37f1487f531b0723b0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","977837f0e37f14898082b0787b06bd","7f07e7f0e47f14998082b0787b0722","7f0e37f1487f531b0723b0b6fb0722","7f0e397bd07f595b0b0bc920fb0722","977837f0e37f14898082b0723b06bd","7f07e7f0e47f14998082b0787b0721","7f0e27f0e47f531b0723b0b6fb0722","7f0e397bd07f531b0b0bb0b6fb0722","9778397bd097c35b0b6fc9210c91aa","97b6b97bd097c36b0b6fc9274c920e","97bcf97bd19801ec9210c965cc920f","97bd0b06bd9801ec95f8c965cc920f","b027097bd097c35b0b0bc9210c91aa","97b6b97bd097c36b0b6fc9274c920e","97bcf97bd19801ec9210c965cc920f","97bd0b06bd9801ec95f8c965cc920f","b027097bd097c35b0b0bc9210c91aa","97b6b97bd097c36b0b6fc9274c920e","97bcf97bd19801ec9210c965cc920f","97bd0b06bd9801ec9210c965cc920f","b027097bd097c35b0b0bc9210c91aa","97b6b97bd097c36b0b6fc9274c920e","97bcf97bd197c36b0b70c965cc920f","97bd097c359801ec9210c965cc920f","b027097bd07f595b0b0bc920fc8dc2","97b6b97bd097c35b0b6fc9274c920e","97bcf97bd197c36b0b70c965cc920f","97bd097c359801ec9210c965cc920f","b027097bd07f595b0b0bc920fc8dc2","97b6b97bd097c35b0b6fc9274c920e","97bcf97bd197c36b0b6fc9274c920f","97bd097c359801ec9210c965cc920f","b027097bd07f595b0b0bc920fb0722","9778397bd097c35b0b6fc9210c91aa","97b6b97bd197c36b0b6fc9274c920f","97bd097c359801ec9210c965cc920f","97bd097bd07f531b0b0bb0b6fb0722","9778397bd097c35b0b6fc9210c91aa","97b6b97bd097c36b0b6fc9274c920e","97bcf97bd19801ec9210c965cc920f","97bd097bd07f531b0b0bb0b6fb0722","9778397bd097c35b0b0bc9210c91aa","97b6b97bd097c36b0b6fc9274c920e","97bcf97bd19801ec9210c965cc920f","97bd097bd07f531b0b0bb0b6fb0722","9778397bd097c35b0b0bc9210c91aa","97b6b97bd097c36b0b6fc9274c920e","97bcf97bd19801ec9210c965cc920f","97bd097bd07f531b0723b0b6fb0722","9778397bd097c35b0b0bc9210c91aa","97b6b97bd097c36b0b6fc9274c920e","97bcf97bd19801eb0b70c965cc920f","97bd097bd07f531b0723b0b6fb0722","9778397bd07f595b0b0bc9210c91aa","97b6b97bd097c35b0b6fc9274c920e","97bcf97bd197c36b0b70c965cc920f","97bd07f1487f531b0723b0b6fb0722","9778397bd07f595b0b0bc920fc8dc2","97b6b97bd097c35b0b6fc9274c920e","97bcf97bd197c36b0b6fc9274c920f","97bd07f1487f531b0723b0b6fb0722","9778397bd07f595b0b0bc920fc8dc2","97b6b97bd097c35b0b6fc9274c920e","97bcf97bd197c36b0b6fc9274c920f","97bd07f1487f531b0723b0b6fb0722","9778397bd07f531b0b0bb0b6fb0722","9778397bd097c35b0b6fc9210c920e","97b6b97bd197c36b0b6fc9274c920f","97bd07f1487f531b0723b0b6fb0722","7f0e397bd07f531b0b0bb0b6fb0722","9778397bd097c35b0b6fc9210c91aa","97b6b97bd097c36b0b6fc9274c920e","97bcf7f0e47f531b0723b0b6fb0722","7f0e397bd07f531b0b0bb0b6fb0722","9778397bd097c35b0b0bc9210c91aa","97b6b97bd097c36b0b6fc9274c920e","97bcf7f0e47f531b0723b0b6fb0722","7f0e397bd07f531b0723b0b6fb0722","9778397bd097c35b0b0bc9210c91aa","97b6b97bd097c36b0b6fc9274c920e","97bcf7f0e47f53198083b0b6fb0722","7f0e397bd07f531b0723b0b6fb0722","9778397bd097c35b0b0bc9210c91aa","97b6b97bd097c36b0b6fc9274c920e","97bcf7f0e47f14998083b0b6fb0722","7f0e397bd07f531b0723b0b6fb0722","9778397bd07f595b0b0bc9210c91aa","97b6b97bd097c35b0b6fc9274c920e","97bcf7f0e47f14998082b0787b0722","7f0e37f1487f531b0723b0b6fb0722","9778397bd07f595b0b0bc920fc8dc2","97b6b97bd097c35b0b6fc9274c920e","97bcf7f0e47f14998082b0787b0722","7f0e37f1487f531b0723b0b6fb0722","9778397bd07f531b0b0bb0b6fc8dc2","97b6b97bd097c35b0b6fc9274c920e","97bcf7f0e47f14998082b0787b0722","7f0e37f1487f531b0723b0b6fb0722","9778397bd07f531b0b0bb0b6fb0722","97b6b97bd097c35b0b6fc9210c920e","97b6b7f0e47f14998082b0787b0722","7f0e37f1487f531b0723b0b6fb0722","9778397bd07f531b0b0bb0b6fb0722","9778397bd097c35b0b0bc9210c91aa","97b6b7f0e37f14998082b0787b0721","7f0e37f0e47f531b0723b0b6fb0722","7f0e397bd07f531b0723b0b6fb0722","9778397bd097c35b0b0bc9210c91aa","97b6b7f0e37f14998082b0787b0721","7f0e27f0e47f53198083b0b6fb0722","7f0e397bd07f531b0723b0b6fb0722","9778397bd097c35b0b0bc9210c91aa","97b6b7f0e37f14998082b0787b0721","7f0e27f0e47f14998083b0b6fb0722","7f0e397bd07f531b0723b0b6fb0722","9778397bd07f595b0b0bc9210c91aa","97b6b7f0e37f14898082b0787b0721","7f0e27f0e47f14998083b0b6fb0722","7f0e397bd07f531b0723b0b6fb0722","9778397bd07f595b0b0bc9210c91aa","97b6b7f0e37f14898082b0787b0721","7f0e27f0e47f14998082b0787b0722","7f0e3977e87f531b0723b0b6fb0722","9778397bd07f595b0b0bc920fc8dc2","97b6b7f0e37f14898082b0787b0721","7f0e27f0e47f14998082b0787b0722","7f0e37f1487f531b0723b0b6fb0722","9778397bd07f531b0b0bb0b6fb0722","97b6b7f0e37f14898082b0723b0721","7f0e27f0e47f14998082b0787b0722","7f0e37f1487f531b0723b0b6fb0722","9778397bd07f531b0b0bb0b6fb0722","97b6b7f0e37f1489801eb0723b0721","7f07e7f0e37f14998082b0787b0722","7f0e37f0e47f531b0723b0b6fb0722","9778397bd07f531b0b0bb0b6fb0722","977837f0e37f1489801eb0723b06bd","7f07e7f0e37f14998082b0787b0722","7f0e37f0e47f531b0723b0b6fb0722","7f0e397bd07f531b0723b0b6fb0722","977837f0e37f1489801eb0723b06bd","7f07e7f0e37f14998082b0787b0721","7f0e27f0e47f53198083b0b6fb0722","7f0e397bd07f531b0723b0b6fb0722","977837f0e37f1489801eb0723b06bd","7f07e7f0e37f14898082b0787b0721","7f0e27f0e47f14998083b0b6fb0722","7f0e397bd07f531b0723b0b6fb0722","977837f0e366aa89801eb0723b06bd","7f07e7f0e37f14898082b0787b0721","7f0e27f0e47f14998082b0787b0722","7f0e397bd07f531b0723b0b6fb0722","977837f0e366aa89801eb0722b06bd","7f07e7f0e37f14898082b0787b0721","7f0e27f0e47f14998082b0787b0722","7f0e3977e87f531b0723b0b6fb0722","977837f0e366a449801e98082b02d5","7f07e7f0e37f14898082b0787b0721","7f0e27f0e47f14998082b0787b0722","7f0e37f1487f531b0723b0b6fb0722","977837f0e366a449801e98082b02d5","7f07e7f0e37f1489801eb0723b0721","7f0e27f0e47f14998082b0787b0722","7f0e37f1487f531b0723b0b6fb0722","977837f0e366a449801e9808297c35","7f07e7f0e37f1489801eb0723b0721","7f07e7f0e37f14998082b0787b0722","7f0e37f0e47f531b0723b0b6fb0722","977837f0e366a4497c369808297c35","7ec967f0e37f1489801eb0723b06bd","7f07e7f0e37f14998082b0787b0722","7f0e37f0e47f53198083b0b6fb0722","7f0e37f0e366a4497c369808297c35","7ec967f0e37f1489801eb0723b06bd","7f07e7f0e37f14898082b0787b0721","7f0e27f0e47f14998083b0b6fb0722","7f0e37f0e366a4497c369808297c35","7ec967f0e366aa89801eb0723b06bd","7f07e7f0e37f14898082b0787b0721","7f0e27f0e47f14998082b0787b0722","7f0e37f0e366a4497c369808297c35","7ec967f0e366aa89801eb0723b06bd","7f07e7f0e37f14898082b0787b0721","7f0e27f0e47f14998082b0787b0722","7f0e37f0e366a4497c369808297c35","7ec967f0e366a449801e98082b06bd","7f07e7f0e37f14898082b0787b0721","7f0e27f0e47f14998082b0787b0722","7f0e37ecfb66a4497c369808297c35","7ec967f0e366a449801e98082b02d5","7f07e7f0e37f1489801eb0787b0721","7f0e27f0e47f14998082b0787b0722","7f0e36665b66a4497c369808297c35","7ec967f0e366a449801e98082b02d5","7f07e7f0e37f1489801eb0723b0721","7f0e27f0e47f14998082b0787b0722","7f0e36665b66a4497c369808297c35","7ec967f0e366a4497c369808297c35","7f07e7f0e37f1489801eb0723b0721","7f0e27f0e37f14998082b0787b0722","7f0e3665f766a447f5969808297c35","7ec967f0e366a4497c369808297c35","7ec967f0e37f1489801eb0723b06bd","7f07e7f0e37f14898082b0787b0722","7f0e3665f76665c7f5969808297c35","665f67f0e366a4497c369808297c35","7ec967f0e37f1489801eb0723b06bd","7f07e7f0e37f14898082b0787b0721","7f0e27f0e47f14998082b0b6fb0722","7f0e397bd07f531b0723b0b6fb0722","9778397bd07f595b0b0bc9210c91aa","97b6b97bd097c35b0b6fc9274c920e","97bcf7f0e47f14998082b0787b0722","7f0e397bd07f531b0723b0b6fb0722","9778397bd07f531b0b0bc9210c91aa","97b6b97bd097c35b0b6fc9274c920e","97bcf7f0e47f14998082b0787b0722","7f0e397bd07f531b0723b0b6fb0722","9778397bd07f531b0b0bb0b6fc91aa","97b6b97bd097c35b0b0bc9274c920e","97bcf7f0e47f14998082b0787b0722","7f0e3977e87f531b0723b0b6fb0722","9778397bd07f531b0b0bb0b6fc8dc2","97b6b97bd097c35b0b0bc9210c920e","97bcf7f0e47f14998082b0787b0722","7f0e37f1487f531b0723b0b6fb0722","9778397bd07f531b0723b0b6fb0722","97b6b97bd097c35b0b0bc9210c920e","97bcf7f0e37f14998082b0787b0722","7f0e37f1487f53198083b0b6fb0722","9778397bd07f531b0723b0b6fb0722","97b6b97bd097c35b0b0bc9210c920e","97bcf7f0e37f14998082b0787b0722","7f0e37f0e47f53198083b0b6fb0722","9778397bd07f531b0723b0b6fb0722","97b6b97bd097c35b0b0bc9210c91aa","97b6b7f0e37f14898082b0787b0722","7f0e37f0e47f14998082b0b6fb0722","9778397bd07f531b0723b0b6fb0722","9778397bd07f595b0b0bc9210c91aa","97b6b7f0e37f14898082b0787b0721","7f0e27f0e47f14998082b0787b0722","7f0e397bd07f531b0723b0b6fb0722","9778397bd07f595b0b0bc9210c91aa","97b6b7f0e37f14898082b0787b0721","7f0e27f0e47f14998082b0787b0722","7f0e397bd07f531b0723b0b6fb0722","9778397bd07f531b0b0bb0b70c91aa","97b6b7f0e37f14898082b0787b0721","7f0e27f0e47f14998082b0787b0722","7f0e397bd07f531b0723b0b6fb0722","9778397bd07f531b0b0bb0b6fc91aa","97b6b7f0e37f1489801eb0723b0721","7f0e27f0e47f14998082b0787b0722","7f0e3977e87f531b0723b0b6fb0722","9778397bd07f531b0723b0b6fc8dc2","97b6b7f0e37f1489801eb0723b0721","7f0e27f0e47f14998082b0787b0722","7f0e37f1487f53198083b0b6fb0722","9778397bd07f531b0723b0b6fb0722","97b6b7f0e37f1489801eb0723b0721","7f0e27f0e37f14898082b0787b0722","7f0e37f0e47f53198083b0b6fb0722","9778397bd07f531b0723b0b6fb0722","97b6b7f0e37f1489801eb0723b0721","7f0e27f0e37f14898082b0787b0722","7f0e37f0e47f14998083b0b6fb0722","9778397bd07f531b0723b0b6fb0722","97b6b7f0e37f1489801eb0723b0721","7f07e7f0e37f14898082b0787b0722","7f0e37f0e47f14998082b0b6fb0722","9778397bd07f531b0723b0b6fb0722","977837f0e366aa89801eb0723b06bd","7f07e7f0e37f14898082b0787b0721","7f0e27f0e47f14998082b0787b0722","7f0e397bd07f531b0723b0b6fb0722","977837f0e366a449801e98083b06bd","7f07e7f0e37f14898082b0787b0721","7f0e27f0e47f14998082b0787b0722","7f0e397bd07f531b0723b0b6fb0722","977837f0e366a449801e98082b06bd","7f07e7f0e37f1489801eb0787b0721","7f0e27f0e47f14998082b0787b0722","7f0e397bd07f531b0723b0b6fb0722","977837f0e366a4497c3698082b06bd","7f07e7f0e37f1489801eb0723b0721","7f0e27f0e47f14998082b0787b0722","7f0e3977e87f53198083b0b6fb0722","977837f0e366a4497c3698082b02d5","7f07e7f0e37f1489801eb0723b0721","7f0e27f0e37f14998082b0787b0722","7f0e37f1487f53198083b0b6fb0722","977837f0e366a4497c369808297c35","7f07e7f0e37f1489801eb0723b0721","7f0e27f0e37f14898082b0787b0722","7f0e37f0e47f14998083b0b6fb0722","977837f0e366a4497c369808297c35","7f07e7f0e37f1489801eb0723b0721","7f0e27f0e37f14898082b0787b0722","7f0e37f0e47f14998082b0b6fb0722","977837f0e366a4497c369808297c35","7f07e7f0e366aa89801eb0723b0721","7f0e27f0e37f14898082b0787b0722","7f0e37f0e47f14998082b0787b0722","977837f0e366a4497c369808297c35","7ec967f0e366a449801eb0723b06bd","7f07e7f0e37f14898082b0787b0722","7f0e37f0e47f14998082b0787b0722","7f0e397bd07f531b0723b0b6fb0722","9778397bd07f531b0b0bb0b70c91aa","97b6b97bd097c35b0b0bc9274c920e","97bcf97bd197c36b0b6fc9274c920f","97bd097bd07f531b0723b0b6fb0722","9778397bd07f531b0723b0b6fc91aa","97b6b97bd097c35b0b0bc9210c920e","97bcf97bd197c36b0b6fc9274c920f","97bd097bd07f53198083b0b6fb0722","9778397bd07f531b0723b0b6fc91aa","97b6b97bd097c35b0b0bc9210c920e","97bcf97bd197c36b0b6fc9274c920f","97bd0977e87f53198083b0b6fb0722","9778397bd07f531b0723b0b6fc8dc2","97b6b97bd097c35b0b0bc9210c920e","97bcf97bd097c35b0b6fc9274c920f","97bd07f1487f53198083b0b6fb0722","9778397bd07f531b0723b0b6fb0722","97b6b97bd097c35b0b0bc9210c920e","97bcf97bd097c35b0b6fc9274c920f","97bd07f0e47f14998082b0b6fb0722","9778397bd07f531b0723b0b6fb0722","97b6b97bd097c35b0b0bc9210c920e","97bcf97bd097c35b0b6fc9274c920f","97bd07f0e47f14998082b0787b0722","9778397bd07f531b0723b0b6fb0722","97b6b97bd07f531b0b0bc9210c920e","97bcf97bd097c35b0b6fc9274c920f","97bd07f0e47f14998082b0787b0722","9778397bd07f531b0723b0b6fb0722","9778397bd07f531b0b0bb0b70c91aa","97b6b97bd097c35b0b0bc9274c920f","97bd07f0e47f14998082b0787b0722","9778397bd07f531b0723b0b6fb0722","9778397bd07f531b0b0bb0b70c91aa","97b6b97bd097c35b0b0bc9274c920e","97bcf7f0e47f14998082b0787b0722","7f0e397bd07f531b0723b0b6fb0722","9778397bd07f531b0723b0b6fc91aa","97b6b97bd097c35b0b0bc9210c920e","97bcf7f0e47f14998082b0787b0722","7f0e3977e87f53198083b0b6fb0722","9778397bd07f531b0723b0b6fc91aa","97b6b97bd097c35b0b0bc9210c920e","97bcf7f0e37f14898082b0787b0722","7f0e3977e87f53198083b0b6fb0722","9778397bd07f531b0723b0b6fb0722","97b6b97bd097c35b0b0bc9210c920e","97bcf7f0e37f14898082b0787b0722","7f0e37f1487f14998082b0b6fb0722","9778397bd07f531b0723b0b6fb0722","97b6b97bd097c35b0b0bc9210c920e","97bcf7f0e37f14898082b0787b0722","7f0e37f0e47f14998082b0b6fb0722","9778397bd07f531b0723b0b6fb0722","97b6b97bd07f595b0b0bc9210c920e","97bcf7f0e37f14898082b0787b0722","7f0e37f0e47f14998082b0787b0722","9778397bd07f531b0723b0b6fb0722","97b6b97bd07f531b0b0bb0b70c920e","97bcf7f0e37f1489801eb0787b0722","7f0e37f0e47f14998082b0787b0722","9778397bd07f531b0723b0b6fb0722","97b6b97bd07f531b0723b0b70c91aa","97b6b7f0e37f1489801eb0787b0722","7f0e37f0e47f14998082b0787b0722","9778397bd07f531b0723b0b6fb0722","9778397bd07f531b0723b0b6fc91aa","97b6b7f0e37f1489801eb0787b0721","7f0e27f0e47f14998082b0787b0722","7f0e397bd07f53198083b0b6fb0722","9778397bd07f531b0723b0b6fc91aa","97b6b7f0e37f1489801eb0723b0721","7f0e27f0e47f14898082b0787b0722","7f0e397bd07f53198083b0b6fb0722","9778397bd07f531b0723b0b6fc91aa","97b6b7f0e37f1489801eb0723b0721","7f0e27f0e37f14898082b0787b0722","7f0e3977e87f53198082b0b6fb0722","9778397bd07f531b0723b0b6fb0722","97b6b7f0e37f1489801eb0723b0721","7f0e27f0e37f14898082b0787b0722","7f0e37f0e47f14998082b0b6fb0722","9778397bd07f531b0723b0b6fb0722","97b6b7f0e366aa89801eb0723b0721","7f0e27f0e37f14898082b0787b0722","7f0e37f0e47f14998082b0787b0722","9778397bd07f531b0723b0b6fb0722","97b6b7f0e366a449801e98083b0721","7f0e27f0e37f1489801eb0787b0722","7f0e37f0e47f14998082b0787b0722","9778397bd07f531b0723b0b6fb0722","97b6b7f0e366a449801e98083b0721","7f0e27f0e37f1489801eb0787b0722","7f0e37f0e47f14998082b0787b0722","9778397bd07f531b0723b0b6fb0722","97b6b7f0e366a4497c3698083b06bd","7f07e7f0e37f1489801eb0787b0722","7f0e37f0e47f14998082b0787b0722","9778397bd07f53198083b0b6fb0722","9778397bd07f531b0723b0b6fc91aa","97b6b97bd097c35b0b0bc9210c920e","97bcf97bd197c35b0b6fc9274c920f","97bd0b06bd9801eb0b70c965cc920f","b027097bd07f531b0723b0b6fc91aa","97b6b97bd097c35b0b0bc9210c920e","97bcf97bd197c35b0b6fc9274c920f","97bd0b06bd9801eb0b70c965cc920f","b027097bd07f531b0723b0b6fc91aa","97b6b97bd097c35b0b0bc9210c920e","97bcf97bd097c35b0b6fc9274c920f","97bd0b02d597c36b0b6fc965cc920f","b027097bd07f531b0723b0b6fb0722","97b6b97bd097c35b0b0bc9210c920e","97bcf97bd097c35b0b6fc9274c920f","97bd097bd197c36b0b6fc9274c920f","b027097bd07f531b0723b0b6fb0722","97b6b97bd07f531b0b0bc9210c920e","97bcf97bd097c35b0b0bc9274c920f","97bd097bd197c36b0b6fc9274c920f","b027097bd07f531b0723b0b6fb0722","97b6b97bd07f531b0b0bb0b70c920e","97bcf97bd097c35b0b0bc9274c920f","97bd097bd197c36b0b6fc9274c920f","b027097bd07f531b0723b0b6fb0722","97b6b97bd07f531b0723b0b70c920e","97bcf97bd097c35b0b0bc9274c920f","97bd097bd197c36b0b6fc9274c920f","b027097bd07f53198083b0b6fb0722","97b6b97bd07f531b0723b0b70c91aa","97bcf97bd097c35b0b0bc9274c920f","97bd097bd197c36b0b6fc9274c920f","b027097bd07f53198083b0b6fb0722","9778397bd07f531b0723b0b6fc91aa","97b6b97bd097c35b0b0bc9210c920e","97bcf97bd197c35b0b6fc9274c920f","97bd097bd07f53198083b0b6fb0722","9778397bd07f531b0723b0b6fc91aa","97b6b97bd097c35b0b0bc9210c920e","97bcf97bd097c35b0b6fc9274c920f","97bd0977e87f14998082b0b6fb0722","9778397bd07f531b0723b0b6fc91aa","97b6b97bd097c35b0b0bc9210c920e","97bcf97bd097c35b0b6fc9274c920f","97bd0977e87f14998082b0b6fb0722","9778397bd07f531b0723b0b6fb0722","97b6b97bd097bd1b0b0bc9210c920e","97bcf97bd097c35b0b0bc9274c920f","97bd07f0e47f14998082b0787b0722","9778397bd07f531b0723b0b6fb0722","97b6b97bd07f531b0b0bb0b70c920e","97bcf97bd097c35b0b0bc9274c920f","97bd07f0e47f14998082b0787b0722","9778397bd07f531b0723b0b6fb0722","97b6b97bd07f531b0723b0b70c920e","97bcf97bd097c35b0b0bc9274c920f","97bd07f0e47f14998082b0787b0722","9778397bd07f53198083b0b6fb0722","97b6b97bd07f531b0723b0b70c920e","97bcf97bd097c35b0b0bc9274c920f","97bd07f0e47f14998082b0787b0722","9778397bd07f53198083b0b6fb0722","97b6b97bd07f531b0723b0b6fc91aa","97bcf97bd097c35b0b0bc9210c920f","97bd07f0e47f14898082b0787b0722","9778397bd07f53198083b0b6fb0722","9778397bd07f531b0723b0b6fc91aa","97b6b97bd097c35b0b0bc9210c920f","97bcf7f0e47f14898082b0787b0722","7f0e397bd07f53198082b0b6fb0722","9778397bd07f531b0723b0b6fc91aa","97b6b97bd097c35b0b0bc9210c920e","97bcf7f0e37f14898082b0787b0722","7f0e3977e87f14998082b0b6fb0722","9778397bd07f531b0723b0b6fc8dc2","97b6b97bd097bd1b0b0bc9210c920e","97bcf7f0e37f1489801eb0787b0722","7f0e3977e87f14998082b0b6fb0722","9778397bd07f531b0723b0b6fb0722","97b6b97bd07f531b0b0bb0b70c920e","97bcf7f0e37f1489801eb0787b0722","7f0e37f0e47f14998082b0787b0722","9778397bd07f531b0723b0b6fb0722","97b6b97bd07f531b0723b0b70c920e","97bcf7f0e37f1489801eb0787b0722","7f0e37f0e47f14998082b0787b0722","9778397bd07f53198083b0b6fb0722","97b6b97bd07f531b0723b0b70c920e","97bcf7f0e37f1489801eb0787b0722","7f0e37f0e47f14998082b0787b0722","9778397bd07f53198083b0b6fb0722","97b6b97bd07f531b0723b0b70c920e","97bcf7f0e37f1489801eb0723b0722","7f0e37f0e47f14898082b0787b0722","9778397bd07f53198083b0b6fb0722","97b6b97bd07f531b0723b0b6fc91aa","97bcf7f0e37f1489801eb0723b0722","7f0e37f0e47f14898082b0787b0722","9778397bd07f53198082b0b6fb0722","97b6b97bd07f531b0723b0b6fc91aa","97b6b7f0e37f1489801eb0723b0722","7f0e37f0e47f14898082b0787b0722","9778397bd07f14998082b0b6fb0722","9778397bd07f531b0723b0b6fc91aa","97b6b7f0e37f1489801eb0723b0721","7f0e27f0e37f14898082b0787b0722","7f0e3977e87f14998082b0b6fb0722","9778397bd07f531b0723b0b6fc8dc2","97b6b7f0e37f0e49801e98083b0721","7f0e27f0e37f1489801eb0787b0722","7f0e3977e87f14998082b0787b0722","9778397bd07f531b0723b0b6fb0722","97b6b7f0e366a4497c3698083b0721","7f0e27f0e37f1489801eb0787b0722","7f0e37f0e47f14998082b0787b0722","9778397bd07f53198083b0b6fb0722","97b6b7f0e366a4497c3698083b0721","7f0e27f0e37f1489801eb0787b0722","7f0e37f0e47f14998082b0787b0722","9778397bd07f53198083b0b6fb0722","97b6b7f0e366a4497c3698083b0721","7f0e27f0e37f1489801eb0787b0722","7f0e37f0e47f14898082b0787b0722","9778397bd07f53198083b0b6fb0722","97b6b7f0e366a4497c3698082b0721","7f0e27f0e37f1489801eb0723b0722","7f0e37f0e47f14898082b0787b0722","9778397bd07f53198082b0b6fb0722","97b6b7f0e366a4497c3698082b06bd","7f0e27f0e37f1489801eb0723b0722","7f0e37f0e47f14898082b0787b0722","9778397bd07f14998082b0b6fb0722","97b6b7f0e366a4497c3698082b06bd","7f07e7f0e37f1489801eb0723b0722","7f0e37f0e37f14898082b0787b0722","9778397bd07f14998082b0b6fb0722","977837f0e366a4497c3698082b06bd","7f07e7f0e37f0e49801eb0723b0721","7f0e27f0e37f1489801eb0787b0722","7f0e3977e87f14998082b0787b0722","977837f0e366a4497c369808297c35","7f07e7f0e366a4497c3698083b0721","7f0e27f0e37f1489801eb0787b0722","7f0e3977e87f14998082b0787b0722","977837f0e366a447f5969808297c35","7f07e7f0e366a4497c3698083b0721","7f0e27f0e37f1489801eb0787b0722","7f0e37f0e47f14998082b0787b0722","977837f0e366a447f5969808297c35","7f07e7f0e366a4497c3698083b0721","7f0e27f0e37f1489801eb0787b0722","7f0e37f0e47f14898082b0787b0722","977837f0e366a447f5969808297c35","7f07e7f0e366a4497c3698083b0721","7f0e27f0e37f1489801eb0787b0722","7f0e37f0e47f14898082b0787b0722","977837f0e366a447f5959808297c35","7f07e7f0e366a4497c3698082b0721","7f0e27f0e37f1489801eb0723b0722","7f0e37f0e47f14898082b0787b0722","977837f0e366a447f5959808297c35","7f07e7f0e366a4497c3698082b06bd","7f0e27f0e37f1489801eb0723b0722","7f0e37f0e47f14898082b0787b0722","977837f0e36665c7f5959808297c35","7f07e7f0e366a4497c3698082b06bd","7f07e7f0e37f0e49801eb0723b0722","7f0e37f0e37f1489801eb0787b0722","977837f0e36665c7f59597c9a97c35","7ec967f0e366a4497c3698082b06bd","7f07e7f0e37f0e497c3698083b0721","7f0e27f0e37f1489801eb0787b0722","7f0e37ecfb6665c7f59597c9a97c35","7ec967f0e366a4497c369808297c35","7f07e7f0e366a4497c3698083b0721","7f0e27f0e37f1489801eb0787b0722","7f0e37ecfb6665c7f59597c9a97c35","7ec967f0e366a447f5969808297c35","7f07e7f0e366a4497c3698083b0721","7f0e27f0e37f1489801eb0787b0722","7f0e37ec976665c7f59597c9a97c35","7ec967f0e366a447f5969808297c35","7f07e7f0e366a4497c3698083b0721","7f0e27f0e37f1489801eb0787b0722","7f0e3665f76665b7f59597c9a97c35","7ec967f0e366a447f5959808297c35","7f07e7f0e366a4497c3698082b0721","7f0e27f0e37f1489801eb0723b0722","7f0e3665f76665b7f59597c9a97c35","7ec967f0e366a447f5959808297c35","7f07e7f0e366a4497c3698082b0721","7f0e27f0e37f1489801eb0723b0722","7f0e3665f76665b7f59597c9a97c35","7ec967f0e36665c7f5959808297c35","7f07e7f0e366a4497c3698082b06bd","7f0e27f0e37f1489801eb0723b0722","7f0e3665f76665b7f53197c9a97c35","7ec967f0e36665c7f5959808297c35","7f07e7f0e366a4497c3698082b06bd","7f0e27f0e37f0e497c3698083b0722","7f0e37f0e37f1489801eb0787b0722","9778397bd07f14998082b0787b0722","9778397bd07f53198083b0b6fc91aa","97b6b97bd07f531b0723b0b70c920e","97bcf7f0e37f1489801eb0787b0722","7f0e3977e87f14998082b0787b0722","9778397bd07f53198083b0b6fb0722","97b6b97bd07f531b0723b0b70c920e","97bcf7f0e37f1489801eb0787b0722","7f0e3977847f14998082b0787b0722","9778397bd07f53198083b0b6fb0722","97b6b97bd07f531b0723b0b70c920e","97bcf7f0e37f1489801eb0787b0722","7f0e3977847f14898082b0787b0722","9778397bd07f53198083b0b6fb0722","97b6b97bd07f531b0723b0b70c920e","97bcf7f0e37f1489801eb0787b0722","7f0e37f0e47f14898082b0787b0722","9778397bd07f53198082b0b6fb0722","97b6b97bd07f531b0723b0b6fc920e","97bcf7f0e37f1489801eb0723b0722","7f0e37f0e47f14898082b0787b0722","9778397bd07f14998082b0b6fb0722","97b6b97bd07f531b0723b0b6fc920e","97bcf7f0e37f1489801eb0723b0722","7f0e37f0e47f1489801eb0787b0722","9778397bd07f14998082b0b6fb0722","97b6b97bd07f531b0723b0b6fc91aa","97bcf7f0e37f0e497c3698083b0722","7f0e37f0e47f1489801eb0787b0722","9778397bd07f14998082b0787b0722","97b6b97bd07f531b0723b0b6fc91aa","97bcf7f0e37f0e497c3698083b0722","7f0e37f0e37f1489801eb0787b0722","9778397bd07f14998082b0787b0722","97b6b97bd07f53198083b0b6fc91aa","97b6b7f0e366a4497c3698083b0721","7f0e27f0e37f1489801eb0787b0722","7f0e3977e87f14998082b0787b0722","9778397bd07f53198083b0b6fb0722","97b6b7f0e366a4497c3698083b0721","7f0e27f0e37f1489801eb0787b0722","7f0e3977847f14898082b0787b0722","9778397bd07f53198083b0b6fb0722","97b6b7f0e366a4497c3698083b0721","7f0e27f0e37f1489801eb0787b0722","7f0e3977847f14898082b0787b0722","9778397bd07f53198082b0b6fb0722","97b6b7f0e366a4497c3698083b0721","7f0e27f0e37f1489801eb0723b0722","7f0e37f0e47f14898082b0787b0722","9778397bd07f53198082b0b6fb0722","97b6b7f0e366a4497c3698082b0721","7f0e27f0e37f1489801eb0723b0722","7f0e37f0e47f1489801eb0787b0722","9778397bd07f14998082b0b6fb0722","97b6b7f0e366a4497c3698082b0721","7f0e27f0e37f0e497c3698083b0722","7f0e37f0e47f1489801eb0787b0722","9778397bd07f14998082b0787b0722","97b6b7f0e366a4497c3698082b06bd","7f0e27f0e37f0e497c3698083b0722","7f0e37f0e37f1489801eb0787b0722","9778397bd07f14998082b0787b0722","97b6b7f0e366a447f59698082b06bd","7f0e27f0e366a4497c3698083b0722","7f0e37f0e37f1489801eb0787b0722","9778397bd07f14998082b0787b0722","97b6b7f0e366a447f596980829801d","7f07e7f0e366a4497c3698083b0722","7f0e37f0e37f1489801eb0787b0722","97783977e87f14898082b0787b0722","977837f0e366a447f5969808297c35","7f07e7f0e366a4497c3698083b0721","7f0e27f0e37f1489801eb0787b0722","7f0e3977847f14898082b0787b0722","977837f0e366a447f5959808297c35","7f07e7f0e366a4497c3698083b0721","7f0e27f0e37f1489801eb0723b0722","7f0e3977847f14898082b0787b0722","977837f0e366a447f5959808297c35","7f07e7f0e366a4497c3698082b0721","7f0e27f0e37f1489801eb0723b0722","7f0e37f0e47f1489801eb0787b0722","977837f0e36665c7f5959808297c35","7f07e7f0e366a4497c3698082b0721","7f0e27f0e37f0e49801eb0723b0722","7f0e37f0e47f1489801eb0787b0722","977837f0e36665c7f5959808297c35","7f07e7f0e366a4497c3698082b0721","7f0e27f0e37f0e497c3698083b0722","7f0e37f0e47f1489801eb0787b0722","977837f0e36665c7f59597c9a97c35","7f07e7f0e366a447f59698082b06bd","7f0e27f0e37f0e497c3698083b0722","7f0e37f0e37f1489801eb0787b0722","977837f0e36665c7f59597c9a97c35","7f07e7f0e366a447f59698082b06bd","7f0e27f0e366a4497c3698083b0722","7f0e37f0e37f1489801eb0787b0722","9778397bd07f14898082b0787b0722"];
+const CG_MAN = ["短命非业谓大空，平生灾难事重重；\n凶祸频临陷逆境，终世困苦事不成。","身寒骨冷苦伶仃，此命推来生乞人。\n碌碌巴巴无度日，终年打拱过平年。","此命推来骨自轻，求谋作事事难成。\n妻儿兄弟应难许，别作散人处他乡。","此命推来福禄无，门庭困苦总难营。\n六亲骨肉皆无靠，流到他乡作老翁。","此命推来祖业微，门庭营度似稀奇。\n六亲骨肉如冰炭，一生勤劳自把持。","平生衣禄苦中求，独自经营事不休。\n离祖出门宜早计，晚来衣禄自无忧。","一生作事少商量，难靠祖宗作主张。\n独马单枪空做去，早来晚岁部无长。","一生作事似飘蓬，祖宗产业在梦中。\n若不过房并改姓，也当移徙两三通。","初年运限未曾享，纵有功名在后底。\n须过四旬绕可上，移居改姓始为良。","劳劳碌碌苦中求，东走西奔何日休。\n若使终身勤与俭，老来稍可免忧愁。","忙忙碌碌苦中求，何日云开见日头。\n难得祖基家可立，中年衣食渐无忧。","初年运蹇事难谋，渐有财源如水流。\n到得中年衣食旺，那时名利一齐来。","早年做事事难成，百计徒劳枉费心。\n半世自如流水去，后来运到得黄金。","此命福气果如何，僧道门中衣禄多。\n离祖出家方得妙，终朝拜佛念彌陀。","平生福量不周全，祖业根基觉少传。\n营业生涯宜守旧，时来衣食胜从前。","不须劳碌过平生，独自成家福不轻。\n早有福星常照命，任君行去百般成。","此命般般事不成，弟兄少力自孤成。\n虽然祖业须微有，来得明时去得明。","一生骨肉最清高，早入黄门姓名标。\n待看年将三十六，蓝袍脱去换红袍。","此命终身运不穷，劳劳作事尽皆空。\n苦心竭力成家计，到得那时在梦中。","生平衣禄是绵长，件件心中自主张。\n前面风霜多受过，后来必定享安康。","此命推来事不同，为人能干略凡庸。\n中年还有逍遥福，不比前年运未通。","得宽怀处且宽怀，何用双眉皱不开。\n若使中年命运济，那时名利一齐来。","为人心性最聪明，作事轩昂近贵人。\n衣禄一生天数定，不须劳碌是丰享。","来事由天莫苦求，须知福禄胜前途。\n当年财帛难如意，晚景欣然便不忧。","名利推来竟若何，前途辛苦后奔波。\n命中难养男与女，骨肉扶持也不多。","东西南北尽皆空，出姓移名更觉隆。\n衣禄无亏天数定，中年晚景一般同。","此命推来旺末年，妻荣子贵自怡然。\n平生原有滔滔福，可有财源如水源。","幼年运道未曾享，若是蹉跎再不兴。\n兄弟六亲皆无靠，一身事业晚年成。","此命推来福不轻，自成自立耀门庭。\n从来富贵人亲近，使婢差奴过一生。","为名为利终日劳，中年福禄也多遭。\n老来是有财星照，不比前番日下高。","一世荣华事事通，不须劳碌自享丰。\n弟兄叔侄皆如意，家业成时福禄宏。","一世享通事事能，不须劳思自然能。\n家族欣然心皆好，家业丰享自称心。","此格推来气像真，兴家发达在其中。\n一生福禄安排家，欲是人间一富翁。","此命推来厚且清，诗画满腹看功成。\n丰衣足食自然稳，正是人间有福人。","走马扬鞭争名利，少年做事费筹谋。\n一朝福禄源源至，富贵荣华耀六亲。","此格推来礼义通，一生福禄用无穷。\n甜酸苦辣皆尝过，财源滚滚稳且丰。","福禄丰盈万事全，一生荣耀显双亲。\n名扬威振人钦敬，处世逍遥似遇春。","平生福禄自然来，名利双全福禄偕。\n雁塔题名为贵客，紫袍玉带走金阶。","细推此格妙且清，必定财高礼义通。\n甲第之中应有分，扬鞭走马显威荣。","一朝金榜快题名，显祖荣宗立大功。\n衣食定然原裕足，田园财帛更丰盛。","不作朝中金榜客，定为世上一财翁。\n聪明天赋经书熟，名显高科自是荣。","此命推来福不穷，读书必定显亲宗。\n紫衣金带为卿相，富贵荣华皆可同。","命主为官福禄长，得来富贵定非常。\n名题雁塔传金榜，定中高科天下扬。","此格威权不可挡，紫袍金带坐高望。\n荣华富贵虽能及，积玉堆金满储仓。","细推此命福不轻，安国安邦极品人。\n文纷雕梁徽富贵，威声照耀四方闻。","此格人间一福人，堆金积玉满堂春。\n从来富贵由天定，正勿垂绅谒圣君。","此命生来福自宏，田园家业最高隆。\n平生衣禄丰盈足，一世荣华万事通。","富贵由大莫苦求，万金家计不须谋。\n十年不比前番事，祖业根基水上舟。","君是人间前禄星，一生富贵众人钦。\n纵然福禄由天定，安享荣华过一生。","此命推来福不轻，不须愁虑苦劳心。\n一生天定衣与禄，富贵荣华主一生。","此命生来大不同，公侯卿相在其中。\n一生自有逍遥福，富贵荣华极品隆。","此命推来天下隆，必定人间一主公。\n富贵荣华数不尽，定为乾坤一蛟龙。"];
+const CG_WOMAN = ["生身此命运不通，乌云盖月黑朦胧。\n莫向故园载花木，可来幽地种青松。","女命孤冷独凄身，此身推来路乞人。\n操心烦恼难度日，一生痛苦度光阴。","女命生来轻薄人，营谋事作难称心。\n六亲骨肉亦无靠，奔走劳碌困苦门。","女命推来福禄无，治家艰难辛苦多。\n丈夫儿女不亲爱，奔走他乡作游姑。","此命一身八字低，家庭艰辛多苦妻。\n娘家亲友冷如炭，一生勤劳多忧眉。","平生依禄但苦求，两次配夫带忧愁。\n咸酸苦辣他偿过，晚年衣食本无忧。","此格做事单独强，难告夫君作主张。\n心问口来口问心，晚景衣禄宜自生。","女命生来八字轻，为善作事也无因。\n你把别人当亲生，别人对你假殷情。","花支艳来硬性身，自奔自力不求人。\n若问求财方可止，在苦有甜度光阴。","女命推来比郎强，婚姻大事碍无障。\n中年走过坎坷地，末年渐经行前强。","早年行运在忙头，劳碌奔波苦勤求。\n费力劳心把家立，后来晚景名忧愁。","时逢运来带吉神，从有凶星转灰尘。\n真变假来假成真，结拜弟妹当亲生。","初限命中有变化，中年可比树落花。\n勤俭持家难度日，晚年成业享荣华。","矮巴勾枣难捞枝，看破红尘最相宜。\n谋望求财空费力，婚姻三娶两次离。","女子走冰怕冰薄，出行交易受残霜。\n婚姻周郎休此意，官司口舌须相加。","忧悉常锁两眉间，家业挂心不等闲。\n从今以后防口角，任意行移不相关。","此命推来费运多，若作摧群受折磨。\n山路崎岖吊下耳，左插右安心难留。","凤鸣岐山四方扬，女命逢此大吉昌。\n走失夫君音信有，晚年衣禄财盈箱。","女命推来运未能，劳碌奔波一场空。\n好似俊鸟在笼锁，中年未限凄秋风。","月令崎岖运不良，千辛万苦受煎熬。\n女身受得多苦难，晚年福禄比密甜。","此命推来一般艰，女子为人很非凡。\n中年逍遥多自在，晚年更比中年超。","杜井破废已多年，今有泉水出来鲜。\n资生济竭人称美，中运来转喜安然。","推车靠涯道路通，女名求财也无穷。\n婚姻出配无阻碍，疾病口舌离身躬。","夜梦金银醒来空，立志谋业运不通。\n婚姻难成交易散，夫君趟失未见踪。","女命终身驳杂多，六亲骨肉不相助。\n命中男女都难养，劳碌辛苦还奔波。","孤舟行水离沙滩，离乡出外早过家。\n是非口舌皆无碍，婚姻合配紫微房。","时来运转喜开颜，多年枯木逢春花。\n枝叶重生多茂盛，凡人见得都赞夸。","一朵鲜花镜中开，看着极好取不来。\n劝你休把镜花想，此命推来主可癫。","一生为人福宏名，心兹随君显门庭。\n容貌美丽惹人爱，银钱富足万事成。","马氏太公不相和，好命逢此忧凝多。\n恩人无义反为仇，是非平地起风波。","肥羊一群入出场，防虎逢之把口张。\n适口充饥心欢喜，女命八字大吉昌。","顺风行舟扯起帆，上天又助一顺风。\n不用费力逍遥去，任意顺行大亨通。","此命相貌眉目清，文武双全功名成。\n一生衣禄皆无缺，可算世上积福人。","运开满腹好文章，谋事求财大吉祥。\n出行交易多得稳，到处亨通姓名扬。","发政旅仁志量高，女命求财任他乡。\n交舍婚姻多有意，无君出外有音耗。","明珠辉吐离埃来，女有口有清散开。\n走失郎君当两归，交易有成永无灾。","游鱼戏水被网惊，踊身变化入龙门。\n三根杨柳垂金钱，万朵桃花显价能。","此命推来转悠悠，时运未来莫强求。\n幸得今日重反点，自有好运在后头。","雨雪载途活泥泞，交易不安难出生。\n疾病还拉婚姻慢，谋望求财事难寻。","女命八字喜气和，谋事求财吉庆多。\n口舌渐消疾病少，夫君走别归老窠。","缘木求鱼事多难，虽不得鱼无害反。\n若是行险弄巧地，事不遂心枉安凡。","指日高升气象新，走失待人有信音。\n好命遇事遂心好，伺病口舌皆除根。","五官脱运难抬头，妇命须当把财求。\n交易少行有人助，一生衣禄不须愁。","俊鸟曾得出胧中，脱离为难显威风。\n一朝得意福力至，东南西北任意通。","女命推来福非轻，兹善为事受人敬。\n天降文王开基业，八百年来富贵门。","时来运转闺阁楼，贤德淑女君子求。\n击鼓乐之大吉庆，女命逢此喜悠悠。","乱丝无头定有头，碰得亲事暂折磨。\n交易出行无好处，谋事求财心不遂。","水底明月不可捞，女命早限运未高。\n交易出行难获利，未运终得渐见好。","太公封祖不非凡，女子求财稳如山。\n交易合伙多吉庆，疾病口角遗天涯。","本命推断喜气新，恰遇郎君金遂心。\n坤身来交正当运，富贵衣禄乐平生。","此命推来宏运交，不须再愁苦劳难。\n一生身有衣禄福，安享荣华胜班超。",""];
+const CG_YEAR = [12,9,6,7,12,5,9,8,7,8,15,9,16,8,8,19,12,6,8,7,5,15,6,16,15,7,9,12,10,7,15,6,5,14,14,9,7,7,9,12,8,7,13,5,14,5,9,17,5,7,12,8,8,6,19,6,8,16,10,6];
+const CG_MONTH = [6,7,18,9,5,16,9,15,18,8,9,5];
+const CG_DAY = [5,10,8,15,16,15,8,16,8,16,9,17,8,17,10,8,9,18,5,15,10,9,8,9,15,18,7,8,16,6];
+const CG_HOUR = [16,6,7,10,9,16,10,8,8,9,6,6];
+
+</script>
+<script>
+/* ==== 解读文案库（原创撰写的传统命理通识解读，供本应用展示） ==== */
+const TXT = {
+  // 天干日主性格（10）
+  gan: {
+    '甲': '甲木如参天大树，主仁厚正直。此干之人上进心强，做事有担当、有原则，吃软不吃硬，越有压力越有斗志，是天生的带头者。惟个性过直，不善拐弯，易因坚持己见而错失转圜。',
+    '乙': '乙木如花草藤蔓，柔韧而机变。此干之人外表温和、善于借力使力，适应环境能力极强，懂得以柔克刚。心思细腻、审美佳，但主见稍弱，遇大事时易摇摆或依赖他人。',
+    '丙': '丙火如太阳之火，光明磊落、热情奔放。此干之人乐观开朗、慷慨大方，行动力与感染力俱佳，走到哪里都能带热气氛。性子偏急，锋芒过露，须防口无遮拦、三分钟热度。',
+    '丁': '丁火如灯烛之火，细腻温润、持久绵长。此干之人思维缜密、感情丰富，善于照顾细节与他人情绪，适合幕后运筹。心思较重，易多愁善感，有时顾虑太多而错失先机。',
+    '戊': '戊土如城墙大地，厚重稳健、守信重诺。此干之人包容力强、耐得住性子，是可托付重任之人。行事偏保守，节奏稍慢，观念一旦形成不易改变，有时显得固执。',
+    '己': '己土如田园之土，谦和包容、善于滋养他人。此干之人亲和力佳、处事圆融，擅长协调与后勤统筹，是很好的辅助者与执行者。易迁就他人、委屈自己，须学会设立边界。',
+    '庚': '庚金如刀剑矿石，刚毅果决、义气当先。此干之人爱恨分明、执行力强，认定之事九牛不回，天生带一股肃杀决断之气。棱角太利，言语直冲，易在不经意间伤人树敌。',
+    '辛': '辛金如珠玉首饰，精致敏感、自尊心强。此干之人注重形象与品质，眼光挑剔，对己对物要求皆高，具备天生的鉴赏力。好面子、想得多，易因小事内耗，情绪需要出口。',
+    '壬': '壬水如江河大海，智慧灵动、胸怀开阔。此干之人聪明有谋略、适应力一流，善捕机会、能屈能伸，天生适合闯荡四方。心性喜自由、不耐约束，须防变化太快、根基不稳。',
+    '癸': '癸水如雨露泉水，安静内敛、心思澄澈。此干之人直觉敏锐、想象力丰富，善于观察细节，惯于以静制动、以柔取胜。胆气稍弱，易紧张多虑，宜多给自己打气、当机立断。'
+  },
+  // 地支通性（12）
+  zhi: {
+    '子': '子水为夜半之水，主智慧机变、心思藏而不露。',
+    '丑': '丑土为寒湿之土，主勤恳踏实、耐力过人，性子偏闷。',
+    '寅': '寅木为山林之木，主进取冒险、行动迅速，颇有侠气。',
+    '卯': '卯木为花草之木，主温和斯文、人缘好，内心自有主张。',
+    '辰': '辰土为水库之土，主包容厚重、怀才不露，变化潜力大。',
+    '巳': '巳火为炉冶之火，主聪明伶俐、心思多变，善于谋划。',
+    '午': '午火为烈阳之火，主热情外放、行动果敢，喜风光场面。',
+    '未': '未土为燥热之土，主温和厚道、重情念旧，略带固执。',
+    '申': '申金为顽铁之金，主义气刚强、机敏好动，闲不住。',
+    '酉': '酉金为成器之金，主精细认真、讲究条理，爱憎分明。',
+    '戌': '戌土为火库之土，主忠诚守信、护短重义，性偏急躁。',
+    '亥': '亥水为江河之水，主胸怀宽厚、乐天知命，心地善良。'
+  },
+  // 十神（10）：desc 性格影响，career 事业倾向
+  tenGod: {
+    '比肩': { jian: '比肩', desc: '自尊自立，讲义气、重朋友，凡事喜欢亲力亲为、不愿服输。', career: '适合合伙创业、需要团队协作与竞争性的行业，但合伙中要防利益之争。' },
+    '劫财': { jian: '劫财', desc: '行动力强、敢拼敢闯，个性豪爽，善于借势而起，但花钱大方、守财稍难。', career: '适合业务开拓、竞争激烈的领域，投机性投入须有节制。' },
+    '食神': { jian: '食神', desc: '温和乐观、有口福懂享受，才思舒缓绵长，是典型的福气之星。', career: '适合餐饮美食、文创艺术、教育写作等凭才华与品味立身的行当。' },
+    '伤官': { jian: '伤官', desc: '聪明外露、才华横溢，思想前卫不服管束，敢说敢做、锋芒毕露。', career: '适合创新、演艺、技术、自媒体等能一鸣惊人的舞台，须收敛傲气、慎防口舌。' },
+    '正财': { jian: '正财', desc: '勤劳务实、精打细算，一分耕耘一分收获，重视家庭与安全感。', career: '适合稳定职业、财务、实体经营等细水长流之财，不宜豪赌式冒险。' },
+    '偏财': { jian: '偏财', desc: '机敏活络、慷慨重义，善于捕捉商机，财来财去、手面阔绰。', career: '适合贸易流通、投资理财、市场销售等流动性强的进财渠道。' },
+    '正官': { jian: '正官', desc: '端正自律、责任感强，讲究规矩名分，行事光明、深得信任。', career: '适合体制、管理、法务等讲究秩序与名望的路径，是传统的贵气之星。' },
+    '七杀': { jian: '七杀', desc: '魄力过人、意志如铁，敢闯敢拼、临危不乱，杀伐决断自带威严。', career: '适合军警、执法、外科、竞争型管理与创业开拓，压力越大成就越大，须防过刚。' },
+    '正印': { jian: '正印', desc: '仁慈宽厚、好学深思，有长辈缘与贵人运，重视名誉与精神世界。', career: '适合学术、教育、文化、医疗等靠学识与口碑立身的领域。' },
+    '偏印': { jian: '偏印', desc: '思维独特、直觉敏锐，擅长冷门专精之学，性喜安静、有点孤僻。', career: '适合研究、玄学、医术、编程、设计等需要深度钻研的冷门绝活。' }
+  },
+  // 五行喜用建议（5）
+  wx: {
+    '木': { color: '青色、绿色', dir: '东方', num: '3、8', job: '教育文化、出版设计、医药养生、木材家具、园艺服装', organ: '肝胆、眼睛、筋络', jewelry: '绿色系水晶、木质手串', desc: '木主仁，象征生长与进取。' },
+    '火': { color: '红色、紫色、橙色', dir: '南方', num: '2、7', job: '能源电力、餐饮美食、影视演艺、互联网内容、照明光电', organ: '心脏小肠、血压、目力', jewelry: '红玛瑙、石榴石、朱砂', desc: '火主礼，象征热情与名誉。' },
+    '土': { color: '黄色、棕色、米色', dir: '西南、东北', num: '5、10', job: '房地产建筑、农业陶瓷、管理人力、仓储咨询', organ: '脾胃、皮肤、消化', jewelry: '黄水晶、和田玉、蜜蜡', desc: '土主信，象征承载与安稳。' },
+    '金': { color: '白色、金色、银色', dir: '西方', num: '4、9', job: '金融财经、机械汽车、法律五金、精密仪器、医疗器械', organ: '肺与大肠、呼吸道、皮肤', jewelry: '白水晶、金银细软、金属表', desc: '金主义，象征果决与秩序。' },
+    '水': { color: '黑色、蓝色、灰色', dir: '北方', num: '1、6', job: '贸易物流、旅游传媒、水产饮品、策划咨询、自由职业', organ: '肾与膀胱、泌尿、听力', jewelry: '黑曜石、蓝宝石、珍珠', desc: '水主智，象征灵动与包容。' }
+  },
+  // 十二长生（12）
+  cs: {
+    '长生': '生机初启，气象一新', '沐浴': '桃花沐浴，聪秀而多情', '冠带': '渐成气象，意气风发',
+    '临官': '进禄得位，稳步上扬', '帝旺': '鼎盛之期，锋芒正劲', '衰': '盛极渐敛，宜守成积蓄',
+    '病': '气力稍减，宜静养调整', '死': '归于沉静，宜反思蜕变', '墓': '收藏入库，厚积而贵',
+    '绝': '旧局已断，重新出发', '胎': '蕴育新机，静候时机', '养': '涵养蓄势，渐入佳境'
+  },
+  // 格局（按月令本气十神）
+  geshi: {
+    '正官格': '月令正官，端正清贵之格。为人守规矩、有担当，中正平和，一生多得长辈上司提携，宜走仕途、管理、专业资格之路。喜财印相辅，最怕伤官冲克。',
+    '七杀格': '月令七杀，威权开创之格。魄力过人、逆境爆发力强，能在高压与乱局中脱颖而出，宜军警、执法、外科、竞争型行业。杀须有制有化，刚柔并济方成大器。',
+    '正财格': '月令正财，勤俭富足之格。务实肯干、财商稳健，善积小成多，家业可期。宜实业、财务、经营管理，忌好高骛远，稳中求进即自有丰足。',
+    '偏财格': '月令偏财，活络大器之格。嗅觉灵敏、出手大方，善抓机遇、财源广开，宜贸易、投资、市场开拓。财动之命须防大起大落，落袋为安是上策。',
+    '正印格': '月令正印，仁慈书香之格。心地善良、好学有文气，贵人运厚，名声重于利益，宜学术、教育、文化、医疗。印重者防依赖心，需自食其力见真章。',
+    '偏印格': '月令偏印，孤秀专精之格。思维独特、直觉敏锐，宜钻研冷门绝学、技术手艺。悟性极高但不喜俗务，能沉潜则自成一家。',
+    '食神格': '月令食神，福寿绵长之格。性情温和乐观，才华自然流露，有口福亦有人缘，宜美食、文创、教育、艺术。食神有气胜财官，是细水长流的福气。',
+    '伤官格': '月令伤官，才华外放之格。聪明绝顶、锋芒毕露，敢破敢立、创意无穷，宜创新、演艺、专业技术。伤官须配印或有财引化，收敛傲气则贵不可言。',
+    '建禄格': '月令建禄，自立自强之格。祖荫较薄、白手起家，身强体健、意志坚定，凡事靠自己打拼，中年后多能自立门户、兴家立业。',
+    '月刃格': '月令羊刃，将相刚强之格。性格刚烈、行动迅猛，胆识与爆发力皆过人，宜开拓性、竞争性事业。刃旺须官杀制伏或食伤泄秀，方能化刚为功。'
+  },
+  // 大运天干十神简评（10）
+  dayunBrief: {
+    '比肩': '同舟共济之运：朋友助力增强，宜合作创业、广结善缘；防兄弟朋友分利、盲目担保。',
+    '劫财': '奋勇拼搏之运：敢闯敢干、运势上扬，但开销增大、竞争加剧；投资宜谨慎，忌投机孤注。',
+    '食神': '福气滋养之运：心宽体健、才华得展，利于创作、进修、添福添丁；享受有度则福气绵长。',
+    '伤官': '才华迸发之运：创意与名声齐飞，宜跳槽转型、大胆表现；口舌是非随之而来，言行留三分。',
+    '正财': '财富积累之运：收入稳定、置业良机，宜踏实经营、细水长流；忌贪快钱而失大局。',
+    '偏财': '机遇进财之运：商机人脉纷纷上门，宜开拓市场、适度投资；财来财去，落袋方为安。',
+    '正官': '名位上升之运：升职掌权、名誉加身，宜考编考证、承担重任；守规守法，方保平顺。',
+    '七杀': '磨砺成钢之运：压力与权力并存，逆境中突飞猛进；防小人暗算与伤病，宜勇中带谋。',
+    '正印': '贵人庇佑之运：学习深造、文书有喜，长辈上司庇护；利考试升迁，忌安逸惰性滋生。',
+    '偏印': '沉潜研习之运：宜修习专技、参悟冷门；心绪多变、睡眠欠佳，须防想太多错失良机。'
+  },
+  // 生肖（12）
+  zodiac: {
+    '鼠': { traits: '机敏灵巧、直觉敏锐，善于储蓄与规划，人缘活络。早年多历练，中年后财禄渐丰。', sanhe: '申(猴)、子(鼠)、辰(龙)三合水局', liuhe: '与丑(牛)六合' },
+    '牛': { traits: '勤勉厚重、责任感强，认准的事一步一个脚印。大器晚成之相，福气在后头。', sanhe: '巳(蛇)、酉(鸡)、丑(牛)三合金局', liuhe: '与子(鼠)六合' },
+    '虎': { traits: '胆识过人、行动力强，天生带领导气场，讲义气好打抱不平。宜防急躁冒进。', sanhe: '寅(虎)、午(马)、戌(狗)三合火局', liuhe: '与亥(猪)六合' },
+    '兔': { traits: '温和文雅、人缘极佳，心思细腻、审美出众。善以柔克刚，贵人缘不俗。', sanhe: '亥(猪)、卯(兔)、未(羊)三合木局', liuhe: '与戌(狗)六合' },
+    '龙': { traits: '气度恢宏、志向远大，理想主义色彩浓，天生具有号召力。名利心重、精力充沛。', sanhe: '申(猴)、子(鼠)、辰(龙)三合水局', liuhe: '与酉(鸡)六合' },
+    '蛇': { traits: '冷静睿智、观察入微，谋定而后动，外表淡然内心炽热。学习能力与直觉皆佳。', sanhe: '巳(蛇)、酉(鸡)、丑(牛)三合金局', liuhe: '与申(猴)六合' },
+    '马': { traits: '热情奔放、崇尚自由，行动如风、说走就走。人脉广阔，最忌被束缚与冷落。', sanhe: '寅(虎)、午(马)、戌(狗)三合火局', liuhe: '与未(羊)六合' },
+    '羊': { traits: '温良体贴、心思细腻，艺术细胞与同理心俱佳。重情念旧，亲缘深厚。', sanhe: '亥(猪)、卯(兔)、未(羊)三合木局', liuhe: '与午(马)六合' },
+    '猴': { traits: '聪明伶俐、随机应变，学什么都快，幽默风趣招人喜欢。须防心猿意马。', sanhe: '申(猴)、子(鼠)、辰(龙)三合水局', liuhe: '与巳(蛇)六合' },
+    '鸡': { traits: '精明干练、注重仪表，观察力与表达力俱佳，做事讲章法。爱憎分明、刀子嘴豆腐心。', sanhe: '巳(蛇)、酉(鸡)、丑(牛)三合金局', liuhe: '与辰(龙)六合' },
+    '狗': { traits: '忠诚正直、护家有责，答应的事必尽力而为。是非分明，直觉与正义感强。', sanhe: '寅(虎)、午(马)、戌(狗)三合火局', liuhe: '与卯(兔)六合' },
+    '猪': { traits: '宽厚乐观、心地善良，能吃苦也能享福，人缘极好。随遇而安，福气绵长。', sanhe: '亥(猪)、卯(兔)、未(羊)三合木局', liuhe: '与寅(虎)六合' }
+  },
+  // 星座（12）：range 起止
+  astro: {
+    '白羊座': { range: '3.21-4.19', traits: '天真果敢、行动派先锋，遇事冲在最前，热爱挑战与新鲜感。' },
+    '金牛座': { range: '4.20-5.20', traits: '沉稳务实、审美出众，重视安全感与生活品质，认定便持久不移。' },
+    '双子座': { range: '5.21-6.21', traits: '机敏多变、消息灵通，好奇心旺盛，是天生的沟通者与杂学家。' },
+    '巨蟹座': { range: '6.22-7.22', traits: '温柔顾家、情感丰沛，照顾人是本能，安全感来自家庭与亲密关系。' },
+    '狮子座': { range: '7.23-8.22', traits: '自信大方、天生主角光环，慷慨热情，喜欢被欣赏也懂得宠爱他人。' },
+    '处女座': { range: '8.23-9.22', traits: '细致严谨、追求完美，分析与执行力一流，对自己要求近乎苛刻。' },
+    '天秤座': { range: '9.23-10.23', traits: '优雅平和、社交高手，凡事讲平衡公道，选择困难是其可爱之处。' },
+    '天蝎座': { range: '10.24-11.22', traits: '深情感性、洞察力惊人，爱恨极致，认定之事带有神秘的执着。' },
+    '射手座': { range: '11.23-12.21', traits: '乐观自由、热爱远方，人生是场冒险，坦率得让人毫无防备。' },
+    '摩羯座': { range: '12.22-1.19', traits: '自律坚毅、目标导向，不动声色地攀登，是厚积薄发的长期主义者。' },
+    '水瓶座': { range: '1.20-2.18', traits: '独立思考、特立独行，脑洞与人文关怀并存，朋友遍天下。' },
+    '双鱼座': { range: '2.19-3.20', traits: '浪漫共情、直觉超群，心怀诗意与慈悲，是温柔的梦境缔造者。' }
+  },
+  // 神煞含义（原创通识短释）
+  shenSha: {
+    '天乙贵人': '一生中最有力之吉星，主逢凶化吉、贵人扶持，紧要关头总有人拉一把。',
+    '太极贵人': '主聪慧好学、与玄学宗教有缘，喜探究天地哲理。',
+    '文昌贵人': '主聪明好学、利考试文章，气质文雅，逢凶亦可化解。',
+    '国印贵人': '主掌印信之贵，为官掌权、做事公正，得信任托付。',
+    '桃花(咸池)': '主人缘魅力、异性缘旺，才艺与浪漫兼备；过旺则须防感情纠葛。',
+    '驿马': '主奔波走动、出行远方，利外地发展、出差旅行、变动升迁。',
+    '华盖': '主孤高聪慧、艺术玄学天分，喜静思哲学，与佛道有缘。',
+    '将星': '主统领掌权之能，有组织领导才干，居中定盘。',
+    '禄神': '主食禄丰足、身心康泰，靠本领吃饭，衣食无忧。',
+    '羊刃': '主刚烈勇猛、行动爆发力强，利武职开拓；须防冲动伤身破财。',
+    '飞刃': '羊刃之冲，主动荡冲击，行事宜稳，防意外破耗。',
+    '红鸾': '主婚姻喜庆、桃花正缘，逢之多有婚恋喜事。',
+    '天喜': '主喜乐添丁、好事临门，心情开朗、人缘和顺。',
+    '孤辰': '主性情孤独、独立自处，六亲情分稍淡，宜主动经营感情。',
+    '寡宿': '主清冷自持、婚姻宜迟不宜急，晚婚更稳。',
+    '劫煞': '主破耗波折，防小人劫财与意外，理财保守为上。',
+    '灾煞': '主灾病磕碰，注意交通安全与健康管理。',
+    '亡神': '主心机深沉、城府内藏，防算计与失窃，心事勿轻付。',
+    '空亡': '主所临之柱事项多聚散无常，欲望看淡反得自在；吉神空亡力减，凶煞空亡亦减。',
+    '天德贵人': '月令天德，主一生仁厚吉祥，大凶之时亦有解救。',
+    '月德贵人': '月令月德，主心地慈善、逢凶化吉，女命得之尤主贤淑。',
+    '阴差阳错': '主感情婚姻多错过波折，聚少离多，宜坦诚沟通。',
+    '魁罡': '主性格刚毅聪明、掌权柄，女命貌美才高，行事果决。'
+  },
+  // 合婚关系文案
+  hehun: {
+    'liuhe': '上上之配：两人生肖六合，气场天然相吸，相处融洽默契，是传统命理中最合拍的组合。',
+    'sanhe': '上等之配：生肖三合，志趣相投、互相成就，同甘共苦易成事业与家庭的双赢搭档。',
+    'banhe': '良缘之配：生肖半合，整体和顺，虽偶有小分歧，大局始终向好。',
+    'chong': '相冲之配：生肖相冲，性格与节奏差异明显，摩擦难免；若能各退一步、明确分工，亦能互补长久。',
+    'xing': '相刑之配：生肖相刑，相处易生内耗与口舌，需要更多的包容与仪式感来化解。',
+    'hai': '相害之配：生肖相害，小事易起龃龉，宜保持边界感、少翻旧账。',
+    'none': '平配：生肖无冲无合，感情走向更多取决于双方经营，势均力敌、细水长流。'
+  },
+  liunian: {
+    '值太岁': '本命值太岁，运势起伏较大，宜稳字当头、主动办喜事以应之。',
+    '冲太岁': '岁运相冲，多有变动远行、搬迁换岗，动荡中藏新机，出行注意安全。',
+    '刑太岁': '刑太岁之年，是非口舌与规矩约束增多，凡事依章办理、少与人争。',
+    '害太岁': '害太岁之年，防小人暗耗与背后是非，重大签约多留心细节。',
+    '合太岁': '与太岁相合，人缘顺遂、合作有望，喜事临门概率高。',
+    '平岁': '与太岁无冲无合，流年平顺，重点看大运与自身努力。'
+  },
+  health: {
+    '木': '木气偏弱者注意肝胆养护与颈椎筋络，宜早睡、多亲近绿色与户外草木，忌熬夜动怒。',
+    '火': '火气偏弱者留心血循环与手脚冰凉，宜适度有氧运动、多晒太阳，忌久坐寒凉。',
+    '土': '土气偏弱者注意脾胃消化，三餐规律、少生冷甜腻，宜五谷养中、细嚼慢咽。',
+    '金': '金气偏弱者注意呼吸道与皮肤，秋燥季节多润肺，宜深呼吸练习、远离烟尘。',
+    '水': '水气偏弱者注意肾气与泌尿系统，多喝温水、节制熬夜，宜黑色食物与静功调养。'
+  },
+  chengguBand(w) { // 称骨总重分段原创简评
+    if (w < 3.1) return '骨重偏轻，古歌所断多奔波劳碌。此非定数，恰是励志之命：根基靠自己一砖一瓦垒起，越早自立、越肯吃苦，晚运越能苦尽甘来。';
+    if (w < 4.1) return '中等偏下之骨，先难后易之象。前半生多历练积累，行至中年渐入佳境，守得住勤俭，便能守得住福气。';
+    if (w < 5.1) return '中等之骨，衣食无忧之命。一生有贵人有衣食，成败多系于自身取舍；稳扎稳打，中晚年自见分晓。';
+    if (w < 6.1) return '骨重清贵，福禄兼得之象。才干与机遇俱备，做事有人捧场、处处有机缘，持盈保泰即是好命。';
+    return '骨重不凡，古歌皆言富贵荣华之命。此等骨相世间罕有，然满则易溢，广结善缘、谦虚持家，方保福泽绵长。';
+  },
+  hourName(h) { // 23~0 时辰名
+    const zhi = Math.floor(((h + 1) % 24) / 2);
+    const names = ['子时', '丑时', '寅时', '卯时', '辰时', '巳时', '午时', '未时', '申时', '酉时', '戌时', '亥时'];
+    const ranges = ['23:00-00:59', '01:00-02:59', '03:00-04:59', '05:00-06:59', '07:00-08:59', '09:00-10:59', '11:00-12:59', '13:00-14:59', '15:00-16:59', '17:00-18:59', '19:00-20:59', '21:00-22:59'];
+    return names[zhi] + '（' + ranges[zhi] + '）';
+  }
+};
+
+</script>
+<script>
+/* ==== 核心计算引擎 ==== */
+const GAN = '甲乙丙丁戊己庚辛壬癸';
+const ZHI = '子丑寅卯辰巳午未申酉戌亥';
+const GAN_WX = ['木','木','火','火','土','土','金','金','水','水'];
+const ZHI_WX = ['水','土','木','木','土','火','火','土','金','金','土','水'];
+const WX_ORDER = ['木','火','土','金','水'];
+const SHENG_XIAO = ['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪'];
+const CANGGAN = [['癸'],['己','癸','辛'],['甲','丙','戊'],['乙'],['戊','乙','癸'],['丙','庚','戊'],['丁','己'],['己','丁','乙'],['庚','壬','戊'],['辛'],['戊','辛','丁'],['壬','甲']];
+const NAYIN = ['海中金','炉中火','大林木','路旁土','剑锋金','山头火','涧下水','城头土','白蜡金','杨柳木','泉中水','屋上土','霹雳火','松柏木','长流水','沙中金','山下火','平地木','壁上土','金箔金','覆灯火','天河水','大驿土','钗钏金','桑柘木','大溪水','沙中土','天上火','石榴木','大海水'];
+const CS_ORDER = ['长生','沐浴','冠带','临官','帝旺','衰','病','死','墓','绝','胎','养'];
+const CS_START = [11, 6, 2, 9, 2, 9, 5, 0, 8, 3]; // 甲亥 乙午 丙寅 丁酉 戊寅 己酉 庚巳 辛子 壬申 癸卯
+const NSTR1 = ['日','一','二','三','四','五','六','七','八','九','十'];
+const NSTR2 = ['初','十','廿','卅'];
+const NSTR3 = ['正','二','三','四','五','六','七','八','九','十','冬','腊'];
+const TERM_NAMES = ['小寒','大寒','立春','雨水','惊蛰','春分','清明','谷雨','立夏','小满','芒种','夏至','小暑','大暑','立秋','处暑','白露','秋分','寒露','霜降','立冬','小雪','大雪','冬至'];
+const JIE_N = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]; // 十二节在节气表中的序号
+const JIE_BRANCH = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0]; // 过节后所属月支：小寒→丑…大雪→子
+
+const MS_DAY = 86400000;
+const termCache = new Map();
+function gzFromSB(s, b) { let i = 0; for (i = 0; i < 60; i++) if (i % 10 === s && i % 12 === b) break; return i; }
+
+/* ---------- 农历（通行万年历算法，1900-3000） ---------- */
+function leapMonth(y) { return LUNAR_INFO[y - 1900] & 0xf; }
+function leapDays(y) { return leapMonth(y) ? ((LUNAR_INFO[y - 1900] & 0x10000) ? 30 : 29) : 0; }
+function monthDays(y, m) { return (LUNAR_INFO[y - 1900] & (0x10000 >> m)) ? 30 : 29; }
+function lYearDays(y) {
+  let sum = 348;
+  for (let i = 0x8000; i > 0x8; i >>= 1) sum += (LUNAR_INFO[y - 1900] & i) ? 1 : 0;
+  return sum + leapDays(y);
+}
+function solar2lunar(y, m, d) {
+  let offset = Math.floor((Date.UTC(y, m - 1, d) - Date.UTC(1900, 0, 31)) / MS_DAY);
+  if (offset < 0) return null;
+  let i, temp = 0, leap = 0, isLeap = false;
+  for (i = 1900; i <= 3000 && offset > 0; i++) { temp = lYearDays(i); offset -= temp; }
+  if (offset < 0) { offset += temp; i--; }
+  const lYear = i;
+  leap = leapMonth(lYear);
+  for (i = 1; i < 13 && offset > 0; i++) {
+    if (leap > 0 && i === (leap + 1) && isLeap === false) { --i; isLeap = true; temp = leapDays(lYear); }
+    else { temp = monthDays(lYear, i); }
+    if (isLeap === true && i === (leap + 1)) isLeap = false;
+    offset -= temp;
+  }
+  if (offset === 0 && leap > 0 && i === leap + 1) {
+    if (isLeap) { isLeap = false; } else { isLeap = true; --i; }
+  }
+  if (offset < 0) { offset += temp; --i; }
+  return { y: lYear, m: i, d: offset + 1, isLeap, leapMonth: leap };
+}
+function lunar2solar(y, m, d, isLeap) {
+  if (y < 1900 || y > 3000 || m < 1 || m > 12) return null;
+  const lm = leapMonth(y);
+  if (isLeap && lm !== m) return null;
+  const dm = isLeap ? leapDays(y) : monthDays(y, m);
+  if (d < 1 || d > dm) return null;
+  let offset = 0;
+  for (let i = 1900; i < y; i++) offset += lYearDays(i);
+  let isAdd = false;
+  for (let i = 1; i < m; i++) {
+    if (!isAdd && lm <= i && lm > 0) { offset += leapDays(y); isAdd = true; }
+    offset += monthDays(y, i);
+  }
+  if (isLeap) offset += monthDays(y, m);
+  const t = new Date(Date.UTC(1900, 0, 31) + (offset + d - 1) * MS_DAY);
+  return { y: t.getUTCFullYear(), m: t.getUTCMonth() + 1, d: t.getUTCDate() };
+}
+function chinaMonth(m, isLeap) { return (isLeap ? '闰' : '') + NSTR3[m - 1] + '月'; }
+function chinaDay(d) {
+  if (d === 10) return '初十';
+  if (d === 20) return '二十';
+  if (d === 30) return '三十';
+  return NSTR2[Math.floor(d / 10)] + NSTR1[d % 10];
+}
+
+/* ---------- 二十四节气（天文算法 + 数据表逐日校验） ---------- */
+function sunLambda(jd) { // jd: J2000.0 起算日数（UT），返回太阳视黄经（度）
+  const L = 280.460 + 0.9856474 * jd;
+  const g = (357.528 + 0.9856003 * jd) * Math.PI / 180;
+  const om = (125.04 - 0.052954 * jd) * Math.PI / 180;
+  let lam = L + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g) - 0.00569 - 0.00478 * Math.sin(om);
+  return ((lam % 360) + 360) % 360;
+}
+function getTermDay(y, n) { // 通行节气表：y年第n个节气(1~24，小寒起)落在几日
+  const _table = TERM_INFO[y - 1900];
+  const _calcDay = [];
+  for (let index = 0; index < _table.length; index += 5) {
+    const chunk = parseInt('0x' + _table.slice(index, index + 5)).toString();
+    _calcDay.push(chunk[0], chunk.slice(1, 3), chunk[3], chunk.slice(4, 6));
+  }
+  return parseInt(_calcDay[n - 1]);
+}
+function termUTCms(y, n) { // n: 0=小寒 … 23=冬至；角度 = (285+15n)°；返回 UTC 毫秒
+  const angle = (285 + 15 * n) % 360;
+  const jan1 = Date.UTC(y, 0, 1) / MS_DAY - 10957.5;
+  let t = jan1 + (((angle - sunLambda(jan1)) % 360 + 360) % 360) / 0.9856;
+  for (let k = 0; k < 6; k++) {
+    const diff = ((angle - sunLambda(t) + 540) % 360) - 180;
+    t += diff / 0.9856;
+  }
+  return (t + 10957.5) * MS_DAY;
+}
+function termBJms(y, n) { return termUTCms(y, n) + 8 * 3600000; }
+function termMomentBJ(y, n) {
+  const d = new Date(termBJms(y, n));
+  return { y: d.getUTCFullYear(), mo: d.getUTCMonth() + 1, d: d.getUTCDate(), h: d.getUTCHours(), mi: d.getUTCMinutes() };
+}
+function allTermsBJ(y) {
+  if (termCache.has(y)) return termCache.get(y);
+  const arr = TERM_NAMES.map((name, n) => ({ name, n, ms: termBJms(y, n), moment: termMomentBJ(y, n) }));
+  termCache.set(y, arr);
+  return arr;
+}
+
+/* ---------- 干支基础 ---------- */
+function gzPair(idx) { return { stem: GAN[((idx % 10) + 10) % 10], branch: ZHI[((idx % 12) + 12) % 12], idx }; }
+function dayGZidx(y, m, d) { return Math.floor(Date.UTC(y, m - 1, d) / MS_DAY) + 25567 + 10; }
+function yearGZidx(gzYear) { return ((gzYear - 4) % 60 + 60) % 60; }
+function addDaysStr(y, m, d, n) { const t = new Date(Date.UTC(y, m - 1, d) + n * MS_DAY); return { y: t.getUTCFullYear(), m: t.getUTCMonth() + 1, d: t.getUTCDate() }; }
+function addMonths(d, n) { const t = new Date(Date.UTC(d.y, d.m - 1 + n, d.d)); return `${t.getUTCFullYear()}-${t.getUTCMonth() + 1}-${t.getUTCDate()}`; }
+function tenGod(dayStemIdx, otherStemIdx) {
+  const d = ((dayStemIdx % 10) + 10) % 10, o = ((otherStemIdx % 10) + 10) % 10;
+  const dw = GAN_WX[d], ow = GAN_WX[o];
+  const sameYY = (d % 2) === (o % 2);
+  if (dw === ow) return sameYY ? '比肩' : '劫财';
+  if (WX_ORDER[(WX_ORDER.indexOf(dw) + 1) % 5] === ow) return sameYY ? '食神' : '伤官'; // 我生
+  if (WX_ORDER[(WX_ORDER.indexOf(dw) + 2) % 5] === ow) return sameYY ? '偏财' : '正财'; // 我克
+  if (WX_ORDER[(WX_ORDER.indexOf(dw) + 3) % 5] === ow) return sameYY ? '七杀' : '正官'; // 克我
+  return sameYY ? '偏印' : '正印'; // 生我
+}
+function changSheng(stemIdx, branchIdx) {
+  const yang = stemIdx % 2 === 0;
+  const off = (((branchIdx - CS_START[stemIdx]) * (yang ? 1 : -1)) % 12 + 12) % 12;
+  return CS_ORDER[off];
+}
+function kongWang(gzIdx) {
+  const startBranch = (gzIdx - gzIdx % 10) % 12;
+  return [((startBranch + 10) % 12 + 12) % 12, ((startBranch + 11) % 12 + 12) % 12];
+}
+function wuhuDun(yearStemIdx, branchIdx) { // 五虎遁
+  return ((yearStemIdx % 5) * 2 + 2 + (((branchIdx - 2) % 12 + 12) % 12)) % 10;
+}
+
+/* ---------- 地支关系 ---------- */
+function isLiuHe(a, b) { return (a + b) % 12 === 1; }
+function isChong(a, b) { return Math.abs(a - b) === 6; }
+function isHai(a, b) { const p = [[0, 7], [1, 6], [2, 5], [3, 4], [8, 11], [9, 10]]; return p.some(x => (x[0] === a && x[1] === b) || (x[0] === b && x[1] === a)); }
+function isXing(a, b) {
+  if (a === b && [4, 6, 9, 11].includes(a)) return true; // 辰午酉亥自刑
+  const wuen = [2, 5, 8], shishi = [1, 7, 10];
+  if (a !== b && wuen.includes(a) && wuen.includes(b)) return true; // 寅巳申
+  if (a !== b && shishi.includes(a) && shishi.includes(b)) return true; // 丑未戌
+  if ((a === 0 && b === 3) || (a === 3 && b === 0)) return true; // 子卯
+  return false;
+}
+const GROUP_OF = { 0: 0, 4: 0, 8: 0, 5: 1, 9: 1, 1: 1, 2: 2, 6: 2, 10: 2, 3: 3, 7: 3, 11: 3 }; // 申子辰0 巳酉丑1 寅午戌2 亥卯未3
+const GROUP_CENTER = { 0: 0, 1: 9, 2: 6, 3: 3 }; // 各局中神：子酉午卯
+function zhiRelationTags(a, b) {
+  const tags = [];
+  if (isLiuHe(a, b)) tags.push('六合');
+  if (isChong(a, b)) tags.push('相冲');
+  if (isXing(a, b)) tags.push('相刑');
+  if (isHai(a, b)) tags.push('相害');
+  if (a !== b && GROUP_OF[a] === GROUP_OF[b] && [a, b].includes(GROUP_CENTER[GROUP_OF[a]])) tags.push('半三合');
+  return tags;
+}
+function branchRelation(a, b) { const t = zhiRelationTags(a, b); return t.length ? t : ['无明显作用']; }
+
+/* ---------- 四柱排盘 ---------- */
+function getJieList(y) { // y-1 ~ y+1 共36个节（北京时刻升序）
+  const list = [];
+  for (const yy of [y - 1, y, y + 1])
+    for (let k = 0; k < 12; k++)
+      list.push({ n: JIE_N[k], branch: JIE_BRANCH[k], ms: termBJms(yy, JIE_N[k]), name: TERM_NAMES[JIE_N[k]], yy });
+  list.sort((a, b) => a.ms - b.ms);
+  return list;
+}
+function analyze(input) {
+  const { name, gender } = input;
+  let sy, sm, sd;
+  if (input.calendar === 'lunar') {
+    const s = lunar2solar(input.y, input.m, input.d, !!input.isLeap);
+    if (!s) return { error: '农历日期超出支持范围（1900-3000）或该日不存在，请检查。' };
+    ({ y: sy, m: sm, d: sd } = s);
+  } else { sy = input.y; sm = input.m; sd = input.d; }
+  const hour = input.hour, minute = input.minute || 0;
+  if (sy < 1901 || sy > 2099) return { error: '请选择 1901 - 2099 年之间的日期。' };
+  const birthBJ = Date.UTC(sy, sm - 1, sd, hour, minute);
+  const lunar = solar2lunar(sy, sm, sd);
+
+  // 月柱：最后一个 ≤ 出生时刻的节
+  const jies = getJieList(sy);
+  let curJie = null;
+  for (const j of jies) if (j.ms <= birthBJ) curJie = j;
+  const monthBranchIdx = curJie.branch;
+
+  // 年柱（立春精确时刻为界）
+  const gzYearNum = birthBJ >= termBJms(sy, 2) ? sy : sy - 1;
+  const yearIdx = yearGZidx(gzYearNum);
+  const yearStemIdx = yearIdx % 10;
+
+  // 月柱干
+  const monthStemIdx = wuhuDun(yearStemIdx, monthBranchIdx);
+
+  // 日柱（夜23时起作次日）与时柱（五鼠遁）
+  const eff = hour >= 23 ? addDaysStr(sy, sm, sd, 1) : { y: sy, m: sm, d: sd };
+  const dayIdx = dayGZidx(eff.y, eff.m, eff.d);
+  const dayStemIdx = dayIdx % 10;
+  const hourBranchIdx = Math.floor(((hour + 1) % 24) / 2);
+  const hourStemIdx = ((dayStemIdx % 5) * 2 + hourBranchIdx) % 10;
+
+  const pillars = [
+    { label: '年柱', stemIdx: yearIdx % 10, branchIdx: yearIdx % 12 },
+    { label: '月柱', stemIdx: monthStemIdx, branchIdx: monthBranchIdx },
+    { label: '日柱', stemIdx: dayIdx % 10, branchIdx: dayIdx % 12 },
+    { label: '时柱', stemIdx: hourStemIdx, branchIdx: hourBranchIdx }
+  ];
+  const dayKong = kongWang(dayIdx), yearKong = kongWang(yearIdx);
+  for (const p of pillars) {
+    p.stem = GAN[p.stemIdx]; p.branch = ZHI[p.branchIdx];
+    p.gzIdx = gzFromSB(p.stemIdx, p.branchIdx);
+    p.tenGod = p.label === '日柱' ? '日主' : tenGod(dayStemIdx, p.stemIdx);
+    p.nayin = NAYIN[Math.floor(p.gzIdx / 2)];
+    p.hide = CANGGAN[p.branchIdx].map((g, i) => {
+      const gi = GAN.indexOf(g);
+      return { g, wx: GAN_WX[gi], tenGod: tenGod(dayStemIdx, gi), weight: i === 0 ? '本气' : (i === 1 ? '中气' : '余气') };
+    });
+    p.cs = changSheng(dayStemIdx, p.branchIdx);
+    p.kongDay = dayKong.includes(p.branchIdx);
+    p.kongYear = yearKong.includes(p.branchIdx);
+  }
+
+  // 胎元、命宫
+  const taiYuan = GAN[(monthStemIdx + 1) % 10] + ZHI[(monthBranchIdx + 3) % 12];
+  const mgBranch = ((5 - monthBranchIdx - hourBranchIdx) % 12 + 12) % 12;
+  const mingGong = GAN[wuhuDun(yearStemIdx, mgBranch)] + ZHI[mgBranch];
+
+  // 出生前后节气（跨年搜索，元旦生人也能取到上一年的大雪/冬至）
+  let prevTerm = null, nextTerm = null;
+  const tAll = [...allTermsBJ(sy - 1), ...allTermsBJ(sy), ...allTermsBJ(sy + 1)];
+  for (const t of tAll) {
+    if (t.ms <= birthBJ) { if (!prevTerm || t.ms > prevTerm.ms) prevTerm = t; }
+    else if (!nextTerm || t.ms < nextTerm.ms) nextTerm = t;
+  }
+
+  // ---------- 五行 ----------
+  const wxCount = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
+  const wxScore = { 木: 0, 火: 0, 土: 0, 金: 0, 水: 0 };
+  for (const p of pillars) {
+    wxCount[GAN_WX[p.stemIdx]]++; wxCount[ZHI_WX[p.branchIdx]]++;
+    wxScore[GAN_WX[p.stemIdx]] += 1.0;
+    CANGGAN[p.branchIdx].forEach((g, i) => {
+      let w = i === 0 ? 1.0 : (i === 1 ? 0.5 : 0.3);
+      if (p.branchIdx === monthBranchIdx && i === 0) w *= 2; // 月令司令加倍
+      wxScore[GAN_WX[GAN.indexOf(g)]] += w;
+    });
+  }
+  const dayWX = GAN_WX[dayStemIdx];
+  const di = WX_ORDER.indexOf(dayWX);
+  const shengWo = WX_ORDER[(di + 4) % 5], woSheng = WX_ORDER[(di + 1) % 5];
+  const woKe = WX_ORDER[(di + 2) % 5], keWo = WX_ORDER[(di + 3) % 5];
+  const totalScore = WX_ORDER.reduce((a, k) => a + wxScore[k], 0);
+  const sameRatio = (wxScore[dayWX] + wxScore[shengWo]) / totalScore;
+  let wangShuai, favorWX;
+  if (sameRatio > 0.55) { wangShuai = '偏旺'; favorWX = [keWo, woKe, woSheng].sort((a, b) => wxScore[b] - wxScore[a]); }
+  else if (sameRatio < 0.45) { wangShuai = '偏弱'; favorWX = [shengWo, dayWX]; }
+  else { wangShuai = '中和'; favorWX = [woSheng, woKe]; }
+  const yongShen = favorWX[0], xiShen = favorWX[1];
+  const missing = WX_ORDER.filter(w => wxCount[w] === 0);
+
+  // ---------- 格局（月令本气十神定格） ----------
+  const yueLingShiShen = tenGod(dayStemIdx, GAN.indexOf(CANGGAN[monthBranchIdx][0]));
+  const geshiMap = { '正官': '正官格', '七杀': '七杀格', '正财': '正财格', '偏财': '偏财格', '正印': '正印格', '偏印': '偏印格', '食神': '食神格', '伤官': '伤官格' };
+  let geshi;
+  if (geshiMap[yueLingShiShen]) geshi = geshiMap[yueLingShiShen];
+  else {
+    // 比劫当令：月支 = 日干临官位 → 建禄格；= 帝旺位（阳干）→ 月刃格；否则杂气格
+    const yangStem = dayStemIdx % 2 === 0;
+    const lu = (CS_START[dayStemIdx] + (yangStem ? 3 : -3) + 12) % 12;
+    const wang = (CS_START[dayStemIdx] + (yangStem ? 4 : -4) + 12) % 12;
+    if (monthBranchIdx === lu) geshi = '建禄格';
+    else if (monthBranchIdx === wang && yangStem) geshi = '月刃格';
+    else geshi = '杂气格';
+  }
+
+  // ---------- 大运 ----------
+  const yangYear = yearStemIdx % 2 === 0;
+  const forward = gender === '男' ? yangYear : !yangYear;
+  let targetJie = null;
+  if (forward) { for (const j of jies) if (j.ms > birthBJ) { targetJie = j; break; } }
+  else { for (const j of jies) if (j.ms < birthBJ) targetJie = j; }
+  const distDays = Math.abs(targetJie.ms - birthBJ) / MS_DAY;
+  const startAgeYears = Math.floor(distDays / 3);
+  const startAgeMonths = Math.floor((distDays / 3 - startAgeYears) * 12);
+  const qiyunDate = addMonths({ y: sy, m: sm, d: sd }, Math.round(distDays * 4));
+  const dayuns = [];
+  for (let k = 0; k < 9; k++) {
+    const off = (forward ? 1 : -1) * (k + 1);
+    const sIdx = (monthStemIdx + off + 100) % 10, bIdx = (monthBranchIdx + off + 120) % 12;
+    const di2 = gzFromSB(sIdx, bIdx);
+    const ageA = startAgeYears + k * 10;
+    dayuns.push({
+      stemIdx: sIdx, branchIdx: bIdx, stem: GAN[sIdx], branch: ZHI[bIdx], gzIdx: di2,
+      tenGod: tenGod(dayStemIdx, sIdx), nayin: NAYIN[Math.floor(di2 / 2)],
+      age: `${ageA}-${ageA + 9}岁`, startYear: sy + ageA, endYear: sy + ageA + 9
+    });
+  }
+  const nowAge = (Date.now() + 8 * 3600000 - birthBJ) / (365.2425 * MS_DAY);
+  const curDayun = dayuns.find(d => nowAge >= parseInt(d.age) && nowAge <= parseInt(d.age) + 9) || null;
+
+  // ---------- 流年（未来10年，立春界） ----------
+  const thisYear = new Date().getFullYear();
+  const liunians = [];
+  for (let yy = thisYear; yy < thisYear + 10; yy++) {
+    const yi = yearGZidx(yy);
+    let key = '平岁';
+    if (yi % 12 === yearIdx % 12) key = '值太岁';
+    else if ((yi % 12 + 6) % 12 === yearIdx % 12) key = '冲太岁';
+    else if (isXing(yi % 12, yearIdx % 12)) key = '刑太岁';
+    else if (isHai(yi % 12, yearIdx % 12)) key = '害太岁';
+    else if (isLiuHe(yi % 12, yearIdx % 12)) key = '合太岁';
+    liunians.push({ year: yy, gz: gzPair(yi), animal: SHENG_XIAO[yi % 12], taiSui: key, withDay: branchRelation(dayIdx % 12, yi % 12) });
+  }
+
+  // ---------- 神煞 ----------
+  const branches = pillars.map(p => p.branchIdx);
+  const shenShas = [];
+  const seen = new Set();
+  const addSha = (n, where) => {
+    const key = n + where;
+    if (!seen.has(key)) { seen.add(key); shenShas.push({ name: n, where }); }
+  };
+  const TIAN_YI = { 0: [1, 7], 4: [1, 7], 6: [1, 7], 1: [0, 8], 5: [0, 8], 2: [11, 9], 3: [11, 9], 8: [3, 5], 9: [3, 5], 10: [6, 2] }; // 甲戊庚牛羊…
+  for (const si of [yearStemIdx, dayStemIdx])
+    branches.forEach((b, bi) => { if ((TIAN_YI[si] || []).includes(b)) addSha('天乙贵人', pillars[bi].label + ZHI[b]); });
+  const WEN_CHANG = { 0: 5, 1: 6, 2: 8, 3: 9, 4: 8, 5: 9, 6: 11, 7: 0, 8: 2, 9: 3 }; // 甲巳 乙午 丙戊申 丁己酉 庚亥 辛子 壬寅 癸卯
+  for (const si of [yearStemIdx, dayStemIdx])
+    branches.forEach((b, bi) => { if (WEN_CHANG[si] === b) addSha('文昌贵人', pillars[bi].label + ZHI[b]); });
+  const TAIJI = { 0: [0, 11], 1: [0, 11], 4: [4, 9], 5: [4, 9], 2: [2, 9], 3: [2, 9], 6: [6, 11], 7: [6, 11], 8: [8, 1], 9: [8, 1] };
+  for (const si of [yearStemIdx, dayStemIdx])
+    branches.forEach((b, bi) => { if ((TAIJI[si] || []).includes(b)) addSha('太极贵人', pillars[bi].label + ZHI[b]); });
+  const GUOYIN = { 0: [10], 4: [10], 6: [10], 1: [4], 5: [4], 2: [2], 3: [2], 8: [8], 9: [8] };
+  for (const si of [yearStemIdx, dayStemIdx])
+    branches.forEach((b, bi) => { if ((GUOYIN[si] || []).includes(b)) addSha('国印贵人', pillars[bi].label + ZHI[b]); });
+  // 桃花驿马华盖将星劫煞灾煞：以年支、日支三合局查（口诀：申子辰在酉、寅午戌在卯、巳酉丑在午、亥卯未在子）
+  const TAOHUA_STD = { 0: 9, 1: 6, 2: 3, 3: 0 };
+  const YIMA = { 0: 2, 1: 11, 2: 8, 3: 5 };    // 申子辰马在寅…
+  const HUAGAI = { 0: 4, 1: 1, 2: 10, 3: 7 };
+  const JIANGXING = { 0: 0, 1: 9, 2: 6, 3: 3 };
+  const JIESHA = { 0: 5, 1: 2, 2: 11, 3: 8 };
+  const ZAISHA = { 0: 6, 1: 3, 2: 0, 3: 9 };
+  for (const ref of [yearIdx % 12, dayIdx % 12]) {
+    const g = GROUP_OF[ref];
+    branches.forEach((b, bi) => {
+      const where = pillars[bi].label + ZHI[b];
+      if (b === TAOHUA_STD[g]) addSha('桃花(咸池)', where);
+      if (b === YIMA[g]) addSha('驿马', where);
+      if (b === HUAGAI[g]) addSha('华盖', where);
+      if (b === JIANGXING[g]) addSha('将星', where);
+      if (b === JIESHA[g]) addSha('劫煞', where);
+      if (b === ZAISHA[g]) addSha('灾煞', where);
+    });
+  }
+  const LU = { 0: 2, 1: 3, 2: 5, 3: 6, 4: 5, 5: 6, 6: 8, 7: 9, 8: 11, 9: 0 }; // 甲寅 乙卯 丙戊巳 丁己午 庚申 辛酉 壬亥 癸子
+  branches.forEach((b, bi) => { if (LU[dayStemIdx] === b) addSha('禄神', pillars[bi].label + ZHI[b]); });
+  const YANGREN = { 0: 3, 2: 6, 4: 6, 6: 9, 8: 0 }; // 阳干羊刃：甲卯 丙戊午 庚酉 壬子
+  const FEIREN = { 0: 9, 2: 0, 4: 0, 6: 3, 8: 6 };  // 飞刃（冲羊刃）
+  branches.forEach((b, bi) => {
+    if (YANGREN[dayStemIdx] === b) addSha('羊刃', pillars[bi].label + ZHI[b]);
+    if (FEIREN[dayStemIdx] === b) addSha('飞刃', pillars[bi].label + ZHI[b]);
+  });
+  const HONG_LUAN = ((3 - yearIdx % 12) % 12 + 12) % 12; // 卯起子逆数
+  branches.forEach((b, bi) => {
+    if (b === HONG_LUAN) addSha('红鸾', pillars[bi].label + ZHI[b]);
+    if (b === (HONG_LUAN + 6) % 12) addSha('天喜', pillars[bi].label + ZHI[b]);
+  });
+  const GUCHEN = { 11: 2, 0: 2, 1: 2, 2: 5, 3: 5, 4: 5, 5: 8, 6: 8, 7: 8, 8: 11, 9: 11, 10: 11 };
+  const GUASU = { 11: 10, 0: 10, 1: 10, 2: 1, 3: 1, 4: 1, 5: 4, 6: 4, 7: 4, 8: 7, 9: 7, 10: 7 };
+  branches.forEach((b, bi) => {
+    if (b === GUCHEN[yearIdx % 12]) addSha('孤辰', pillars[bi].label + ZHI[b]);
+    if (b === GUASU[yearIdx % 12]) addSha('寡宿', pillars[bi].label + ZHI[b]);
+  });
+  const dayGZ = GAN[dayStemIdx] + ZHI[dayIdx % 12];
+  if (['庚辰', '庚戌', '壬辰', '戊戌'].includes(dayGZ)) addSha('魁罡', '日柱' + dayGZ);
+  if (['丙子','丁丑','戊寅','辛卯','壬辰','癸巳','丙午','丁未','戊申','辛酉','壬戌','癸亥'].includes(dayGZ)) addSha('阴差阳错', '日柱' + dayGZ);
+  // 天德/月德（月支查四柱天干）
+  const YUE_DE = { 2: '丙', 6: '丙', 10: '丙', 8: '壬', 0: '壬', 4: '壬', 11: '甲', 3: '甲', 7: '甲', 5: '庚', 9: '庚', 1: '庚' };
+  const TIAN_DE = { 2: '丁', 4: '壬', 5: '辛', 7: '甲', 8: '癸', 10: '丙', 11: '乙', 1: '庚' };
+  const yuede = YUE_DE[monthBranchIdx], tiande = TIAN_DE[monthBranchIdx];
+  pillars.forEach(p => {
+    if (yuede && p.stem === yuede) addSha('月德贵人', p.label + '天干' + yuede);
+    if (tiande && (p.stem === tiande || p.branch === tiande)) addSha('天德贵人', p.label + (p.stem === tiande ? '天干' : '地支') + tiande);
+  });
+
+  // ---------- 干支关系 ----------
+  const relations = { gan: [], zhi: [] };
+  for (let i = 0; i < 4; i++) for (let j = i + 1; j < 4; j++) {
+    const a = pillars[i], b = pillars[j];
+    const gd = (a.stemIdx - b.stemIdx + 10) % 10;
+    if (gd === 5) relations.gan.push(`${a.label}${a.stem}·${b.label}${b.stem}：天干五合（${a.stem}${b.stem}合）`);
+    const pairSet = [[0, 6], [1, 7], [2, 8], [3, 9]];
+    if (pairSet.some(p => (p[0] === a.stemIdx && p[1] === b.stemIdx) || (p[0] === b.stemIdx && p[1] === a.stemIdx)))
+      relations.gan.push(`${a.label}${a.stem}·${b.label}${b.stem}：天干相冲（${a.stem}${b.stem}冲）`);
+    for (const t of zhiRelationTags(a.branchIdx, b.branchIdx))
+      relations.zhi.push(`${a.label}${a.branch}·${b.label}${b.branch}：${ZHI[a.branchIdx]}${ZHI[b.branchIdx]}${t}`);
+  }
+
+  // ---------- 称骨 ----------
+  const cgGzIdx = yearGZidx(lunar.y);
+  const cgY = CG_YEAR[cgGzIdx], cgM = CG_MONTH[lunar.m - 1], cgD = CG_DAY[lunar.d - 1], cgH = CG_HOUR[hourBranchIdx];
+  const cgTotal = (cgY + cgM + cgD + cgH) / 10;
+  const cgIdx = Math.round((cgTotal - 2.1) * 10);
+  let cgPoem = gender === '男' ? CG_MAN[cgIdx] : CG_WOMAN[cgIdx];
+  const cgNote = (gender !== '男' && !CG_WOMAN[cgIdx]) ? '女命此骨重古歌未载，兹附男命歌诀以供参考。' : (lunar.isLeap ? '出生在闰月，骨重按同序月计。' : '');
+
+  return {
+    name: name || (gender === '男' ? '命主' : '坤造'),
+    gender, solar: { y: sy, m: sm, d: sd, hour, minute }, lunar,
+    lunarCN: `${chinaMonth(lunar.m, lunar.isLeap)}${chinaDay(lunar.d)}`,
+    lunarYearGZ: gzPair(yearGZidx(lunar.y)),
+    pillars, dayStemIdx, dayIdx, yearIdx, hourBranchIdx,
+    taiYuan, mingGong,
+    curJie: curJie.name, prevTerm, nextTerm, gzYearNum,
+    wxCount, wxScore, sameRatio, wangShuai, yongShen, xiShen, missing, dayWX,
+    yueLingShiShen, geshi,
+    dayun: { forward, targetJieName: targetJie.name, startAgeYears, startAgeMonths, qiyunDate, list: dayuns, cur: curDayun },
+    liunian: liunians, shenShas, relations,
+    chenggu: { y: cgY, m: cgM, d: cgD, h: cgH, total: cgTotal, poem: cgPoem, note: cgNote, band: TXT.chengguBand(cgTotal) },
+    animal: SHENG_XIAO[yearIdx % 12], constellation: getConstellation(sm, sd)
+  };
+}
+function getConstellation(m, d) {
+  const arr = [20, 19, 21, 21, 21, 22, 23, 23, 23, 23, 22, 22];
+  const names = ['摩羯', '水瓶', '双鱼', '白羊', '金牛', '双子', '巨蟹', '狮子', '处女', '天秤', '天蝎', '射手', '摩羯'];
+  return names[m - (d < arr[m - 1] ? 1 : 0)] + '座';
+}
+
+/* ---------- 合婚 ---------- */
+function wxRelText(w1, w2) {
+  if (w1 === w2) return '五行比和，同气连枝、感同身受';
+  const i1 = WX_ORDER.indexOf(w1), i2 = WX_ORDER.indexOf(w2);
+  if ((i1 + 1) % 5 === i2) return `我生对方（${w1}生${w2}），甘于付出、乐见其成`;
+  if ((i2 + 1) % 5 === i1) return `对方生我（${w2}生${w1}），多得滋养与照顾`;
+  if ((i1 + 2) % 5 === i2) return `我克对方（${w1}克${w2}），主导权和责任都在你`;
+  if ((i2 + 2) % 5 === i1) return `对方克我（${w2}克${w1}），对方强势，宜多沟通`;
+  return '五行相涉';
+}
+function matchPartner(p1, p2) {
+  const zodiacRel = (() => {
+    if (isLiuHe(p1.yb, p2.yb)) return ['liuhe', '六合'];
+    if (GROUP_OF[p1.yb] === GROUP_OF[p2.yb]) return ['sanhe', '三合'];
+    if (isChong(p1.yb, p2.yb)) return ['chong', '相冲'];
+    if (isXing(p1.yb, p2.yb)) return ['xing', '相刑'];
+    if (isHai(p1.yb, p2.yb)) return ['hai', '相害'];
+    return ['none', '平配'];
+  })();
+  const ganRel = (() => {
+    const d = (p1.ds - p2.ds + 10) % 10;
+    if (d === 5) return `双方日主${GAN[p1.ds]}${GAN[p2.ds]}天干五合，心意相通、天然投缘，是命理中的上等组合。`;
+    if ([4, 6].includes(d)) return `双方日主${GAN[p1.ds]}${GAN[p2.ds]}天干相冲，个性与节奏差异较大，磨合之后反成互补。`;
+    if (GAN_WX[p1.ds] === GAN_WX[p2.ds]) return `双方日主同为${GAN_WX[p1.ds]}，志同道合，强势对强势时记得互相退让。`;
+    const t = tenGod(p1.ds, p2.ds);
+    return `对方日主${GAN[p2.ds]}于我为「${t}」，相处中对方自带「${t}」的角色气质，${(t === '正官' || t === '七杀') ? '彼此有约束与被约束的张力' : (t === '正财' || t === '偏财') ? '容易互相欣赏、彼此成就' : (t === '正印' || t === '偏印') ? '对方对你多有照顾提点' : '你乐于付出、对方乐于接受'}。`;
+  })();
+  const nayinRel = (() => {
+    const w1 = NAYIN[Math.floor((((p1.dgz % 60) + 60) % 60) / 2)].slice(-1);
+    const w2 = NAYIN[Math.floor((((p2.dgz % 60) + 60) % 60) / 2)].slice(-1);
+    return `两人日柱纳音五行分别为「${w1}」与「${w2}」——${wxRelText(w1, w2)}。`;
+  })();
+  const dayRel = zhiRelationTags(p1.db, p2.db);
+  let score = 60;
+  if (zodiacRel[0] === 'liuhe') score += 22; else if (zodiacRel[0] === 'sanhe') score += 18;
+  else if (zodiacRel[0] === 'chong') score -= 14; else if (zodiacRel[0] === 'xing') score -= 10;
+  else if (zodiacRel[0] === 'hai') score -= 8;
+  if ((p1.ds - p2.ds + 10) % 10 === 5) score += 14; else if ([4, 6].includes((p1.ds - p2.ds + 10) % 10)) score -= 8;
+  if (isLiuHe(p1.db, p2.db)) score += 10; else if (isChong(p1.db, p2.db)) score -= 8;
+  score = Math.max(35, Math.min(98, score));
+  return { zodiacRel, ganRel, nayinRel, dayRel, score };
+}
+globalThis.BaziEngine = {
+  GAN, ZHI, GAN_WX, ZHI_WX, WX_ORDER, SHENG_XIAO, CANGGAN, NAYIN, TERM_NAMES,
+  analyze, solar2lunar, lunar2solar, termBJms, termMomentBJ, allTermsBJ, getTermDay,
+  gzPair, dayGZidx, yearGZidx, tenGod, kongWang, changSheng, chinaMonth, chinaDay,
+  matchPartner, zhiRelationTags, branchRelation, getConstellation, addMonths, TXT
+};
+
+</script>
+<script>
+/* ==== UI 渲染与交互 ==== */
+const $ = id => document.getElementById(id);
+const state = { calendar: 'solar', gender: '男', gender2: '男', lastResult: null };
+const WX_COLORS = { '木': 'var(--wx-mu)', '火': 'var(--wx-huo)', '土': 'var(--wx-tu)', '金': 'var(--wx-jin)', '水': 'var(--wx-shui)' };
+function ganSpan(idx, cls) { return `<span class="${cls || ''}" style="color:${WX_COLORS[BaziEngine.GAN_WX[idx % 10]]}">${BaziEngine.GAN[idx % 10]}</span>`; }
+function zhiSpan(idx, cls) { return `<span class="${cls || ''}" style="color:${WX_COLORS[BaziEngine.ZHI_WX[idx % 12]]}">${BaziEngine.ZHI[idx % 12]}</span>`; }
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+function pad2(n) { return String(n).padStart(2, '0'); }
+
+/* ---------- 表单初始化 ---------- */
+function initForms() {
+  const ySel = $('fYear'), mSel = $('fMonth'), dSel = $('fDay');
+  for (let y = 2099; y >= 1901; y--) ySel.add(new Option(y + '年', y));
+  for (let m = 1; m <= 12; m++) mSel.add(new Option(m + '月', m));
+  ySel.value = '1990'; mSel.value = '6'; fillDays();
+  const hSel = $('fHour');
+  for (let h = 0; h < 24; h++) hSel.add(new Option(`${pad2(h)}:00 ${TXT.hourName(h).split('（')[0]}`, h));
+  hSel.value = '12';
+
+  const hy = $('hYear'), hm = $('hMonth'), hd = $('hDay'), hh = $('hHour');
+  for (let y = 2099; y >= 1901; y--) hy.add(new Option(y + '年', y));
+  for (let m = 1; m <= 12; m++) hm.add(new Option(m + '月', m));
+  hy.value = String(new Date().getFullYear() - 2); hm.value = '8';
+  fillHDays();
+  for (let h = 0; h < 24; h++) hh.add(new Option(`${pad2(h)}:00 ${TXT.hourName(h).split('（')[0]}`, h));
+  hh.value = '12';
+
+  mSel.addEventListener('change', fillDays);
+  ySel.addEventListener('change', () => { fillDays(); syncLeapField(); });
+  mSel.addEventListener('change', () => { fillDays(); syncLeapField(); });
+  hm.addEventListener('change', fillHDays);
+  hy.addEventListener('change', fillHDays);
+  document.querySelectorAll('#btnSolar,#btnLunar').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#btnSolar,#btnLunar').forEach(x => x.classList.remove('on'));
+    b.classList.add('on'); state.calendar = b.id === 'btnSolar' ? 'solar' : 'lunar';
+    $('leapField').style.display = state.calendar === 'lunar' ? '' : 'none';
+    fillDays(); if (state.calendar === 'lunar') syncLeapField();
+  }));
+  document.querySelectorAll('#btnMale,#btnFemale').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#btnMale,#btnFemale').forEach(x => x.classList.remove('on'));
+    b.classList.add('on'); state.gender = b.id === 'btnMale' ? '男' : '女';
+  }));
+  document.querySelectorAll('#btnM2,#btnF2').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('#btnM2,#btnF2').forEach(x => x.classList.remove('on'));
+    b.classList.add('on'); state.gender2 = b.id === 'btnM2' ? '男' : '女';
+  }));
+  $('fLeap').addEventListener('change', () => { fillDays(); syncLeapField(); });
+  $('btnGo').addEventListener('click', runPaipan);
+  $('btnHe').addEventListener('click', runHehun);
+  $('btnQuery').addEventListener('click', runQuery);
+  renderToday();
+  setInterval(renderToday, 30000);
+}
+function daysInSolarMonth(y, m) { return new Date(Date.UTC(y, m, 0)).getUTCDate(); }
+function lunarMonthDays(y, m, isLeap) {
+  for (let d = 30; d >= 29; d--) { if (BaziEngine.lunar2solar(y, m, d, isLeap)) return d; }
+  return 29;
+}
+function fillDays() {
+  const dSel = $('fDay');
+  const y = parseInt($('fYear').value), m = parseInt($('fMonth').value);
+  const cur = dSel.value;
+  dSel.innerHTML = '';
+  const n = state.calendar === 'lunar' ? lunarMonthDays(y, m, $('fLeap').checked) : daysInSolarMonth(y, m);
+  for (let d = 1; d <= n; d++) dSel.add(new Option(state.calendar === 'lunar' ? BaziEngine.chinaDay(d) : d + '日', d));
+  if (cur && parseInt(cur) <= n) dSel.value = cur; else dSel.value = String(Math.min(15, n));
+}
+function fillHDays() {
+  const hd = $('hDay');
+  const y = parseInt($('hYear').value), m = parseInt($('hMonth').value);
+  const cur = hd.value;
+  hd.innerHTML = '';
+  const n = daysInSolarMonth(y, m);
+  for (let d = 1; d <= n; d++) hd.add(new Option(d + '日', d));
+  if (cur && parseInt(cur) <= n) hd.value = cur; else hd.value = '8';
+}
+function syncLeapField() {
+  const y = parseInt($('fYear').value);
+  let lm = 0;
+  try { lm = LUNAR_INFO[y - 1900] & 0xf; } catch (e) { lm = 0; }
+  $('leapHint').textContent = lm ? `（${y}年闰${BaziEngine.chinaMonth(lm, false).replace('月', '')}月）` : '（该年无闰月）';
+  $('fLeap').disabled = !lm;
+  if (!lm) $('fLeap').checked = false;
+  fillDays();
+}
+
+/* ---------- 排盘主流程 ---------- */
+function runPaipan() {
+  const input = {
+    name: $('fName').value.trim(), gender: state.gender, calendar: state.calendar,
+    y: parseInt($('fYear').value), m: parseInt($('fMonth').value), d: parseInt($('fDay').value),
+    isLeap: state.calendar === 'lunar' && $('fLeap').checked && !$('fLeap').disabled,
+    hour: parseInt($('fHour').value), minute: 0
+  };
+  const r = BaziEngine.analyze(input);
+  if (r.error) { $('resultArea').style.display = 'block'; $('warnArea').innerHTML = `<div class="warn-box">${esc(r.error)}</div>`; return; }
+  state.lastResult = r;
+  $('resultArea').style.display = 'block';
+  $('warnArea').innerHTML = '';
+  renderOverview(r); renderPan(r); renderWuxing(r); renderRead(r);
+  renderDayun(r); renderLiunian(r); renderShensha(r); renderChenggu(r); renderZodiac(r);
+  document.getElementById('sec-pan').scrollIntoView({ behavior: 'smooth' });
+}
+
+function renderOverview(r) {
+  $('ovWho').textContent = `${r.name} · ${r.gender}命`;
+  const s = r.solar;
+  const tm = t => t ? `${t.name}（${t.moment.mo}月${t.moment.d}日 ${pad2(t.moment.h)}:${pad2(t.moment.mi)}）` : '—';
+  $('ovCard').innerHTML = `
+    <div class="ov-grid">
+      <div class="ov-item"><div class="k">公历生日</div><div class="v">${s.y}-${s.m}-${s.d}</div></div>
+      <div class="ov-item"><div class="k">出生时间</div><div class="v">${TXT.hourName(s.hour)}</div></div>
+      <div class="ov-item"><div class="k">农历生日</div><div class="v kai">${r.lunarYearGZ.stem}${r.lunarYearGZ.branch}年 ${r.lunarCN}</div></div>
+      <div class="ov-item"><div class="k">生肖 / 星座</div><div class="v">${r.animal} · ${r.constellation}</div></div>
+      <div class="ov-item"><div class="k">日主（命主）</div><div class="v" style="color:${WX_COLORS[r.dayWX]}">${r.pillars[2].stem} ${r.dayWX}</div></div>
+      <div class="ov-item"><div class="k">格局</div><div class="v">${r.geshi}</div></div>
+      <div class="ov-item"><div class="k">喜神 / 用神</div><div class="v">${r.xiShen} · ${r.yongShen}</div></div>
+      <div class="ov-item"><div class="k">出生节气</div><div class="v">${r.curJie}后</div></div>
+    </div>
+    <div class="note">节气：出生前最近节气为「${tm(r.prevTerm)}」，其后为「${tm(r.nextTerm)}」。年柱以立春、月柱以十二节为界，均用精确节气时刻。</div>`;
+}
+
+function renderPan(r) {
+  let html = '<table class="bazi"><tr><th>四柱</th>';
+  for (const p of r.pillars) html += `<th>${p.label}</th>`;
+  html += '</tr><tr><th>十神</th>';
+  for (const p of r.pillars) html += `<td class="ten-god">${p.tenGod}</td>`;
+  html += '</tr><tr><th>天干</th>';
+  for (const p of r.pillars) html += `<td>${ganSpan(p.stemIdx, 'gan-zhi')}</td>`;
+  html += '</tr><tr><th>地支</th>';
+  for (const p of r.pillars) {
+    const kong = [];
+    if (p.kongDay) kong.push('<span class="rela kong">日空</span>');
+    if (p.kongYear) kong.push('<span class="rela kong">年空</span>');
+    html += `<td>${zhiSpan(p.branchIdx, 'gan-zhi')}${kong.length ? '<div style="margin-top:4px">' + kong.join('') + '</div>' : ''}</td>`;
+  }
+  html += '</tr><tr><th>藏干</th>';
+  for (const p of r.pillars)
+    html += `<td class="zang">` + p.hide.map(h => `<span style="color:${WX_COLORS[h.wx]}">${h.g}</span> ${h.tenGod}`).join('<br>') + '</td>';
+  html += '</tr><tr><th>星运</th>';
+  for (const p of r.pillars) html += `<td>${p.cs}</td>`;
+  html += '</tr><tr><th>纳音</th>';
+  for (const p of r.pillars) html += `<td class="nayin">${p.nayin}</td>`;
+  html += '</tr></table>';
+  html += `<div class="badge-line">胎元：<b class="kai">${r.taiYuan}</b> ｜ 命宫：<b class="kai">${r.mingGong}</b> ｜ 旬空：<b>${kongText(r.dayIdx)}（按日柱查）</b></div>`;
+  $('panCard').innerHTML = html;
+
+  const rel = r.relations;
+  let relHtml = '<div class="sec-title" style="font-size:17px">柱间作用关系 <small>合则有情，冲刑则动</small></div>';
+  if (!rel.gan.length && !rel.zhi.length) {
+    relHtml += '<p class="desc-p">四柱干支之间无明显的合、冲、刑、害关系，命局组合平和。</p>';
+  } else {
+    const cls = t => t.includes('合') ? 'he' : (t.includes('冲') ? 'chong' : (t.includes('刑') ? 'xing' : 'hai'));
+    if (rel.gan.length) relHtml += '<p class="desc-p">' + rel.gan.map(t => `<span class="rela ${cls(t)}">${esc(t)}</span>`).join(' ') + '</p>';
+    if (rel.zhi.length) relHtml += '<p class="desc-p">' + rel.zhi.map(t => {
+      const tag = t.split('：')[1] || '';
+      return `<span class="rela ${cls(tag)}">${esc(t)}</span>`;
+    }).join(' ') + '</p>';
+    relHtml += '<div class="note">口诀：天干五合主情谊（甲己合、乙庚合、丙辛合、丁壬合、戊癸合）；地支六合主亲善，三合主呼应，相冲主动荡，相刑主磨炼，相害主暗损。</div>';
+  }
+  $('relaCard').innerHTML = relHtml;
+}
+function kongText(dayIdx) {
+  const x = dayIdx % 10, sb = (dayIdx - x) % 12;
+  return BaziEngine.ZHI[(sb + 10) % 12] + BaziEngine.ZHI[(sb + 11) % 12];
+}
+
+function renderWuxing(r) {
+  const max = Math.max(...Object.values(r.wxScore));
+  let bars = '';
+  for (const w of BaziEngine.WX_ORDER) {
+    const pct = Math.max(3, Math.round(r.wxScore[w] / max * 100));
+    bars += `<div class="wx-row">
+      <div class="wx-name" style="color:${WX_COLORS[w]}">${w}</div>
+      <div class="wx-bar"><i style="width:${pct}%;background:${WX_COLORS[w]}"></i></div>
+      <div class="wx-num">${r.wxCount[w]}个 · ${r.wxScore[w].toFixed(1)}分</div>
+    </div>`;
+  }
+  const missingText = r.missing.length ? `八字五行缺<b style="color:var(--cinnabar)">${r.missing.join('、')}</b>，可参考喜用建议重点补益。` : '八字五行俱全，格局流通较顺。';
+  $('wxCard').innerHTML = `<div class="sec-title" style="font-size:17px">五行力量 <small>天干1.0 · 地支本气1.0/中气0.5/余气0.3 · 月令司令加倍</small></div>
+    ${bars}
+    <p class="desc-p" style="margin-top:10px">${missingText}</p>
+    <p class="desc-p">日主 <b style="color:${WX_COLORS[r.dayWX]}">${r.pillars[2].stem}${r.dayWX}</b>，同类（比劫＋印星）力量占比 ${(r.sameRatio * 100).toFixed(0)}%，判定为 <b style="color:var(--cinnabar)">${r.wangShuai}</b>。</p>`;
+
+  const w = BaziEngine.TXT.wx[r.yongShen], x = BaziEngine.TXT.wx[r.xiShen];
+  $('xiyongCard').innerHTML = `<div class="sec-title" style="font-size:17px">喜用神建议 <small>取全局最有力的补救之五行为用神</small></div>
+    <p class="desc-p">用神：<b style="color:${WX_COLORS[r.yongShen]};font-size:18px">${r.yongShen}</b>（${w.desc}）　喜神：<b style="color:${WX_COLORS[r.xiShen]};font-size:18px">${r.xiShen}</b>（${x.desc}）</p>
+    <div class="advice">
+      <div class="adv-chip"><b>${r.yongShen}</b> 吉色：${w.color}</div>
+      <div class="adv-chip"><b>${r.yongShen}</b> 吉方：${w.dir}</div>
+      <div class="adv-chip"><b>${r.yongShen}</b> 数字：${w.num}</div>
+      <div class="adv-chip"><b>${r.yongShen}</b> 行业：${w.job}</div>
+      <div class="adv-chip"><b>${r.yongShen}</b> 饰品：${w.jewelry}</div>
+    </div>
+    <div class="note">以上为按五行旺衰推得的通用趋吉建议，属民俗参考。</div>`;
+}
+
+function renderRead(r) {
+  const T = BaziEngine.TXT;
+  const positions = ['年柱主祖上与早年', '月柱主父母与青年', '日柱主自身与配偶', '时柱主子女与晚年'];
+  let html = `<div class="sec-title" style="font-size:17px">日主与性格 <small>${r.geshi} · 日主${r.pillars[2].stem}${r.dayWX}</small></div>
+    <p class="desc-p"><b>【日主${r.pillars[2].stem}（${r.dayWX}）】</b>${T.gan[r.pillars[2].stem]}</p>
+    <p class="desc-p"><b>【${r.geshi}】</b>${T.geshi[r.geshi] || '月令之气驳杂，兼取所透之干为格，行运配合得宜亦能有成。'}</p>
+    <p class="desc-p"><b>【月令十神·${r.yueLingShiShen}】</b>${T.tenGod[r.yueLingShiShen].desc}</p>
+    <p class="desc-p"><b>【四柱览要】</b></p>`;
+  r.pillars.forEach((p, i) => {
+    html += `<p class="desc-p" style="padding-left:12px">${positions[i]}：${ganSpan(p.stemIdx)}${zhiSpan(p.branchIdx)}（${p.tenGod === '日主' ? '日主坐' + p.branch : p.tenGod + '当柱'}，${p.cs}，藏干 ${p.hide.map(h => h.g + '·' + h.tenGod).join('、')}）</p>`;
+  });
+  const cntAll = {};
+  r.pillars.forEach(p => {
+    if (p.tenGod !== '日主') cntAll[p.tenGod] = (cntAll[p.tenGod] || 0) + 1;
+    p.hide.forEach(h => { cntAll[h.tenGod] = (cntAll[h.tenGod] || 0) + 1; });
+  });
+  html += `<p class="desc-p"><b>【十神分布】</b>` + Object.keys(cntAll).map(k => `<span class="tag-inline">${k}×${cntAll[k]}</span>`).join('') + `。官杀主规矩与魄力，财星主务实与机遇，食伤主才华表达，印星主学识庇护，比劫主自立人缘；某类越旺，其气质越显。</p>`;
+  $('readCard').innerHTML = html;
+
+  const w = T.wx[r.yongShen];
+  $('careerCard').innerHTML = `<div class="sec-title" style="font-size:17px">事业与财运</div>
+    <p class="desc-p"><b>【行事风格】</b>${T.tenGod[r.yueLingShiShen].career}</p>
+    <p class="desc-p"><b>【喜用行业】</b>喜「${r.yongShen}」之气：${w.job}等可重点考虑；次选喜神「${r.xiShen}」相关：${T.wx[r.xiShen].job}。</p>
+    <p class="desc-p"><b>【进财方式】</b>命中「正财」偏重者宜稳中求进、聚沙成塔；「偏财」活络者长于经营流通、把握时机；食伤生财者凭手艺才华变现。结合大运流年择机而动，事半功倍。</p>
+    <p class="desc-p"><b>【开运提示】</b>吉色${w.color}、吉方${w.dir}、幸运数字${w.num}，可布置于衣着、办公与居家。</p>`;
+
+  const spTen = r.pillars[2].hide[0].tenGod;
+  const cnt = k => cntAll[k] || 0;
+  const marryText = (r.gender === '男')
+    ? `男命以财星为妻星：命中见正财×${cnt('正财')}、偏财×${cnt('偏财')}。${(cnt('正财') + cnt('偏财')) ? '妻星入命，姻缘有定——' + T.tenGod[cnt('正财') >= cnt('偏财') ? '正财' : '偏财'].desc : '财星不显，姻缘宜迟不宜急，逢合财岁运自有良缘。'}日支夫妻宫坐${r.pillars[2].branch}（藏干本气为${spTen}），配偶气质近似「${spTen}」：${T.tenGod[spTen].desc}`
+    : `女命以官杀为夫星：命中见正官×${cnt('正官')}、七杀×${cnt('七杀')}。${(cnt('正官') + cnt('七杀')) ? '夫星入命，婚姻有靠——' + T.tenGod[cnt('正官') >= cnt('七杀') ? '正官' : '七杀'].desc : '官星不显，宜自立自强，逢官杀岁运姻缘方动。'}日支夫妻宫坐${r.pillars[2].branch}（藏干本气为${spTen}），配偶气质近似「${spTen}」：${T.tenGod[spTen].desc}`;
+  const peach = r.shenShas.some(s => s.name.includes('桃花'));
+  const hongxi = r.shenShas.some(s => s.name === '红鸾' || s.name === '天喜');
+  $('marriageCard').innerHTML = `<div class="sec-title" style="font-size:17px">婚姻感情</div>
+    <p class="desc-p">${marryText}</p>
+    <p class="desc-p"><b>【感情提示】</b>${peach ? '命中带桃花，人缘魅力俱佳，感情机会多，重在择一而终。' : '感情细水长流型，重在经营与陪伴，慢热者反而更稳。'}${hongxi ? '红鸾／天喜入命，婚恋喜事有较早之象。' : ''}</p>
+    <div class="note">夫妻宫逢合主融洽，逢冲刑多聚散波动；可用「合婚配对」栏目实测两人组合。</div>`;
+
+  const weak = BaziEngine.WX_ORDER.slice().sort((a, b) => r.wxScore[a] - r.wxScore[b])[0];
+  $('healthCard').innerHTML = `<div class="sec-title" style="font-size:17px">健康提示</div>
+    <p class="desc-p">命局中「<b style="color:${WX_COLORS[weak]}">${weak}</b>」之气最弱，对应脏腑宜多养护：${T.health[weak]}</p>
+    <p class="desc-p">喜用之「${r.yongShen}」对应${T.wx[r.yongShen].organ}，顺势调养亦有裨益。</p>
+    <div class="note">命理养生仅为民俗参考，身体不适请及时就医。</div>`;
+}
+
+function renderDayun(r) {
+  const d = r.dayun;
+  let strip = '';
+  for (const du of d.list) {
+    const cur = d.cur && d.cur.startYear === du.startYear;
+    strip += `<div class="du ${cur ? 'cur' : ''}">${cur ? '<span class="tag">当前大运</span>' : ''}
+      <div class="dz2 kai"><span style="color:${WX_COLORS[BaziEngine.GAN_WX[du.stemIdx]]}">${du.stem}</span><span style="color:${WX_COLORS[BaziEngine.ZHI_WX[du.branchIdx]]}">${du.branch}</span></div>
+      <div class="age">${du.age}</div><div class="yr">${du.startYear}~${du.endYear}</div>
+      <div class="tg">${du.tenGod} · ${du.nayin}</div></div>`;
+  }
+  let html = `<div class="sec-title" style="font-size:17px">大运 <small>${r.gender === '男' ? '男命' : '女命'}，${d.forward ? '顺' : '逆'}排：数至${d.targetJieName}，三天折一岁</small></div>
+    <p class="desc-p">起运：出生后约 <b style="color:var(--cinnabar)">${d.startAgeYears} 岁 ${d.startAgeMonths} 个月</b>（约公历 ${d.qiyunDate} 前后）交入第一步大运，此后每十年一换。</p>
+    <div class="dayun-scroll"><div class="dayun-strip">${strip}</div></div>`;
+  const curTen = d.cur ? d.cur.tenGod : null;
+  html += curTen
+    ? `<p class="desc-p">当前正值「${d.cur.stem}${d.cur.branch}」运（${curTen}）：${BaziEngine.TXT.dayunBrief[curTen]}</p>`
+    : `<p class="desc-p">当前尚未交入所列大运区间，幼运以月柱与流年参看。</p>`;
+  html += `<div class="note">大运由月柱${d.forward ? '顺' : '逆'}推而得；古法以天干管前五年、地支管后五年，亦可干支并看。</div>`;
+  $('dayunCard').innerHTML = html;
+}
+function renderLiunian(r) {
+  const T = BaziEngine.TXT.liunian;
+  let rows = '<table class="plain"><tr><th>流年</th><th>干支</th><th>生肖</th><th>太岁关系</th><th>与日支</th><th>提示</th></tr>';
+  for (const ly of r.liunian) {
+    rows += `<tr><td>${ly.year}</td>
+      <td class="kai" style="font-size:17px"><span style="color:${WX_COLORS[BaziEngine.GAN_WX[ly.gz.idx % 10]]}">${ly.gz.stem}</span><span style="color:${WX_COLORS[BaziEngine.ZHI_WX[ly.gz.idx % 12]]}">${ly.gz.branch}</span></td>
+      <td>${ly.animal}</td><td>${ly.taiSui}</td><td>${ly.withDay.join('、')}</td><td style="text-align:left;font-size:13px">${T[ly.taiSui]}</td></tr>`;
+  }
+  rows += '</table>';
+  $('liunianCard').innerHTML = `<div class="sec-title" style="font-size:17px">未来流年 <small>与年柱太岁的关系为主轴</small></div>${rows}
+    <div class="note">流年吉凶是全局配合之结果，此处仅示太岁作用关系；值、冲、刑、害之年宜守，合太岁之年宜进取。</div>`;
+}
+function renderShensha(r) {
+  const T = BaziEngine.TXT.shenSha;
+  let html = '<div class="ss-grid">';
+  if (!r.shenShas.length) html += '<p class="desc-p">未查得常见神煞，命局平顺，以正五行生克论命即可。</p>';
+  for (const s of r.shenShas)
+    html += `<div class="ss-item"><b>${s.name}</b> <span class="cx">（${s.where}）</span><br>${T[s.name] || ''}</div>`;
+  html += '</div><div class="note">神煞为辅助参考，古法云「神煞好不如格局好」，命局成败仍以五行生克为主。</div>';
+  $('ssCard').innerHTML = html;
+}
+function renderChenggu(r) {
+  const cg = r.chenggu;
+  const liang = Math.floor(cg.total), qian = Math.round((cg.total - liang) * 10 + 1e-9);
+  const CNUM = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
+  $('cgCard').innerHTML = `
+    <p class="gu-weight">农历 ${r.lunar.y} 年（${r.lunarYearGZ.stem}${r.lunarYearGZ.branch}）${BaziEngine.chinaMonth(r.lunar.m, r.lunar.isLeap)}${BaziEngine.chinaDay(r.lunar.d)} · ${TXT.hourName(r.solar.hour).split('（')[0]}出生<br>
+    年骨 ${cg.y / 10} 两 ＋ 月骨 ${cg.m / 10} 两 ＋ 日骨 ${cg.d / 10} 两 ＋ 时骨 ${cg.h / 10} 两 ＝ <b>${cg.total.toFixed(1)} 两（${CNUM[liang]}两${CNUM[qian]}钱）</b></p>
+    <div class="poem">${(cg.poem || '').replace(/\n/g, '<br>')}</div>
+    <p class="gu-weight" style="font-size:14px">${cg.note ? cg.note + '<br>' : ''}${cg.band}</p>
+    <div class="note">称骨之法相传为唐代袁天罡所创，以骨重断福分。骨重并非绝对吉凶，古歌亦重自强与行善积德；总重相同者，歌诀随男女而异。</div>`;
+}
+function renderZodiac(r) {
+  const T = BaziEngine.TXT;
+  const z = T.zodiac[r.animal];
+  $('zodiacCard').innerHTML = `<div class="sec-title" style="font-size:17px">生肖 · ${r.animal} <small>以立春为界</small></div>
+    <p class="desc-p">${z.traits}</p>
+    <p class="desc-p"><b>【三合】</b><span class="tag-inline">${z.sanhe}</span></p>
+    <p class="desc-p"><b>【六合贵人】</b><span class="tag-inline">${z.liuhe}</span></p>
+    <div class="note">三合六合之属相为传统上的贵人伙伴、吉配方向。</div>`;
+  const a = T.astro[r.constellation];
+  $('astroCard').innerHTML = `<div class="sec-title" style="font-size:17px">星座 · ${r.constellation} <small>${a.range}</small></div>
+    <p class="desc-p">${a.traits}</p>
+    <div class="note">西方占星以公历生日划分十二宫，与东方八字互为参照。</div>`;
+}
+
+/* ---------- 合婚 ---------- */
+function runHehun() {
+  if (!state.lastResult) { $('hehunResult').innerHTML = '<div class="warn-box">请先在上方完成自己的排盘，再进行合婚。</div>'; return; }
+  const me = state.lastResult;
+  const other = BaziEngine.analyze({
+    name: '对方', gender: state.gender2, calendar: 'solar',
+    y: parseInt($('hYear').value), m: parseInt($('hMonth').value), d: parseInt($('hDay').value),
+    hour: parseInt($('hHour').value), minute: 0
+  });
+  if (other.error) { $('hehunResult').innerHTML = `<div class="warn-box">${esc(other.error)}</div>`; return; }
+  const m = BaziEngine.matchPartner(
+    { yb: me.yearIdx % 12, ds: me.dayStemIdx, db: me.dayIdx % 12, dgz: me.dayIdx },
+    { yb: other.yearIdx % 12, ds: other.dayStemIdx, db: other.dayIdx % 12, dgz: other.dayIdx }
+  );
+  const cls = { liuhe: 'he', sanhe: 'he', chong: 'chong', xing: 'xing', hai: 'hai', none: '' }[m.zodiacRel[0]];
+  const scoreColor = m.score >= 80 ? '#22743a' : (m.score >= 60 ? '#9a6210' : '#a92c20');
+  const dbRel = BaziEngine.zhiRelationTags(me.dayIdx % 12, other.dayIdx % 12);
+  const dbText = dbRel.includes('六合') ? '两人日支六合，夫妻宫彼此相合，主感情融洽、形影不离。'
+    : dbRel.includes('相冲') ? '两人日支相冲，夫妻宫逢冲，生活习惯差异较大，宜保留彼此空间。'
+    : dbRel.length ? `两人日支存在「${dbRel.join('、')}」之关系，相处多一分体谅便多一分和睦。`
+    : '两人日支无刑冲，夫妻宫平稳。';
+  $('hehunResult').innerHTML = `
+    <div style="text-align:center;margin:14px 0;">
+      <div style="font-size:52px;font-family:KaiTi;color:${scoreColor}">${m.score}</div>
+      <div style="font-size:14px;color:var(--ink2)">合婚指数（满分100，民俗参考）</div>
+    </div>
+    <p class="desc-p"><span class="rela ${cls}">生肖${m.zodiacRel[1]}</span>　${BaziEngine.TXT.hehun[m.zodiacRel[0]]}</p>
+    <p class="desc-p"><b>【日主关系】</b>${m.ganRel}</p>
+    <p class="desc-p"><b>【夫妻宫】</b>${dbText}</p>
+    <p class="desc-p"><b>【纳音五行】</b>${m.nayinRel}</p>
+    <div class="note">合婚以生肖、日主、夫妻宫为主参。凡相冲相刑者不必过忧——命理言「冲中有合、刑中有情」，真实的感情靠理解与经营。</div>`;
+}
+
+/* ---------- 今日干支 / 万年历 ---------- */
+function renderToday() {
+  const n = new Date();
+  const y = n.getFullYear(), mo = n.getMonth() + 1, d = n.getDate(), h = n.getHours();
+  const r = BaziEngine.analyze({ name: '', gender: '男', calendar: 'solar', y, m: mo, d, hour: h, minute: 0 });
+  if (r.error) return;
+  const boxes = [['年柱', r.pillars[0]], ['月柱', r.pillars[1]], ['日柱', r.pillars[2]], ['时柱', r.pillars[3]]];
+  $('todayBox').innerHTML = boxes.map(([t, p]) => `
+    <div class="tb"><div class="t">${t}</div>
+      <div class="g"><span style="color:${WX_COLORS[BaziEngine.GAN_WX[p.stemIdx]]}">${p.stem}</span><span style="color:${WX_COLORS[BaziEngine.ZHI_WX[p.branchIdx]]}">${p.branch}</span></div>
+      <div class="w">${p.tenGod === '日主' ? '日主' : p.tenGod} · ${p.nayin}</div></div>`).join('');
+  const lu = r.lunar;
+  $('todayLunar').textContent = `${y}年${mo}月${d}日 · 农历${BaziEngine.chinaMonth(lu.m, lu.isLeap)}${BaziEngine.chinaDay(lu.d)} · ${TXT.hourName(h)}`;
+}
+function runQuery() {
+  const v = $('qDate').value;
+  if (!v) { $('queryResult').textContent = '请先选择日期。'; return; }
+  const [y, m, d] = v.split('-').map(Number);
+  const r = BaziEngine.analyze({ name: '', gender: '男', calendar: 'solar', y, m, d, hour: 12, minute: 0 });
+  if (r.error) { $('queryResult').innerHTML = `<span style="color:#a92c20">${esc(r.error)}</span>`; return; }
+  const lu = r.lunar;
+  const ts = BaziEngine.allTermsBJ(y).filter(t => t.moment.mo === m && t.moment.d === d).map(t => t.name).join('、');
+  $('queryResult').innerHTML = `<b>${y}-${m}-${d}</b>：农历<b class="kai">${r.lunarYearGZ.stem}${r.lunarYearGZ.branch}年 ${BaziEngine.chinaMonth(lu.m, lu.isLeap)}${BaziEngine.chinaDay(lu.d)}</b> · 日柱<b class="kai" style="font-size:18px"> ${r.pillars[2].stem}${r.pillars[2].branch} </b>（${r.pillars[2].nayin}）${ts ? ' · 当日节气：' + ts : ''}`;
+}
+
+document.addEventListener('DOMContentLoaded', initForms);
+
+</script>
+</body>
+</html>
